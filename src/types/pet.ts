@@ -1,5 +1,3 @@
-import type { Category } from "./category";
-
 export interface Pet {
   id: number;
   name: string;
@@ -7,7 +5,6 @@ export interface Pet {
   status: string;
   category_id: number;
   owner_id?: number | null;
-  category?: Category;
 }
 
 export interface CreatePetDTO {
