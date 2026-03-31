@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import TagForm from "../components/TagForm";
-import TagList from "../components/TagList";
+import EditTagForm from "../components/tag/EditTagForm";
+import TagForm from "../components/tag/TagForm";
+import TagList from "../components/tag/TagList";
 import { apexTheme } from "../lib/theme";
 import {
   createTag,
@@ -98,12 +99,19 @@ export default function TagsPage() {
         )}
 
         <TagForm
-          key={tagBeingEdited?.id ?? "new-tag"}
-          tagBeingEdited={tagBeingEdited}
+          tagBeingEdited={null}
           onCreate={handleCreateTag}
           onUpdate={handleUpdateTag}
           onCancelEdit={() => setTagBeingEdited(null)}
         />
+
+        {tagBeingEdited && (
+          <EditTagForm
+            tag={tagBeingEdited}
+            onUpdate={handleUpdateTag}
+            onCancel={() => setTagBeingEdited(null)}
+          />
+        )}
 
         <section className="space-y-4">
           <div className="flex items-center justify-between">

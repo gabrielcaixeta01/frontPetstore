@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { CreateTagDTO, Tag, UpdateTagDTO } from "../types/tag";
+import type { CreateTagDTO, Tag, UpdateTagDTO } from "../../types/tag";
 
 interface TagFormProps {
   tagBeingEdited: Tag | null;

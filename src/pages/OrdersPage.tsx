@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import OrderForm from "../components/OrderForm";
-import OrderList from "../components/OrderList";
+import EditOrderForm from "../components/order/EditOrderForm";
+import OrderForm from "../components/order/OrderForm";
+import OrderList from "../components/order/OrderList";
 import { apexTheme } from "../lib/theme";
 import {
   createOrder,
@@ -98,12 +99,19 @@ export default function OrdersPage() {
         )}
 
         <OrderForm
-          key={orderBeingEdited?.id ?? "new-order"}
-          orderBeingEdited={orderBeingEdited}
+          orderBeingEdited={null}
           onCreate={handleCreateOrder}
           onUpdate={handleUpdateOrder}
           onCancelEdit={() => setOrderBeingEdited(null)}
         />
+
+        {orderBeingEdited && (
+          <EditOrderForm
+            order={orderBeingEdited}
+            onUpdate={handleUpdateOrder}
+            onCancel={() => setOrderBeingEdited(null)}
+          />
+        )}
 
         <section className="space-y-4">
           <div className="flex items-center justify-between">

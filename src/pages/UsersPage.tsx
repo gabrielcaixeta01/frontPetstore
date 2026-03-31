@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import UserForm from "../components/UserForm";
-import UserList from "../components/UserList";
+import EditUserForm from "../components/user/EditUserForm";
+import UserForm from "../components/user/UserForm";
+import UserList from "../components/user/UserList";
 import { apexTheme } from "../lib/theme";
 import {
   createUser,
@@ -98,12 +99,19 @@ export default function UsersPage() {
         )}
 
         <UserForm
-          key={userBeingEdited?.id ?? "new-user"}
-          userBeingEdited={userBeingEdited}
+          userBeingEdited={null}
           onCreate={handleCreateUser}
           onUpdate={handleUpdateUser}
           onCancelEdit={() => setUserBeingEdited(null)}
         />
+
+        {userBeingEdited && (
+          <EditUserForm
+            user={userBeingEdited}
+            onUpdate={handleUpdateUser}
+            onCancel={() => setUserBeingEdited(null)}
+          />
+        )}
 
         <section className="space-y-4">
           <div className="flex items-center justify-between">

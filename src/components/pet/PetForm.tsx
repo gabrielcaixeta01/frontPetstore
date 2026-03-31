@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { getCategories } from "../services/categoryService";
-import type { Category } from "../types/category";
-import type { CreatePetDTO, Pet, UpdatePetDTO } from "../types/pet";
+import { getCategories } from "../../services/categoryService";
+import type { Category } from "../../types/category";
+import type { CreatePetDTO, Pet, UpdatePetDTO } from "../../types/pet";
 
 interface PetFormProps {
   petBeingEdited: Pet | null;

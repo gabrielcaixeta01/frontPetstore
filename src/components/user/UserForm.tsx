@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { CreateUserDTO, UpdateUserDTO, User } from "../types/user";
+import type { CreateUserDTO, UpdateUserDTO, User } from "../../types/user";
 
 interface UserFormProps {
   userBeingEdited: User | null;

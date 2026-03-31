@@ -1,4 +1,4 @@
-import type { Tag } from "../types/tag";
+import type { Tag } from "../../types/tag";
 
 interface TagListProps {
   tags: Tag[];

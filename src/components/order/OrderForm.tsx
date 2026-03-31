@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { CreateOrderDTO, Order, UpdateOrderDTO } from "../types/order";
+import type { CreateOrderDTO, Order, UpdateOrderDTO } from "../../types/order";
 
 interface OrderFormProps {
   orderBeingEdited: Order | null;

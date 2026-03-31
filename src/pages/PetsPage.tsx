@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import PetForm from "../components/PetForm";
-import PetList from "../components/PetList";
+import EditPetForm from "../components/pet/EditPetForm";
+import PetForm from "../components/pet/PetForm";
+import PetList from "../components/pet/PetList";
 import { apexTheme } from "../lib/theme";
 import {
   createPet,
@@ -98,12 +99,19 @@ export default function PetsPage() {
         )}
 
         <PetForm
-          key={petBeingEdited?.id ?? "new-pet"}
-          petBeingEdited={petBeingEdited}
+          petBeingEdited={null}
           onCreate={handleCreatePet}
           onUpdate={handleUpdatePet}
           onCancelEdit={() => setPetBeingEdited(null)}
         />
+
+        {petBeingEdited && (
+          <EditPetForm
+            pet={petBeingEdited}
+            onUpdate={handleUpdatePet}
+            onCancel={() => setPetBeingEdited(null)}
+          />
+        )}
 
         <section className="space-y-4">
           <div className="flex items-center justify-between">
