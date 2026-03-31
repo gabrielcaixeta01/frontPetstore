@@ -2,11 +2,7 @@ import { api } from "./api";
 import type { CreatePetDTO, Pet, UpdatePetDTO } from "../types/pet";
 
 export async function getPets(): Promise<Pet[]> {
-  const response = await api.get("/pet/findByStatus", {
-    params: {
-      status: "available", // ou pending / sold
-    },
-  });
+  const response = await api.get("/pet/all");
   return response.data;
 }
 
@@ -25,6 +21,7 @@ export async function updatePet(id: number, data: UpdatePetDTO): Promise<Pet> {
   return response.data;
 }
 
-export async function deletePet(id: number): Promise<void> {
-  await api.delete(`/pet/${id}`);
+export async function deletePet(id: number): Promise<{ message: string }> {
+  const response = await api.delete(`/pet/${id}`);
+  return response.data;
 }
