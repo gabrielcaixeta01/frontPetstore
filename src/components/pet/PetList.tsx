@@ -27,17 +27,22 @@ export default function PetList({ pets, onEdit, onDelete }: PetListProps) {
         >
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div className="space-y-1">
-              <h3 className={`text-xl font-bold ${c.text}`}>{pet.name}</h3>
+              <h3 className={`text-xl font-bold ${c.text}`}>{pet.nome}</h3>
               <p className={`text-sm ${c.textMuted}`}>ID: {pet.id}</p>
-              <p className={`text-sm ${c.textSoft}`}>Status: {pet.status}</p>
+              <p className={`text-sm ${c.textSoft}`}>Raça: {pet.raca ?? "-"}</p>
               <p className={`text-sm ${c.textSoft}`}>
-                Categoria ID: {pet.category_id}
+                Sexo: {pet.sexo ?? "-"}
               </p>
               <p className={`text-sm ${c.textSoft}`}>
-                Owner ID: {pet.owner_id ?? "Sem dono"}
+                Porte: {pet.porte ?? "-"}
               </p>
               <p className={`text-sm ${c.textSoft} break-all`}>
-                Foto: {pet.photoUrls || "Não informada"}
+                Peso: {pet.peso ?? "-"}
+              </p>
+              <p className={`text-sm ${c.textSoft}`}>Categoria ID: {pet.categoria_id}</p>
+              <p className={`text-sm ${c.textSoft}`}>Dono ID: {pet.dono_id}</p>
+              <p className={`text-sm ${c.textSoft} break-all`}>
+                Observações: {pet.observacoes_saude || "Não informada"}
               </p>
             </div>
 

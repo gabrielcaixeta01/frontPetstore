@@ -1,24 +1,33 @@
 export interface Pet {
   id: number;
-  name: string;
-  photoUrls?: string;
-  status: string;
-  category_id: number;
-  owner_id?: number | null;
+  nome: string;
+  raca?: string;
+  sexo?: 'macho' | 'femea';
+  porte?: 'pequeno' | 'medio' | 'grande';
+  peso?: number;
+  observacoes_saude?: string;
+  categoria_id: number;
+  dono_id: number;
 }
 
 export interface CreatePetDTO {
-  name: string;
-  photoUrls?: string;
-  status: string;
-  category_id: number;
-  owner_id?: number | null;
+  nome: string;
+  raca?: string;
+  sexo?: 'macho' | 'femea';
+  porte?: 'pequeno' | 'medio' | 'grande';
+  peso?: number;
+  observacoes_saude?: string;
+  categoria_id: number;
+  dono_id: number;
 }
 
 export interface UpdatePetDTO {
-  name: string;
-  photoUrls?: string;
-  status: string;
-  category_id: number;
-  owner_id?: number | null;
+  nome?: string;
+  raca?: string;
+  sexo?: 'macho' | 'femea';
+  porte?: 'pequeno' | 'medio' | 'grande';
+  peso?: number;
+  observacoes_saude?: string;
+  categoria_id?: number;
+  dono_id?: number;
 }

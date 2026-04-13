@@ -27,7 +27,10 @@ export default function TagList({ tags, onEdit, onDelete }: TagListProps) {
         >
           <div className="flex items-center justify-between gap-4">
             <div>
-              <h3 className={`text-xl font-bold ${c.text}`}>{tag.name}</h3>
+              <h3 className={`text-xl font-bold ${c.text}`}>{tag.nome}</h3>
+              {tag.descricao && (
+                <p className={`mt-1 text-sm ${c.textSoft}`}>{tag.descricao}</p>
+              )}
               <p className={`text-sm ${c.textSoft}`}>ID: {tag.id}</p>
             </div>
 

@@ -1,12 +1,15 @@
 export interface Tag {
   id: number;
-  name: string;
+  nome: string;
+  descricao?: string;
 }
 
 export interface CreateTagDTO {
-  name: string;
+  nome: string;
+  descricao?: string;
 }
 
 export interface UpdateTagDTO {
-  name: string;
+  nome?: string;
+  descricao?: string;
 }

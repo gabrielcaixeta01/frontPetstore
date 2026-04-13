@@ -16,23 +16,28 @@ export default function TagForm({
   onCancelEdit,
 }: TagFormProps) {
   const c = apexTheme.colors;
-  const [name, setName] = useState(tagBeingEdited?.name ?? "");
+  const [nome, setNome] = useState(tagBeingEdited?.nome ?? "");
+  const [descricao, setDescricao] = useState(tagBeingEdited?.descricao ?? "");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    if (!name.trim()) {
+    if (!nome.trim()) {
       alert("Informe o nome da tag.");
       return;
     }
 
-    const payload = { name: name.trim() };
+    const payload = {
+      nome: nome.trim(),
+      descricao: descricao.trim() || undefined,
+    };
 
     if (tagBeingEdited) {
       await onUpdate(tagBeingEdited.id, payload);
     } else {
       await onCreate(payload);
-      setName("");
+      setNome("");
+      setDescricao("");
     }
   }
 
@@ -53,9 +58,22 @@ export default function TagForm({
         <input
           id="tag-name"
           type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          value={nome}
+          onChange={(e) => setNome(e.target.value)}
           required
+          className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="tag-desc" className={`mb-1 block text-sm ${c.textSoft}`}>
+          Descricao
+        </label>
+        <textarea
+          id="tag-desc"
+          value={descricao}
+          onChange={(e) => setDescricao(e.target.value)}
+          rows={3}
           className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
         />
       </div>

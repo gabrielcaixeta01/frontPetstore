@@ -17,7 +17,7 @@ export default function AppNavbar() {
           <div className="text-2xl font-bold bg-linear-to-r from-[#1c46f3] to-[#00bb69] bg-clip-text text-transparent">
             Apex
           </div>
-          <div className="text-2xl font-light text-gray-900">Petstore</div>
+          <div className="text-2xl font-extralight text-gray-900">Petstore</div>
         </NavLink>
 
         <nav className="flex items-center gap-1">

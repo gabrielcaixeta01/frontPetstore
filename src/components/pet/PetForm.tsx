@@ -21,9 +21,12 @@ export default function PetForm({
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
 
-  const [name, setName] = useState("");
-  const [photoUrls, setPhotoUrls] = useState("");
-  const [status, setStatus] = useState("available");
+  const [nome, setNome] = useState("");
+  const [raca, setRaca] = useState("");
+  const [sexo, setSexo] = useState<CreatePetDTO["sexo"] | "">("");
+  const [porte, setPorte] = useState<CreatePetDTO["porte"] | "">("");
+  const [peso, setPeso] = useState("");
+  const [observacoesSaude, setObservacoesSaude] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [ownerId, setOwnerId] = useState("");
 
@@ -45,26 +48,23 @@ export default function PetForm({
 
   useEffect(() => {
     if (petBeingEdited) {
-      setName(petBeingEdited.name ?? "");
-      setPhotoUrls(petBeingEdited.photoUrls ?? "");
-      setStatus(petBeingEdited.status ?? "available");
-      setCategoryId(
-        petBeingEdited.category_id !== undefined &&
-          petBeingEdited.category_id !== null
-          ? String(petBeingEdited.category_id)
-          : ""
-      );
-      setOwnerId(
-        petBeingEdited.owner_id !== undefined && petBeingEdited.owner_id !== null
-          ? String(petBeingEdited.owner_id)
-          : ""
-      );
+      setNome(petBeingEdited.nome ?? "");
+      setRaca(petBeingEdited.raca ?? "");
+      setSexo(petBeingEdited.sexo ?? "");
+      setPorte(petBeingEdited.porte ?? "");
+      setPeso(petBeingEdited.peso !== undefined ? String(petBeingEdited.peso) : "");
+      setObservacoesSaude(petBeingEdited.observacoes_saude ?? "");
+      setCategoryId(String(petBeingEdited.categoria_id ?? ""));
+      setOwnerId(String(petBeingEdited.dono_id ?? ""));
       return;
     }
 
-    setName("");
-    setPhotoUrls("");
-    setStatus("available");
+    setNome("");
+    setRaca("");
+    setSexo("");
+    setPorte("");
+    setPeso("");
+    setObservacoesSaude("");
     setOwnerId("");
 
     if (categories.length > 0) {
@@ -77,7 +77,7 @@ export default function PetForm({
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    if (!name.trim()) {
+    if (!nome.trim()) {
       alert("Informe o nome do pet.");
       return;
     }
@@ -87,25 +87,46 @@ export default function PetForm({
       return;
     }
 
-    const payload: CreatePetDTO | UpdatePetDTO = {
-      name: name.trim(),
-      photoUrls: photoUrls.trim() || undefined,
-      status,
-      category_id: Number(categoryId),
-      owner_id: ownerId.trim() ? Number(ownerId) : null,
-    };
+    const sexoValue = sexo || undefined;
+    const porteValue = porte || undefined;
+    const pesoValue = peso.trim() ? Number(peso) : undefined;
 
     try {
       if (petBeingEdited) {
+        const payload: UpdatePetDTO = {
+          nome: nome.trim(),
+          raca: raca.trim() || undefined,
+          sexo: sexoValue,
+          porte: porteValue,
+          peso: pesoValue,
+          observacoes_saude: observacoesSaude.trim() || undefined,
+          categoria_id: Number(categoryId),
+          dono_id: Number(ownerId),
+        };
+
         await onUpdate(petBeingEdited.id, payload);
       } else {
+        const payload: CreatePetDTO = {
+          nome: nome.trim(),
+          raca: raca.trim() || undefined,
+          sexo: sexoValue,
+          porte: porteValue,
+          peso: pesoValue,
+          observacoes_saude: observacoesSaude.trim() || undefined,
+          categoria_id: Number(categoryId),
+          dono_id: Number(ownerId),
+        };
+
         await onCreate(payload);
       }
 
       if (!petBeingEdited) {
-        setName("");
-        setPhotoUrls("");
-        setStatus("available");
+        setNome("");
+        setRaca("");
+        setSexo("");
+        setPorte("");
+        setPeso("");
+        setObservacoesSaude("");
         setOwnerId("");
         if (categories.length > 0) {
           setCategoryId(String(categories[0].id));
@@ -132,40 +153,87 @@ export default function PetForm({
 
       <div className="grid gap-4 md:grid-cols-2">
         <div>
-          <label htmlFor="name" className={`mb-1 block text-sm ${c.textSoft}`}>
+          <label htmlFor="nome" className={`mb-1 block text-sm ${c.textSoft}`}>
             Nome
           </label>
           <input
-            id="name"
+            id="nome"
             type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={nome}
+            onChange={(e) => setNome(e.target.value)}
             required
             className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
           />
         </div>
 
         <div>
-          <label htmlFor="status" className={`mb-1 block text-sm ${c.textSoft}`}>
-            Status
+          <label htmlFor="raca" className={`mb-1 block text-sm ${c.textSoft}`}>
+            Raça
+          </label>
+          <input
+            id="raca"
+            type="text"
+            value={raca}
+            onChange={(e) => setRaca(e.target.value)}
+            className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="sexo" className={`mb-1 block text-sm ${c.textSoft}`}>
+            Sexo
           </label>
           <select
-            id="status"
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
+            id="sexo"
+            value={sexo}
+            onChange={(e) =>
+              setSexo(e.target.value as CreatePetDTO["sexo"] | "")
+            }
             className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
           >
-            <option value="available">available</option>
-            <option value="pending">pending</option>
-            <option value="sold">sold</option>
+            <option value="">Selecione</option>
+            <option value="macho">macho</option>
+            <option value="femea">femea</option>
           </select>
         </div>
 
         <div>
-          <label
-            htmlFor="category"
-            className={`mb-1 block text-sm ${c.textSoft}`}
+          <label htmlFor="porte" className={`mb-1 block text-sm ${c.textSoft}`}>
+            Porte
+          </label>
+          <select
+            id="porte"
+            value={porte}
+            onChange={(e) =>
+              setPorte(e.target.value as CreatePetDTO["porte"] | "")
+            }
+            className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
           >
+            <option value="">Selecione</option>
+            <option value="pequeno">pequeno</option>
+            <option value="medio">medio</option>
+            <option value="grande">grande</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <div>
+          <label htmlFor="peso" className={`mb-1 block text-sm ${c.textSoft}`}>
+            Peso
+          </label>
+          <input
+            id="peso"
+            type="number"
+            step="0.01"
+            value={peso}
+            onChange={(e) => setPeso(e.target.value)}
+            className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="category" className={`mb-1 block text-sm ${c.textSoft}`}>
             Categoria
           </label>
           <select
@@ -190,11 +258,8 @@ export default function PetForm({
         </div>
 
         <div>
-          <label
-            htmlFor="ownerId"
-            className={`mb-1 block text-sm ${c.textSoft}`}
-          >
-            Owner ID
+          <label htmlFor="ownerId" className={`mb-1 block text-sm ${c.textSoft}`}>
+            Dono ID
           </label>
           <input
             id="ownerId"
@@ -204,22 +269,19 @@ export default function PetForm({
             className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
           />
         </div>
-      </div>
 
-      <div>
-        <label
-          htmlFor="photoUrls"
-          className={`mb-1 block text-sm ${c.textSoft}`}
-        >
-          Photo URL
-        </label>
-        <input
-          id="photoUrls"
-          type="text"
-          value={photoUrls}
-          onChange={(e) => setPhotoUrls(e.target.value)}
-          className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
-        />
+        <div>
+          <label htmlFor="observacoes" className={`mb-1 block text-sm ${c.textSoft}`}>
+            Observações de saúde
+          </label>
+          <textarea
+            id="observacoes"
+            value={observacoesSaude}
+            onChange={(e) => setObservacoesSaude(e.target.value)}
+            rows={3}
+            className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
+          />
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-3">
