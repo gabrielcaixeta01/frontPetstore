@@ -1,5 +1,4 @@
-import { NavLink, useNavigate } from "react-router-dom";
-import { removeToken, isAuthenticated } from "../services/authService";
+import { NavLink } from "react-router-dom";
 
 const links = [
   { to: "/", label: "Home" },
@@ -10,57 +9,32 @@ const links = [
 ];
 
 export default function AppNavbar() {
-  const navigate = useNavigate();
-  const isAuth = isAuthenticated();
-
-  function handleLogout() {
-    removeToken();
-    navigate("/login");
-  }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[#1f5a55] bg-[#071c1b]/85 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <NavLink to="/" className="text-xl font-bold text-white">
-          Petstore ApexBrasil
+    <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
+        <NavLink to="/" className="flex items-center gap-2">
+          <div className="text-2xl font-bold bg-linear-to-r from-[#1c46f3] to-[#00bb69] bg-clip-text text-transparent">
+            Apex
+          </div>
+          <div className="text-2xl font-light text-gray-900">Petstore</div>
         </NavLink>
 
-        <nav className="flex flex-wrap items-center gap-2">
-          {isAuth &&
-            links.map((link) => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                end={link.to === "/"}
-                className={({ isActive }) =>
-                  `rounded-xl px-4 py-2 text-sm font-medium transition ${
-                    isActive
-                      ? "bg-[#00a889] text-[#071c1b]"
-                      : "text-[#d7ece8] hover:bg-[#123d3a]"
-                  }`
-                }
-              >
-                {link.label}
-              </NavLink>
-            ))}
-
-          {!isAuth && (
+        <nav className="flex items-center gap-1">
+          {links.map((link) => (
             <NavLink
-              to="/login"
-              className="rounded-xl px-4 py-2 text-sm font-medium text-[#d7ece8] transition hover:bg-[#123d3a]"
+              key={link.to}
+              to={link.to}
+              end={link.to === "/"}
+              className={({ isActive }) =>
+                isActive
+                  ? "bg-[#1c46f3] text-white px-4 py-2 rounded-lg text-sm font-semibold transition"
+                  : "text-gray-700 hover:text-[#1c46f3] px-4 py-2 rounded-lg text-sm font-medium transition hover:bg-gray-50"
+              }
             >
-              Login
+              {link.label}
             </NavLink>
-          )}
-
-          {isAuth && (
-            <button
-              onClick={handleLogout}
-              className="ml-2 rounded-xl border border-[#2d726b] px-4 py-2 text-sm font-medium text-[#d7ece8] transition hover:bg-[#123d3a]"
-            >
-              Sair
-            </button>
-          )}
+          ))}
         </nav>
       </div>
     </header>

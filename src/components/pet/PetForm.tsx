@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getCategories } from "../../services/categoryService";
+import { apexTheme } from "../../lib/theme";
 import type { Category } from "../../types/category";
 import type { CreatePetDTO, Pet, UpdatePetDTO } from "../../types/pet";
 
@@ -16,6 +17,7 @@ export default function PetForm({
   onUpdate,
   onCancelEdit,
 }: PetFormProps) {
+  const c = apexTheme.colors;
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
 
@@ -117,20 +119,20 @@ export default function PetForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-4 rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-lg"
+      className={`space-y-4 rounded-2xl border ${c.border} ${c.card} p-6 shadow-lg`}
     >
       <div>
-        <h2 className="text-2xl font-bold text-white">
+        <h2 className={`text-2xl font-bold ${c.text}`}>
           {petBeingEdited ? "Editar Pet" : "Cadastrar Pet"}
         </h2>
-        <p className="mt-1 text-sm text-zinc-400">
+        <p className={`mt-1 text-sm ${c.textMuted}`}>
           Preencha os dados do pet para salvar no sistema.
         </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <div>
-          <label htmlFor="name" className="mb-1 block text-sm text-zinc-300">
+          <label htmlFor="name" className={`mb-1 block text-sm ${c.textSoft}`}>
             Nome
           </label>
           <input
@@ -139,19 +141,19 @@ export default function PetForm({
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-white outline-none focus:border-zinc-500"
+            className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
           />
         </div>
 
         <div>
-          <label htmlFor="status" className="mb-1 block text-sm text-zinc-300">
+          <label htmlFor="status" className={`mb-1 block text-sm ${c.textSoft}`}>
             Status
           </label>
           <select
             id="status"
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-white outline-none focus:border-zinc-500"
+            className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
           >
             <option value="available">available</option>
             <option value="pending">pending</option>
@@ -162,7 +164,7 @@ export default function PetForm({
         <div>
           <label
             htmlFor="category"
-            className="mb-1 block text-sm text-zinc-300"
+            className={`mb-1 block text-sm ${c.textSoft}`}
           >
             Categoria
           </label>
@@ -171,7 +173,7 @@ export default function PetForm({
             value={categoryId}
             onChange={(e) => setCategoryId(e.target.value)}
             disabled={loadingCategories || categories.length === 0}
-            className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-white outline-none focus:border-zinc-500 disabled:opacity-60"
+            className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3] disabled:opacity-60`}
           >
             {loadingCategories ? (
               <option value="">Carregando categorias...</option>
@@ -190,7 +192,7 @@ export default function PetForm({
         <div>
           <label
             htmlFor="ownerId"
-            className="mb-1 block text-sm text-zinc-300"
+            className={`mb-1 block text-sm ${c.textSoft}`}
           >
             Owner ID
           </label>
@@ -199,7 +201,7 @@ export default function PetForm({
             type="number"
             value={ownerId}
             onChange={(e) => setOwnerId(e.target.value)}
-            className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-white outline-none focus:border-zinc-500"
+            className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
           />
         </div>
       </div>
@@ -207,7 +209,7 @@ export default function PetForm({
       <div>
         <label
           htmlFor="photoUrls"
-          className="mb-1 block text-sm text-zinc-300"
+          className={`mb-1 block text-sm ${c.textSoft}`}
         >
           Photo URL
         </label>
@@ -216,7 +218,7 @@ export default function PetForm({
           type="text"
           value={photoUrls}
           onChange={(e) => setPhotoUrls(e.target.value)}
-          className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-white outline-none focus:border-zinc-500"
+          className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
         />
       </div>
 
@@ -224,7 +226,7 @@ export default function PetForm({
         <button
           type="submit"
           disabled={loadingCategories || categories.length === 0}
-          className="rounded-xl bg-white px-5 py-3 font-semibold text-black transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          className={`rounded-xl ${c.primary} ${c.primaryText} px-5 py-3 font-semibold transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60`}
         >
           {petBeingEdited ? "Salvar alterações" : "Cadastrar"}
         </button>
@@ -233,7 +235,7 @@ export default function PetForm({
           <button
             type="button"
             onClick={onCancelEdit}
-            className="rounded-xl border border-zinc-700 px-5 py-3 font-semibold text-white transition hover:bg-zinc-800"
+            className={`rounded-xl border ${c.border} px-5 py-3 font-semibold ${c.text} transition hover:${c.bgSoft}`}
           >
             Cancelar edição
           </button>

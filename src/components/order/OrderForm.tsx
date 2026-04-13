@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { apexTheme } from "../../lib/theme";
 import type { CreateOrderDTO, Order, UpdateOrderDTO } from "../../types/order";
 
 interface OrderFormProps {
@@ -14,6 +15,7 @@ export default function OrderForm({
   onUpdate,
   onCancelEdit,
 }: OrderFormProps) {
+  const c = apexTheme.colors;
   const [petId, setPetId] = useState(
     orderBeingEdited?.petId !== undefined && orderBeingEdited?.petId !== null
       ? String(orderBeingEdited.petId)
@@ -74,15 +76,15 @@ export default function OrderForm({
     <form
       key={orderBeingEdited?.id ?? "new"}
       onSubmit={handleSubmit}
-      className="space-y-4 rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-lg"
+      className={`space-y-4 rounded-2xl border p-6 shadow-lg ${c.border} ${c.card}`}
     >
-      <h2 className="text-2xl font-bold text-white">
+      <h2 className={`text-2xl font-bold ${c.text}`}>
         {orderBeingEdited ? "Editar Order" : "Cadastrar Order"}
       </h2>
 
       <div className="grid gap-4 md:grid-cols-2">
         <div>
-          <label htmlFor="petId" className="mb-1 block text-sm text-zinc-300">
+          <label htmlFor="petId" className={`mb-1 block text-sm ${c.textSoft}`}>
             Pet ID
           </label>
           <input
@@ -91,12 +93,12 @@ export default function OrderForm({
             value={petId}
             onChange={(e) => setPetId(e.target.value)}
             required
-            className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-white outline-none focus:border-zinc-500"
+            className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3]`}
           />
         </div>
 
         <div>
-          <label htmlFor="ownerId" className="mb-1 block text-sm text-zinc-300">
+          <label htmlFor="ownerId" className={`mb-1 block text-sm ${c.textSoft}`}>
             Owner ID
           </label>
           <input
@@ -105,12 +107,12 @@ export default function OrderForm({
             value={ownerId}
             onChange={(e) => setOwnerId(e.target.value)}
             required
-            className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-white outline-none focus:border-zinc-500"
+            className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3]`}
           />
         </div>
 
         <div>
-          <label htmlFor="quantity" className="mb-1 block text-sm text-zinc-300">
+          <label htmlFor="quantity" className={`mb-1 block text-sm ${c.textSoft}`}>
             Quantity
           </label>
           <input
@@ -118,12 +120,12 @@ export default function OrderForm({
             type="number"
             value={quantity}
             onChange={(e) => setQuantity(e.target.value)}
-            className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-white outline-none focus:border-zinc-500"
+            className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3]`}
           />
         </div>
 
         <div>
-          <label htmlFor="shipDate" className="mb-1 block text-sm text-zinc-300">
+          <label htmlFor="shipDate" className={`mb-1 block text-sm ${c.textSoft}`}>
             Ship Date
           </label>
           <input
@@ -131,12 +133,12 @@ export default function OrderForm({
             type="datetime-local"
             value={shipDate}
             onChange={(e) => setShipDate(e.target.value)}
-            className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-white outline-none focus:border-zinc-500"
+            className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3]`}
           />
         </div>
 
         <div>
-          <label htmlFor="status" className="mb-1 block text-sm text-zinc-300">
+          <label htmlFor="status" className={`mb-1 block text-sm ${c.textSoft}`}>
             Status
           </label>
           <input
@@ -144,7 +146,7 @@ export default function OrderForm({
             type="text"
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-white outline-none focus:border-zinc-500"
+            className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3]`}
           />
         </div>
 
@@ -156,7 +158,7 @@ export default function OrderForm({
             onChange={(e) => setComplete(e.target.checked)}
             className="h-4 w-4"
           />
-          <label htmlFor="complete" className="text-sm text-zinc-300">
+          <label htmlFor="complete" className={`text-sm ${c.textSoft}`}>
             Complete
           </label>
         </div>
@@ -165,7 +167,7 @@ export default function OrderForm({
       <div className="flex flex-wrap gap-3">
         <button
           type="submit"
-          className="rounded-xl bg-white px-5 py-3 font-semibold text-black transition hover:opacity-90"
+          className={`rounded-xl px-5 py-3 font-semibold transition hover:opacity-90 ${c.primary} ${c.primaryText}`}
         >
           {orderBeingEdited ? "Salvar alterações" : "Cadastrar"}
         </button>
@@ -174,7 +176,7 @@ export default function OrderForm({
           <button
             type="button"
             onClick={onCancelEdit}
-            className="rounded-xl border border-zinc-700 px-5 py-3 font-semibold text-white transition hover:bg-zinc-800"
+            className={`rounded-xl border px-5 py-3 font-semibold transition ${c.border} ${c.text} hover:${c.bgSoft}`}
           >
             Cancelar edição
           </button>

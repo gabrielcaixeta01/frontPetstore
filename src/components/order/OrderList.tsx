@@ -1,3 +1,4 @@
+import { apexTheme } from "../../lib/theme";
 import type { Order } from "../../types/order";
 
 interface OrderListProps {
@@ -7,9 +8,10 @@ interface OrderListProps {
 }
 
 export default function OrderList({ orders, onEdit, onDelete }: OrderListProps) {
+  const c = apexTheme.colors;
   if (orders.length === 0) {
     return (
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 text-zinc-400">
+      <div className={`rounded-2xl border p-6 ${c.border} ${c.card} ${c.textMuted}`}>
         Nenhuma order encontrada.
       </div>
     );
@@ -20,35 +22,35 @@ export default function OrderList({ orders, onEdit, onDelete }: OrderListProps) 
       {orders.map((order) => (
         <div
           key={order.id}
-          className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 shadow-lg"
+          className={`rounded-2xl border p-5 shadow-lg ${c.border} ${c.card}`}
         >
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div className="space-y-1">
-              <h3 className="text-xl font-bold text-white">Order #{order.id}</h3>
-              <p className="text-sm text-zinc-300">Pet ID: {order.petId}</p>
-              <p className="text-sm text-zinc-300">
+              <h3 className={`text-xl font-bold ${c.text}`}>Order #{order.id}</h3>
+              <p className={`text-sm ${c.textSoft}`}>Pet ID: {order.petId}</p>
+              <p className={`text-sm ${c.textSoft}`}>
                 Quantity: {order.quantity ?? "-"}
               </p>
-              <p className="text-sm text-zinc-300">
+              <p className={`text-sm ${c.textSoft}`}>
                 Ship Date: {order.shipDate ?? "-"}
               </p>
-              <p className="text-sm text-zinc-300">Status: {order.status ?? "-"}</p>
-              <p className="text-sm text-zinc-300">
+              <p className={`text-sm ${c.textSoft}`}>Status: {order.status ?? "-"}</p>
+              <p className={`text-sm ${c.textSoft}`}>
                 Complete: {order.complete ? "Sim" : "Não"}
               </p>
-              <p className="text-sm text-zinc-300">Owner ID: {order.owner_id}</p>
+              <p className={`text-sm ${c.textSoft}`}>Owner ID: {order.owner_id}</p>
             </div>
 
             <div className="flex gap-3">
               <button
                 onClick={() => onEdit(order)}
-                className="rounded-xl border border-zinc-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800"
+                className={`rounded-xl border px-4 py-2 text-sm font-medium transition ${c.border} ${c.text} hover:${c.bgSoft}`}
               >
                 Editar
               </button>
               <button
                 onClick={() => onDelete(order.id)}
-                className="rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-500"
+                className={`rounded-xl px-4 py-2 text-sm font-medium transition ${c.danger}`}
               >
                 Excluir
               </button>

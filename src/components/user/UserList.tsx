@@ -1,3 +1,4 @@
+import { apexTheme } from "../../lib/theme";
 import type { User } from "../../types/user";
 
 interface UserListProps {
@@ -7,9 +8,10 @@ interface UserListProps {
 }
 
 export default function UserList({ users, onEdit, onDelete }: UserListProps) {
+  const c = apexTheme.colors;
   if (users.length === 0) {
     return (
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 text-zinc-400">
+      <div className={`rounded-2xl border p-6 ${c.border} ${c.card} ${c.textMuted}`}>
         Nenhum usuário encontrado.
       </div>
     );
@@ -20,19 +22,19 @@ export default function UserList({ users, onEdit, onDelete }: UserListProps) {
       {users.map((user) => (
         <div
           key={user.id}
-          className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 shadow-lg"
+          className={`rounded-2xl border p-5 shadow-lg ${c.border} ${c.card}`}
         >
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div className="space-y-1">
-              <h3 className="text-xl font-bold text-white">{user.username}</h3>
-              <p className="text-sm text-zinc-300">ID: {user.id}</p>
-              <p className="text-sm text-zinc-300">
+              <h3 className={`text-xl font-bold ${c.text}`}>{user.username}</h3>
+              <p className={`text-sm ${c.textSoft}`}>ID: {user.id}</p>
+              <p className={`text-sm ${c.textSoft}`}>
                 Nome: {user.firstName ?? "-"} {user.lastName ?? ""}
               </p>
-              <p className="text-sm text-zinc-300">Email: {user.email ?? "-"}</p>
-              <p className="text-sm text-zinc-300">Phone: {user.phone ?? "-"}</p>
-              <p className="text-sm text-zinc-300">Role: {user.role}</p>
-              <p className="text-sm text-zinc-300">
+              <p className={`text-sm ${c.textSoft}`}>Email: {user.email ?? "-"}</p>
+              <p className={`text-sm ${c.textSoft}`}>Phone: {user.phone ?? "-"}</p>
+              <p className={`text-sm ${c.textSoft}`}>Role: {user.role}</p>
+              <p className={`text-sm ${c.textSoft}`}>
                 Ativo: {user.user_active ? "Sim" : "Não"}
               </p>
             </div>
@@ -40,13 +42,13 @@ export default function UserList({ users, onEdit, onDelete }: UserListProps) {
             <div className="flex gap-3">
               <button
                 onClick={() => onEdit(user)}
-                className="rounded-xl border border-zinc-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800"
+                className={`rounded-xl border px-4 py-2 text-sm font-medium transition ${c.border} ${c.text} hover:${c.bgSoft}`}
               >
                 Editar
               </button>
               <button
                 onClick={() => onDelete(user.id)}
-                className="rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-500"
+                className={`rounded-xl px-4 py-2 text-sm font-medium transition ${c.danger}`}
               >
                 Excluir
               </button>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { apexTheme } from "../../lib/theme";
 import type { CreateTagDTO, Tag, UpdateTagDTO } from "../../types/tag";
 
 interface TagFormProps {
@@ -14,6 +15,7 @@ export default function TagForm({
   onUpdate,
   onCancelEdit,
 }: TagFormProps) {
+  const c = apexTheme.colors;
   const [name, setName] = useState(tagBeingEdited?.name ?? "");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -38,14 +40,14 @@ export default function TagForm({
     <form
       key={tagBeingEdited?.id ?? "new"} // 🔥 ISSO AQUI resolve tudo
       onSubmit={handleSubmit}
-      className="space-y-4 rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-lg"
+      className={`space-y-4 rounded-2xl border ${c.border} ${c.card} p-6 shadow-lg`}
     >
-      <h2 className="text-2xl font-bold text-white">
+      <h2 className={`text-2xl font-bold ${c.text}`}>
         {tagBeingEdited ? "Editar Tag" : "Cadastrar Tag"}
       </h2>
 
       <div>
-        <label htmlFor="tag-name" className="mb-1 block text-sm text-zinc-300">
+        <label htmlFor="tag-name" className={`mb-1 block text-sm ${c.textSoft}`}>
           Nome
         </label>
         <input
@@ -54,14 +56,14 @@ export default function TagForm({
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
-          className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-white outline-none focus:border-zinc-500"
+          className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
         />
       </div>
 
       <div className="flex flex-wrap gap-3">
         <button
           type="submit"
-          className="rounded-xl bg-white px-5 py-3 font-semibold text-black transition hover:opacity-90"
+          className={`rounded-xl ${c.primary} ${c.primaryText} px-5 py-3 font-semibold transition hover:opacity-90`}
         >
           {tagBeingEdited ? "Salvar alterações" : "Cadastrar"}
         </button>
@@ -70,7 +72,7 @@ export default function TagForm({
           <button
             type="button"
             onClick={onCancelEdit}
-            className="rounded-xl border border-zinc-700 px-5 py-3 font-semibold text-white transition hover:bg-zinc-800"
+            className={`rounded-xl border ${c.border} px-5 py-3 font-semibold ${c.text} transition hover:${c.bgSoft}`}
           >
             Cancelar edição
           </button>

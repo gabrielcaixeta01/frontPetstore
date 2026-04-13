@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { apexTheme } from "../../lib/theme";
 import type { CreateUserDTO, UpdateUserDTO, User } from "../../types/user";
 
 interface UserFormProps {
@@ -14,6 +15,7 @@ export default function UserForm({
   onUpdate,
   onCancelEdit,
 }: UserFormProps) {
+  const c = apexTheme.colors;
   const [username, setUsername] = useState(userBeingEdited?.username ?? "");
   const [firstName, setFirstName] = useState(userBeingEdited?.firstName ?? "");
   const [lastName, setLastName] = useState(userBeingEdited?.lastName ?? "");
@@ -63,17 +65,17 @@ export default function UserForm({
     <form
       key={userBeingEdited?.id ?? "new"}
       onSubmit={handleSubmit}
-      className="space-y-4 rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-lg"
+      className={`space-y-4 rounded-2xl border p-6 shadow-lg ${c.border} ${c.card}`}
     >
       <div>
-        <h2 className="text-2xl font-bold text-white">
+        <h2 className={`text-2xl font-bold ${c.text}`}>
           {userBeingEdited ? "Editar Usuário" : "Cadastrar Usuário"}
         </h2>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <div>
-          <label htmlFor="username" className="mb-1 block text-sm text-zinc-300">
+          <label htmlFor="username" className={`mb-1 block text-sm ${c.textSoft}`}>
             Username
           </label>
           <input
@@ -82,19 +84,19 @@ export default function UserForm({
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
-            className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-white outline-none focus:border-zinc-500"
+            className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3]`}
           />
         </div>
 
         <div>
-          <label htmlFor="role" className="mb-1 block text-sm text-zinc-300">
+          <label htmlFor="role" className={`mb-1 block text-sm ${c.textSoft}`}>
             Role
           </label>
           <select
             id="role"
             value={role}
             onChange={(e) => setRole(e.target.value)}
-            className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-white outline-none focus:border-zinc-500"
+            className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3]`}
           >
             <option value="user">user</option>
             <option value="admin">admin</option>
@@ -102,7 +104,7 @@ export default function UserForm({
         </div>
 
         <div>
-          <label htmlFor="firstName" className="mb-1 block text-sm text-zinc-300">
+          <label htmlFor="firstName" className={`mb-1 block text-sm ${c.textSoft}`}>
             First Name
           </label>
           <input
@@ -110,12 +112,12 @@ export default function UserForm({
             type="text"
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
-            className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-white outline-none focus:border-zinc-500"
+            className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3]`}
           />
         </div>
 
         <div>
-          <label htmlFor="lastName" className="mb-1 block text-sm text-zinc-300">
+          <label htmlFor="lastName" className={`mb-1 block text-sm ${c.textSoft}`}>
             Last Name
           </label>
           <input
@@ -123,12 +125,12 @@ export default function UserForm({
             type="text"
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
-            className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-white outline-none focus:border-zinc-500"
+            className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3]`}
           />
         </div>
 
         <div>
-          <label htmlFor="email" className="mb-1 block text-sm text-zinc-300">
+          <label htmlFor="email" className={`mb-1 block text-sm ${c.textSoft}`}>
             Email
           </label>
           <input
@@ -136,12 +138,12 @@ export default function UserForm({
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-white outline-none focus:border-zinc-500"
+            className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3]`}
           />
         </div>
 
         <div>
-          <label htmlFor="phone" className="mb-1 block text-sm text-zinc-300">
+          <label htmlFor="phone" className={`mb-1 block text-sm ${c.textSoft}`}>
             Phone
           </label>
           <input
@@ -149,12 +151,12 @@ export default function UserForm({
             type="text"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-white outline-none focus:border-zinc-500"
+            className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3]`}
           />
         </div>
 
         <div>
-          <label htmlFor="password" className="mb-1 block text-sm text-zinc-300">
+          <label htmlFor="password" className={`mb-1 block text-sm ${c.textSoft}`}>
             Password
           </label>
           <input
@@ -162,7 +164,7 @@ export default function UserForm({
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-white outline-none focus:border-zinc-500"
+            className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3]`}
           />
         </div>
 
@@ -174,7 +176,7 @@ export default function UserForm({
             onChange={(e) => setUserActive(e.target.checked)}
             className="h-4 w-4"
           />
-          <label htmlFor="user_active" className="text-sm text-zinc-300">
+          <label htmlFor="user_active" className={`text-sm ${c.textSoft}`}>
             Usuário ativo
           </label>
         </div>
@@ -183,7 +185,7 @@ export default function UserForm({
       <div className="flex flex-wrap gap-3">
         <button
           type="submit"
-          className="rounded-xl bg-white px-5 py-3 font-semibold text-black transition hover:opacity-90"
+          className={`rounded-xl px-5 py-3 font-semibold transition hover:opacity-90 ${c.primary} ${c.primaryText}`}
         >
           {userBeingEdited ? "Salvar alterações" : "Cadastrar"}
         </button>
@@ -192,7 +194,7 @@ export default function UserForm({
           <button
             type="button"
             onClick={onCancelEdit}
-            className="rounded-xl border border-zinc-700 px-5 py-3 font-semibold text-white transition hover:bg-zinc-800"
+            className={`rounded-xl border px-5 py-3 font-semibold transition ${c.border} ${c.text} hover:${c.bgSoft}`}
           >
             Cancelar edição
           </button>
