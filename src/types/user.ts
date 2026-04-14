@@ -1,32 +1,37 @@
-export interface User {
+export interface Usuario {
   id: number;
-  username: string;
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  phone?: string;
-  role: string;
-  user_active: boolean;
+  nome: string;
+  email: string;
+  telefone: string;
+  tipo_perfil: "cliente" | "funcionario";
+  cpf?: string | null;
+  cnpj?: string | null;
+  ativo: boolean;
+  is_superuser: boolean;
+  data_cadastro: string;
 }
 
-export interface CreateUserDTO {
-  username: string;
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  phone?: string;
-  password?: string;
-  role?: string;
-  user_active?: boolean;
+export interface CreateUsuarioDTO {
+  nome: string;
+  email: string;
+  senha_hash: string;
+  telefone: string;
+  tipo_perfil: "cliente" | "funcionario";
+  cpf?: string | null;
+  cnpj?: string | null;
 }
 
-export interface UpdateUserDTO {
-  username?: string;
-  firstName?: string;
-  lastName?: string;
+export interface UpdateUsuarioDTO {
+  nome?: string;
   email?: string;
-  phone?: string;
-  password?: string;
-  role?: string;
-  user_active?: boolean;
+  telefone?: string;
+  tipo_perfil?: "cliente" | "funcionario";
+  cpf?: string | null;
+  cnpj?: string | null;
+  ativo?: boolean;
+  is_superuser?: boolean;
 }
+
+export type User = Usuario;
+export type CreateUserDTO = CreateUsuarioDTO;
+export type UpdateUserDTO = UpdateUsuarioDTO;

@@ -12,7 +12,7 @@ export default function OrderList({ orders, onEdit, onDelete }: OrderListProps) 
   if (orders.length === 0) {
     return (
       <div className={`rounded-2xl border p-6 ${c.border} ${c.card} ${c.textMuted}`}>
-        Nenhuma order encontrada.
+        Nenhum atendimento encontrado.
       </div>
     );
   }
@@ -26,19 +26,22 @@ export default function OrderList({ orders, onEdit, onDelete }: OrderListProps) 
         >
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div className="space-y-1">
-              <h3 className={`text-xl font-bold ${c.text}`}>Order #{order.id}</h3>
-              <p className={`text-sm ${c.textSoft}`}>Pet ID: {order.petId}</p>
+              <h3 className={`text-xl font-bold ${c.text}`}>Atendimento #{order.id}</h3>
               <p className={`text-sm ${c.textSoft}`}>
-                Quantity: {order.quantity ?? "-"}
+                Valor final: R$ {Number(order.valor_final).toFixed(2)}
               </p>
+              <p className={`text-sm ${c.textSoft}`}>Data: {order.data_atendimento}</p>
               <p className={`text-sm ${c.textSoft}`}>
-                Ship Date: {order.shipDate ?? "-"}
+                Forma pagamento: {order.forma_pagamento}
               </p>
-              <p className={`text-sm ${c.textSoft}`}>Status: {order.status ?? "-"}</p>
+              <p className={`text-sm ${c.textSoft}`}>Status: {order.status}</p>
               <p className={`text-sm ${c.textSoft}`}>
-                Complete: {order.complete ? "Sim" : "Não"}
+                Online: {order.online ? "Sim" : "Não"}
               </p>
-              <p className={`text-sm ${c.textSoft}`}>Owner ID: {order.owner_id}</p>
+              <p className={`text-sm ${c.textSoft}`}>Loja ID: {order.loja_id}</p>
+              <p className={`text-sm ${c.textSoft}`}>Cliente ID: {order.cliente_id}</p>
+              <p className={`text-sm ${c.textSoft}`}>Funcionário ID: {order.funcionario_id}</p>
+              <p className={`text-sm ${c.textSoft}`}>{order.observacoes ?? "Sem observações"}</p>
             </div>
 
             <div className="flex gap-3">

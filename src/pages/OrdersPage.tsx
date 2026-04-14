@@ -80,9 +80,9 @@ export default function OrdersPage() {
       <div className="mx-auto max-w-6xl space-y-8">
         <header className={`rounded-3xl border ${c.border} ${c.card} p-8`}>
           <p className={`text-sm ${c.textMuted}`}>Módulo</p>
-          <h1 className="mt-2 text-4xl font-bold">Pedidos</h1>
+          <h1 className="mt-2 text-4xl font-bold">Atendimentos</h1>
           <p className={`mt-3 ${c.textSoft}`}>
-            Controle pedidos, envio, quantidade e conclusão das ordens.
+            Controle atendimentos, pagamento, status e vínculos com loja, cliente e funcionário.
           </p>
         </header>
 
@@ -115,7 +115,7 @@ export default function OrdersPage() {
 
         <section className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold">Lista de pedidos</h2>
+            <h2 className="text-2xl font-bold">Lista de atendimentos</h2>
             <button
               onClick={loadOrders}
               className={`rounded-2xl px-4 py-2 font-medium transition ${c.outlineButton}`}

@@ -82,7 +82,7 @@ export default function UsersPage() {
           <p className={`text-sm ${c.textMuted}`}>Módulo</p>
           <h1 className="mt-2 text-4xl font-bold">Usuários</h1>
           <p className={`mt-3 ${c.textSoft}`}>
-            Gerencie contas, dados de contato e permissões de acesso.
+            Gerencie pessoas do sistema com perfil, documentos e status.
           </p>
         </header>
 

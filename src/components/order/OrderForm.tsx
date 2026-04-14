@@ -16,59 +16,73 @@ export default function OrderForm({
   onCancelEdit,
 }: OrderFormProps) {
   const c = apexTheme.colors;
-  const [petId, setPetId] = useState(
-    orderBeingEdited?.petId !== undefined && orderBeingEdited?.petId !== null
-      ? String(orderBeingEdited.petId)
+  const [formaPagamento, setFormaPagamento] = useState<Order["forma_pagamento"]>(
+    orderBeingEdited?.forma_pagamento ?? "pix"
+  );
+  const [status, setStatus] = useState<Order["status"]>(
+    orderBeingEdited?.status ?? "agendado"
+  );
+  const [online, setOnline] = useState(orderBeingEdited?.online ?? false);
+  const [observacoes, setObservacoes] = useState(
+    orderBeingEdited?.observacoes ?? ""
+  );
+  const [lojaId, setLojaId] = useState(
+    orderBeingEdited?.loja_id !== undefined && orderBeingEdited?.loja_id !== null
+      ? String(orderBeingEdited.loja_id)
       : ""
   );
-  const [quantity, setQuantity] = useState(
-    orderBeingEdited?.quantity !== undefined &&
-      orderBeingEdited?.quantity !== null
-      ? String(orderBeingEdited.quantity)
+  const [clienteId, setClienteId] = useState(
+    orderBeingEdited?.cliente_id !== undefined &&
+      orderBeingEdited?.cliente_id !== null
+      ? String(orderBeingEdited.cliente_id)
       : ""
   );
-  const [shipDate, setShipDate] = useState(orderBeingEdited?.shipDate ?? "");
-  const [status, setStatus] = useState(orderBeingEdited?.status ?? "");
-  const [complete, setComplete] = useState(orderBeingEdited?.complete ?? false);
-  const [ownerId, setOwnerId] = useState(
-    orderBeingEdited?.owner_id !== undefined &&
-      orderBeingEdited?.owner_id !== null
-      ? String(orderBeingEdited.owner_id)
+  const [funcionarioId, setFuncionarioId] = useState(
+    orderBeingEdited?.funcionario_id !== undefined &&
+      orderBeingEdited?.funcionario_id !== null
+      ? String(orderBeingEdited.funcionario_id)
       : ""
   );
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    if (!petId.trim()) {
-      alert("Informe o petId.");
+    if (!lojaId.trim() || !clienteId.trim() || !funcionarioId.trim()) {
+      alert("Informe loja, cliente e funcionário.");
       return;
     }
-
-    if (!ownerId.trim()) {
-      alert("Informe o owner_id.");
-      return;
-    }
-
-    const payload: CreateOrderDTO | UpdateOrderDTO = {
-      petId: Number(petId),
-      quantity: quantity.trim() ? Number(quantity) : undefined,
-      shipDate: shipDate.trim() || undefined,
-      status: status.trim() || undefined,
-      complete,
-      owner_id: Number(ownerId),
-    };
 
     if (orderBeingEdited) {
+      const payload: UpdateOrderDTO = {
+        forma_pagamento: formaPagamento,
+        status,
+        online,
+        observacoes: observacoes.trim() || undefined,
+        loja_id: Number(lojaId),
+        cliente_id: Number(clienteId),
+        funcionario_id: Number(funcionarioId),
+      };
+
       await onUpdate(orderBeingEdited.id, payload);
     } else {
-      await onCreate(payload as CreateOrderDTO);
-      setPetId("");
-      setQuantity("");
-      setShipDate("");
-      setStatus("");
-      setComplete(false);
-      setOwnerId("");
+      const payload: CreateOrderDTO = {
+        forma_pagamento: formaPagamento,
+        status,
+        online,
+        observacoes: observacoes.trim() || undefined,
+        loja_id: Number(lojaId),
+        cliente_id: Number(clienteId),
+        funcionario_id: Number(funcionarioId),
+      };
+
+      await onCreate(payload);
+      setFormaPagamento("pix");
+      setStatus("agendado");
+      setOnline(false);
+      setObservacoes("");
+      setLojaId("");
+      setClienteId("");
+      setFuncionarioId("");
     }
   }
 
@@ -79,87 +93,108 @@ export default function OrderForm({
       className={`space-y-4 rounded-2xl border p-6 shadow-lg ${c.border} ${c.card}`}
     >
       <h2 className={`text-2xl font-bold ${c.text}`}>
-        {orderBeingEdited ? "Editar Order" : "Cadastrar Order"}
+        {orderBeingEdited ? "Editar Atendimento" : "Cadastrar Atendimento"}
       </h2>
 
       <div className="grid gap-4 md:grid-cols-2">
         <div>
-          <label htmlFor="petId" className={`mb-1 block text-sm ${c.textSoft}`}>
-            Pet ID
+          <label htmlFor="formaPagamento" className={`mb-1 block text-sm ${c.textSoft}`}>
+            Forma de pagamento
           </label>
-          <input
-            id="petId"
-            type="number"
-            value={petId}
-            onChange={(e) => setPetId(e.target.value)}
-            required
+          <select
+            id="formaPagamento"
+            value={formaPagamento}
+            onChange={(e) => setFormaPagamento(e.target.value as Order["forma_pagamento"])}
             className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3]`}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="ownerId" className={`mb-1 block text-sm ${c.textSoft}`}>
-            Owner ID
-          </label>
-          <input
-            id="ownerId"
-            type="number"
-            value={ownerId}
-            onChange={(e) => setOwnerId(e.target.value)}
-            required
-            className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3]`}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="quantity" className={`mb-1 block text-sm ${c.textSoft}`}>
-            Quantity
-          </label>
-          <input
-            id="quantity"
-            type="number"
-            value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
-            className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3]`}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="shipDate" className={`mb-1 block text-sm ${c.textSoft}`}>
-            Ship Date
-          </label>
-          <input
-            id="shipDate"
-            type="datetime-local"
-            value={shipDate}
-            onChange={(e) => setShipDate(e.target.value)}
-            className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3]`}
-          />
+          >
+            <option value="pix">pix</option>
+            <option value="cartao_credito">cartao_credito</option>
+            <option value="cartao_debito">cartao_debito</option>
+            <option value="dinheiro">dinheiro</option>
+          </select>
         </div>
 
         <div>
           <label htmlFor="status" className={`mb-1 block text-sm ${c.textSoft}`}>
             Status
           </label>
-          <input
+          <select
             id="status"
-            type="text"
             value={status}
-            onChange={(e) => setStatus(e.target.value)}
+            onChange={(e) => setStatus(e.target.value as Order["status"])}
+            className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3]`}
+          >
+            <option value="agendado">agendado</option>
+            <option value="concluido">concluido</option>
+            <option value="cancelado">cancelado</option>
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="lojaId" className={`mb-1 block text-sm ${c.textSoft}`}>
+            Loja ID
+          </label>
+          <input
+            id="lojaId"
+            type="number"
+            value={lojaId}
+            onChange={(e) => setLojaId(e.target.value)}
+            required
+            className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3]`}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="clienteId" className={`mb-1 block text-sm ${c.textSoft}`}>
+            Cliente ID
+          </label>
+          <input
+            id="clienteId"
+            type="number"
+            value={clienteId}
+            onChange={(e) => setClienteId(e.target.value)}
+            required
+            className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3]`}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="funcionarioId" className={`mb-1 block text-sm ${c.textSoft}`}>
+            Funcionário ID
+          </label>
+          <input
+            id="funcionarioId"
+            type="number"
+            value={funcionarioId}
+            onChange={(e) => setFuncionarioId(e.target.value)}
+            required
+            className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3]`}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="observacoes" className={`mb-1 block text-sm ${c.textSoft}`}>
+            Observações
+          </label>
+          <textarea
+            id="observacoes"
+            value={observacoes}
+            onChange={(e) => setObservacoes(e.target.value)}
+            rows={3}
             className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3]`}
           />
         </div>
 
         <div className="flex items-center gap-3 pt-8">
           <input
-            id="complete"
+            id="online"
             type="checkbox"
-            checked={complete}
-            onChange={(e) => setComplete(e.target.checked)}
+            checked={online}
+            onChange={(e) => setOnline(e.target.checked)}
             className="h-4 w-4"
           />
-          <label htmlFor="complete" className={`text-sm ${c.textSoft}`}>
-            Complete
+          <label htmlFor="online" className={`text-sm ${c.textSoft}`}>
+            Online
           </label>
         </div>
       </div>

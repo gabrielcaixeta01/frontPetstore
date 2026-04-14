@@ -16,48 +16,67 @@ export default function UserForm({
   onCancelEdit,
 }: UserFormProps) {
   const c = apexTheme.colors;
-  const [username, setUsername] = useState(userBeingEdited?.username ?? "");
-  const [firstName, setFirstName] = useState(userBeingEdited?.firstName ?? "");
-  const [lastName, setLastName] = useState(userBeingEdited?.lastName ?? "");
+  const [nome, setNome] = useState(userBeingEdited?.nome ?? "");
   const [email, setEmail] = useState(userBeingEdited?.email ?? "");
-  const [phone, setPhone] = useState(userBeingEdited?.phone ?? "");
-  const [password, setPassword] = useState("");
-  const [role, setRole] = useState(userBeingEdited?.role ?? "user");
-  const [userActive, setUserActive] = useState(
-    userBeingEdited?.user_active ?? true
+  const [senhaHash, setSenhaHash] = useState("");
+  const [telefone, setTelefone] = useState(userBeingEdited?.telefone ?? "");
+  const [tipoPerfil, setTipoPerfil] = useState<"cliente" | "funcionario">(
+    userBeingEdited?.tipo_perfil ?? "cliente"
+  );
+  const [cpf, setCpf] = useState(userBeingEdited?.cpf ?? "");
+  const [cnpj, setCnpj] = useState(userBeingEdited?.cnpj ?? "");
+  const [ativo, setAtivo] = useState(userBeingEdited?.ativo ?? true);
+  const [isSuperuser, setIsSuperuser] = useState(
+    userBeingEdited?.is_superuser ?? false
   );
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    if (!username.trim()) {
-      alert("Informe o username.");
+    if (!nome.trim()) {
+      alert("Informe o nome.");
       return;
     }
 
-    const payload: CreateUserDTO | UpdateUserDTO = {
-      username: username.trim(),
-      firstName: firstName.trim() || undefined,
-      lastName: lastName.trim() || undefined,
-      email: email.trim() || undefined,
-      phone: phone.trim() || undefined,
-      password: password.trim() || undefined,
-      role,
-      user_active: userActive,
-    };
-
     if (userBeingEdited) {
+      const payload: UpdateUserDTO = {
+        nome: nome.trim(),
+        email: email.trim(),
+        telefone: telefone.trim(),
+        tipo_perfil: tipoPerfil,
+        cpf: cpf.trim() || undefined,
+        cnpj: cnpj.trim() || undefined,
+        ativo,
+        is_superuser: isSuperuser,
+      };
+
       await onUpdate(userBeingEdited.id, payload);
     } else {
-      await onCreate(payload as CreateUserDTO);
-      setUsername("");
-      setFirstName("");
-      setLastName("");
+      if (!senhaHash.trim()) {
+        alert("Informe a senha.");
+        return;
+      }
+
+      const payload: CreateUserDTO = {
+        nome: nome.trim(),
+        email: email.trim(),
+        senha_hash: senhaHash.trim(),
+        telefone: telefone.trim(),
+        tipo_perfil: tipoPerfil,
+        cpf: cpf.trim() || undefined,
+        cnpj: cnpj.trim() || undefined,
+      };
+
+      await onCreate(payload);
+      setNome("");
       setEmail("");
-      setPhone("");
-      setPassword("");
-      setRole("user");
-      setUserActive(true);
+      setSenhaHash("");
+      setTelefone("");
+      setTipoPerfil("cliente");
+      setCpf("");
+      setCnpj("");
+      setAtivo(true);
+      setIsSuperuser(false);
     }
   }
 
@@ -75,56 +94,15 @@ export default function UserForm({
 
       <div className="grid gap-4 md:grid-cols-2">
         <div>
-          <label htmlFor="username" className={`mb-1 block text-sm ${c.textSoft}`}>
-            Username
+          <label htmlFor="nome" className={`mb-1 block text-sm ${c.textSoft}`}>
+            Nome
           </label>
           <input
-            id="username"
+            id="nome"
             type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            value={nome}
+            onChange={(e) => setNome(e.target.value)}
             required
-            className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3]`}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="role" className={`mb-1 block text-sm ${c.textSoft}`}>
-            Role
-          </label>
-          <select
-            id="role"
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3]`}
-          >
-            <option value="user">user</option>
-            <option value="admin">admin</option>
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="firstName" className={`mb-1 block text-sm ${c.textSoft}`}>
-            First Name
-          </label>
-          <input
-            id="firstName"
-            type="text"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3]`}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="lastName" className={`mb-1 block text-sm ${c.textSoft}`}>
-            Last Name
-          </label>
-          <input
-            id="lastName"
-            type="text"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
             className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3]`}
           />
         </div>
@@ -143,41 +121,97 @@ export default function UserForm({
         </div>
 
         <div>
-          <label htmlFor="phone" className={`mb-1 block text-sm ${c.textSoft}`}>
-            Phone
+          <label htmlFor="telefone" className={`mb-1 block text-sm ${c.textSoft}`}>
+            Telefone
           </label>
           <input
-            id="phone"
+            id="telefone"
             type="text"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            value={telefone}
+            onChange={(e) => setTelefone(e.target.value)}
             className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3]`}
           />
         </div>
 
         <div>
-          <label htmlFor="password" className={`mb-1 block text-sm ${c.textSoft}`}>
-            Password
+          <label htmlFor="tipo_perfil" className={`mb-1 block text-sm ${c.textSoft}`}>
+            Tipo de perfil
+          </label>
+          <select
+            id="tipo_perfil"
+            value={tipoPerfil}
+            onChange={(e) =>
+              setTipoPerfil(e.target.value as "cliente" | "funcionario")
+            }
+            className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3]`}
+          >
+            <option value="cliente">cliente</option>
+            <option value="funcionario">funcionario</option>
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="cpf" className={`mb-1 block text-sm ${c.textSoft}`}>
+            CPF
           </label>
           <input
-            id="password"
+            id="cpf"
+            type="text"
+            value={cpf}
+            onChange={(e) => setCpf(e.target.value)}
+            className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3]`}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="cnpj" className={`mb-1 block text-sm ${c.textSoft}`}>
+            CNPJ
+          </label>
+          <input
+            id="cnpj"
+            type="text"
+            value={cnpj}
+            onChange={(e) => setCnpj(e.target.value)}
+            className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3]`}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="senha" className={`mb-1 block text-sm ${c.textSoft}`}>
+            Senha hash
+          </label>
+          <input
+            id="senha"
             type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={senhaHash}
+            onChange={(e) => setSenhaHash(e.target.value)}
             className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3]`}
           />
         </div>
 
         <div className="flex items-center gap-3 pt-8">
           <input
-            id="user_active"
+            id="ativo"
             type="checkbox"
-            checked={userActive}
-            onChange={(e) => setUserActive(e.target.checked)}
+            checked={ativo}
+            onChange={(e) => setAtivo(e.target.checked)}
             className="h-4 w-4"
           />
-          <label htmlFor="user_active" className={`text-sm ${c.textSoft}`}>
+          <label htmlFor="ativo" className={`text-sm ${c.textSoft}`}>
             Usuário ativo
+          </label>
+        </div>
+
+        <div className="flex items-center gap-3 pt-8">
+          <input
+            id="superuser"
+            type="checkbox"
+            checked={isSuperuser}
+            onChange={(e) => setIsSuperuser(e.target.checked)}
+            className="h-4 w-4"
+          />
+          <label htmlFor="superuser" className={`text-sm ${c.textSoft}`}>
+            Superuser
           </label>
         </div>
       </div>

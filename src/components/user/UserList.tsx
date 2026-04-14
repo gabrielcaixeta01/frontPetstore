@@ -26,16 +26,29 @@ export default function UserList({ users, onEdit, onDelete }: UserListProps) {
         >
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div className="space-y-1">
-              <h3 className={`text-xl font-bold ${c.text}`}>{user.username}</h3>
+              <h3 className={`text-xl font-bold ${c.text}`}>{user.nome}</h3>
               <p className={`text-sm ${c.textSoft}`}>ID: {user.id}</p>
               <p className={`text-sm ${c.textSoft}`}>
-                Nome: {user.firstName ?? "-"} {user.lastName ?? ""}
+                Email: {user.email}
               </p>
-              <p className={`text-sm ${c.textSoft}`}>Email: {user.email ?? "-"}</p>
-              <p className={`text-sm ${c.textSoft}`}>Phone: {user.phone ?? "-"}</p>
-              <p className={`text-sm ${c.textSoft}`}>Role: {user.role}</p>
+              <p className={`text-sm ${c.textSoft}`}>Telefone: {user.telefone}</p>
               <p className={`text-sm ${c.textSoft}`}>
-                Ativo: {user.user_active ? "Sim" : "Não"}
+                Perfil: {user.tipo_perfil}
+              </p>
+              <p className={`text-sm ${c.textSoft}`}>
+                CPF: {user.cpf ?? "-"}
+              </p>
+              <p className={`text-sm ${c.textSoft}`}>
+                CNPJ: {user.cnpj ?? "-"}
+              </p>
+              <p className={`text-sm ${c.textSoft}`}>
+                Ativo: {user.ativo ? "Sim" : "Não"}
+              </p>
+              <p className={`text-sm ${c.textSoft}`}>
+                Superuser: {user.is_superuser ? "Sim" : "Não"}
+              </p>
+              <p className={`text-sm ${c.textSoft}`}>
+                Cadastro: {user.data_cadastro}
               </p>
             </div>
 
