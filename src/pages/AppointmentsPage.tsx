@@ -5,6 +5,7 @@ import AppointmentList from "../components/appointment/AppointmentList";
 import EditAppointmentForm from "../components/appointment/EditAppointmentForm";
 import { apexTheme } from "../lib/theme";
 import { getLojas } from "../services/lojaService";
+import { getPets } from "../services/petService";
 import { getServicos } from "../services/servicoService";
 import {
   createAtendimentoServico,
@@ -29,9 +30,9 @@ export default function AppointmentsPage() {
   const [lojasById, setLojasById] = useState<Record<number, string>>({});
   const [clientesById, setClientesById] = useState<Record<number, string>>({});
   const [funcionariosById, setFuncionariosById] = useState<Record<number, string>>({});
+  const [petsById, setPetsById] = useState<Record<number, string>>({});
   const [precoServicoById, setPrecoServicoById] = useState<Record<number, number>>({});
   const [servicosById, setServicosById] = useState<Record<number, string>>({});
-  const [servicosPorAtendimento, setServicosPorAtendimento] = useState<Record<number, string[]>>({});
 
   async function loadAtendimentos() {
     try {
@@ -54,9 +55,10 @@ export default function AppointmentsPage() {
   useEffect(() => {
     async function loadRelacionamentos() {
       try {
-        const [lojas, usuarios, servicos] = await Promise.all([
+        const [lojas, usuarios, pets, servicos] = await Promise.all([
           getLojas(),
           getUsuarios(),
+          getPets(),
           getServicos(),
         ]);
 
@@ -80,6 +82,12 @@ export default function AppointmentsPage() {
         setClientesById(clientesMap);
         setFuncionariosById(funcionariosMap);
 
+        const petsMap: Record<number, string> = {};
+        pets.forEach((pet) => {
+          petsMap[pet.id] = pet.nome;
+        });
+        setPetsById(petsMap);
+
         const precoServicoMap: Record<number, number> = {};
         const servicosMap: Record<number, string> = {};
         servicos.forEach((servico) => {
@@ -96,47 +104,6 @@ export default function AppointmentsPage() {
 
     loadRelacionamentos();
   }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadServicosDaLista() {
-      if (atendimentos.length === 0) {
-        setServicosPorAtendimento({});
-        return;
-      }
-
-      const pairs = await Promise.all(
-        atendimentos.map(async (atendimento) => {
-          try {
-            const itens = await getAtendimentoServicos(atendimento.id);
-            const nomes = itens.map((item) => {
-              return servicosById[item.servico_id] ?? `Servico #${item.servico_id}`;
-            });
-
-            return [atendimento.id, nomes] as const;
-          } catch (error) {
-            console.error(
-              `Erro ao carregar servicos do atendimento ${atendimento.id}:`,
-              error
-            );
-            return [atendimento.id, []] as const;
-          }
-        })
-      );
-
-      if (cancelled) return;
-
-      const servicosMap = Object.fromEntries(pairs);
-      setServicosPorAtendimento(servicosMap);
-    }
-
-    void loadServicosDaLista();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [atendimentos, servicosById]);
 
   async function syncServicosAtendimento(atendimentoId: number, servicoIdsSelecionados: number[]) {
     const itensAtuais = await getAtendimentoServicos(atendimentoId);
@@ -283,7 +250,8 @@ export default function AppointmentsPage() {
               lojasById={lojasById}
               clientesById={clientesById}
               funcionariosById={funcionariosById}
-              servicosPorAtendimento={servicosPorAtendimento}
+              petsById={petsById}
+              servicosById={servicosById}
             />
           )}
         </section>

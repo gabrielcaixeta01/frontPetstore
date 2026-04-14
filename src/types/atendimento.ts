@@ -1,3 +1,12 @@
+export interface AppointmentItem {
+  appointment_id: number;
+  service_id: number;
+  charged_value: number;
+  order_date: string;
+  delivery_date: string | null;
+  observations: string | null;
+}
+
 export interface Atendimento {
   id: number;
   valor_final: number;
@@ -9,6 +18,8 @@ export interface Atendimento {
   loja_id: number;
   cliente_id: number;
   funcionario_id: number;
+  pet_id: number;
+  items: AppointmentItem[];
 }
 
 export interface CreateAtendimentoDTO {
@@ -19,6 +30,7 @@ export interface CreateAtendimentoDTO {
   loja_id: number;
   cliente_id: number;
   funcionario_id: number;
+  pet_id: number;
 }
 
 export interface UpdateAtendimentoDTO {
@@ -29,6 +41,7 @@ export interface UpdateAtendimentoDTO {
   loja_id?: number;
   cliente_id?: number;
   funcionario_id?: number;
+  pet_id?: number;
 }
 
 export interface AtendimentoServico {

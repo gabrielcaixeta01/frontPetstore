@@ -1,5 +1,13 @@
 import { api } from "./api";
-import type { Atendimento, CreateAtendimentoDTO, UpdateAtendimentoDTO, AtendimentoServico, CreateAtendimentoServicoDTO, UpdateAtendimentoServicoDTO } from "../types/atendimento";
+import type {
+  AppointmentItem,
+  Atendimento,
+  CreateAtendimentoDTO,
+  UpdateAtendimentoDTO,
+  AtendimentoServico,
+  CreateAtendimentoServicoDTO,
+  UpdateAtendimentoServicoDTO,
+} from "../types/atendimento";
 
 type ApiAppointment = {
   id: number;
@@ -12,6 +20,17 @@ type ApiAppointment = {
   store_id: number;
   client_id: number;
   worker_id: number;
+  pet_id: number;
+  items?: ApiAppointmentItem[];
+};
+
+type ApiAppointmentItem = {
+  appointment_id: number;
+  service_id: number;
+  charged_value: number;
+  order_date: string;
+  delivery_date: string | null;
+  observations: string | null;
 };
 
 type ApiAppointmentService = {
@@ -29,6 +48,17 @@ type ApiAppointmentService = {
   observations?: string | null;
 };
 
+function toAppointmentItem(item: ApiAppointmentItem): AppointmentItem {
+  return {
+    appointment_id: item.appointment_id,
+    service_id: item.service_id,
+    charged_value: item.charged_value,
+    order_date: item.order_date,
+    delivery_date: item.delivery_date,
+    observations: item.observations,
+  };
+}
+
 function toAtendimento(appointment: ApiAppointment): Atendimento {
   return {
     id: appointment.id,
@@ -41,6 +71,8 @@ function toAtendimento(appointment: ApiAppointment): Atendimento {
     loja_id: appointment.store_id,
     cliente_id: appointment.client_id,
     funcionario_id: appointment.worker_id,
+    pet_id: appointment.pet_id,
+    items: (appointment.items ?? []).map(toAppointmentItem),
   };
 }
 
@@ -90,6 +122,7 @@ export async function createAppointment(data: CreateAtendimentoDTO): Promise<Ate
       store_id: data.loja_id,
       client_id: data.cliente_id,
       worker_id: data.funcionario_id,
+      pet_id: data.pet_id,
     },
   });
   return toAtendimento(response.data);
@@ -105,6 +138,7 @@ export async function updateAppointment(id: number, data: UpdateAtendimentoDTO):
       store_id: data.loja_id,
       client_id: data.cliente_id,
       worker_id: data.funcionario_id,
+      pet_id: data.pet_id,
     },
   });
   return toAtendimento(response.data);

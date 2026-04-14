@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { apexTheme } from "../../lib/theme";
-import { getAtendimentoServicos } from "../../services/atendimentoService";
+import { getPets } from "../../services/petService";
 import { getLojas } from "../../services/lojaService";
 import { getServicos } from "../../services/servicoService";
 import { getUsuarios } from "../../services/usuarioService";
@@ -9,6 +9,7 @@ import type {
   CreateAppointmentDTO,
   UpdateAppointmentDTO,
 } from "../../types/atendimento";
+import type { Pet } from "../../types/pet";
 import type { Loja } from "../../types/loja";
 import type { Servico } from "../../types/servico";
 import type { Usuario } from "../../types/usuario";
@@ -30,9 +31,9 @@ export default function AppointmentForm({
   const [lojas, setLojas] = useState<Loja[]>([]);
   const [clientes, setClientes] = useState<Usuario[]>([]);
   const [funcionarios, setFuncionarios] = useState<Usuario[]>([]);
+  const [pets, setPets] = useState<Pet[]>([]);
   const [servicos, setServicos] = useState<Servico[]>([]);
   const [loadingRelacionamentos, setLoadingRelacionamentos] = useState(true);
-  const [loadingServicosAtendimento, setLoadingServicosAtendimento] = useState(false);
 
   const [formaPagamento, setFormaPagamento] = useState<Appointment["forma_pagamento"]>(
     appointmentBeingEdited?.forma_pagamento ?? "pix"
@@ -61,6 +62,11 @@ export default function AppointmentForm({
       ? String(appointmentBeingEdited.funcionario_id)
       : ""
   );
+  const [petId, setPetId] = useState(
+    appointmentBeingEdited?.pet_id !== undefined && appointmentBeingEdited?.pet_id !== null
+      ? String(appointmentBeingEdited.pet_id)
+      : ""
+  );
   const [servicoIdsSelecionados, setServicoIdsSelecionados] = useState<number[]>([]);
 
   function getPrecoSeguro(preco: number): number {
@@ -73,15 +79,17 @@ export default function AppointmentForm({
       try {
         setLoadingRelacionamentos(true);
 
-        const [lojasData, usuariosData, servicosData] = await Promise.all([
+        const [lojasData, usuariosData, petsData, servicosData] = await Promise.all([
           getLojas(),
           getUsuarios(),
+          getPets(),
           getServicos(),
         ]);
 
         setLojas(lojasData);
         setClientes(usuariosData.filter((u) => u.tipo_perfil === "cliente"));
         setFuncionarios(usuariosData.filter((u) => u.tipo_perfil === "funcionario"));
+        setPets(petsData);
         setServicos(servicosData);
       } catch (error) {
         console.error("Erro ao carregar relacionamentos e servicos:", error);
@@ -94,46 +102,38 @@ export default function AppointmentForm({
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function loadServicosDoAtendimento(atendimentoId: number) {
-      try {
-        setLoadingServicosAtendimento(true);
-        const itens = await getAtendimentoServicos(atendimentoId);
-        if (cancelled) return;
-        setServicoIdsSelecionados(itens.map((item) => item.servico_id));
-      } catch (error) {
-        console.error("Erro ao carregar servicos do atendimento:", error);
-        if (!cancelled) {
-          setServicoIdsSelecionados([]);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoadingServicosAtendimento(false);
-        }
-      }
-    }
-
     if (appointmentBeingEdited) {
       setLojaId(String(appointmentBeingEdited.loja_id ?? ""));
       setClienteId(String(appointmentBeingEdited.cliente_id ?? ""));
       setFuncionarioId(String(appointmentBeingEdited.funcionario_id ?? ""));
-      void loadServicosDoAtendimento(appointmentBeingEdited.id);
+      setPetId(String(appointmentBeingEdited.pet_id ?? ""));
+      setServicoIdsSelecionados(appointmentBeingEdited.items?.map((item) => item.service_id) ?? []);
     } else {
-      setServicoIdsSelecionados([]);
-      setLoadingServicosAtendimento(false);
-
       if (!lojaId && lojas.length > 0) setLojaId(String(lojas[0].id));
       if (!clienteId && clientes.length > 0) setClienteId(String(clientes[0].id));
       if (!funcionarioId && funcionarios.length > 0) {
         setFuncionarioId(String(funcionarios[0].id));
       }
+      setServicoIdsSelecionados([]);
+    }
+  }, [appointmentBeingEdited, lojas, clientes, funcionarios]);
+
+  useEffect(() => {
+    if (appointmentBeingEdited) return;
+
+    const petsDoCliente = clienteId
+      ? pets.filter((pet) => String(pet.dono_id) === clienteId)
+      : [];
+
+    if (petsDoCliente.length === 0) {
+      setPetId("");
+      return;
     }
 
-    return () => {
-      cancelled = true;
-    };
-  }, [appointmentBeingEdited, lojaId, clienteId, funcionarioId, lojas, clientes, funcionarios]);
+    if (!petId || !petsDoCliente.some((pet) => String(pet.id) === petId)) {
+      setPetId(String(petsDoCliente[0].id));
+    }
+  }, [appointmentBeingEdited, clienteId, pets, petId]);
 
   const valorTotalSelecionado = servicoIdsSelecionados.reduce((total, servicoId) => {
     const servico = servicos.find((item) => item.id === servicoId);
@@ -153,13 +153,24 @@ export default function AppointmentForm({
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    if (!lojaId.trim() || !clienteId.trim() || !funcionarioId.trim()) {
-      alert("Informe loja, cliente e funcionario.");
+    if (!lojaId.trim() || !clienteId.trim() || !funcionarioId.trim() || !petId.trim()) {
+      alert("Informe loja, cliente, funcionario e pet.");
       return;
     }
 
     if (servicoIdsSelecionados.length === 0) {
       alert("Selecione pelo menos um servico para o atendimento.");
+      return;
+    }
+
+    const petsDoCliente = pets.filter((pet) => String(pet.dono_id) === clienteId);
+    if (petsDoCliente.length === 0) {
+      alert("O cliente selecionado nao possui pets cadastrados.");
+      return;
+    }
+
+    if (!petsDoCliente.some((pet) => String(pet.id) === petId)) {
+      alert("Selecione um pet pertencente ao cliente informado.");
       return;
     }
 
@@ -172,6 +183,7 @@ export default function AppointmentForm({
         loja_id: Number(lojaId),
         cliente_id: Number(clienteId),
         funcionario_id: Number(funcionarioId),
+        pet_id: Number(petId),
       };
       await onUpdate(appointmentBeingEdited.id, payload, servicoIdsSelecionados);
       return;
@@ -185,6 +197,7 @@ export default function AppointmentForm({
       loja_id: Number(lojaId),
       cliente_id: Number(clienteId),
       funcionario_id: Number(funcionarioId),
+      pet_id: Number(petId),
     };
 
     await onCreate(payload, servicoIdsSelecionados);
@@ -195,8 +208,13 @@ export default function AppointmentForm({
     setLojaId(lojas.length > 0 ? String(lojas[0].id) : "");
     setClienteId(clientes.length > 0 ? String(clientes[0].id) : "");
     setFuncionarioId(funcionarios.length > 0 ? String(funcionarios[0].id) : "");
+    setPetId("");
     setServicoIdsSelecionados([]);
   }
+
+  const petsDoCliente = clienteId
+    ? pets.filter((pet) => String(pet.dono_id) === clienteId)
+    : [];
 
   return (
     <form
@@ -321,6 +339,37 @@ export default function AppointmentForm({
         </div>
 
         <div>
+          <label htmlFor="petId" className={`mb-1 block text-sm ${c.textSoft}`}>
+            Pet
+          </label>
+          <select
+            id="petId"
+            value={petId}
+            onChange={(e) => setPetId(e.target.value)}
+            disabled={loadingRelacionamentos || petsDoCliente.length === 0}
+            required
+            className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3] disabled:opacity-60`}
+          >
+            {loadingRelacionamentos ? (
+              <option value="">Carregando pets...</option>
+            ) : !clienteId ? (
+              <option value="">Selecione um cliente primeiro</option>
+            ) : petsDoCliente.length === 0 ? (
+              <option value="">Nenhum pet para este cliente</option>
+            ) : (
+              <>
+                <option value="">Selecione</option>
+                {petsDoCliente.map((pet) => (
+                  <option key={pet.id} value={String(pet.id)}>
+                    {pet.nome}
+                  </option>
+                ))}
+              </>
+            )}
+          </select>
+        </div>
+
+        <div>
           <label htmlFor="observacoes" className={`mb-1 block text-sm ${c.textSoft}`}>
             Observacoes
           </label>
@@ -354,7 +403,7 @@ export default function AppointmentForm({
             </span>
           </div>
 
-          {loadingRelacionamentos || loadingServicosAtendimento ? (
+          {loadingRelacionamentos ? (
             <div className={`rounded-xl border px-4 py-3 text-sm ${c.border} ${c.cardSoft} ${c.textSoft}`}>
               Carregando servicos...
             </div>

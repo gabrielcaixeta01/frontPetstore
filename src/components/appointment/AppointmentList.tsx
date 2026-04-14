@@ -8,7 +8,8 @@ type AppointmentListProps = {
   lojasById: Record<number, string>;
   clientesById: Record<number, string>;
   funcionariosById: Record<number, string>;
-  servicosPorAtendimento: Record<number, string[]>;
+  petsById: Record<number, string>;
+  servicosById: Record<number, string>;
 };
 
 function formatDateTime(dateValue?: string) {
@@ -30,9 +31,14 @@ export default function AppointmentList({
   lojasById,
   clientesById,
   funcionariosById,
-  servicosPorAtendimento,
+  petsById,
+  servicosById,
 }: AppointmentListProps) {
   const c = apexTheme.colors;
+  const appointmentItemsById = appointments.map((appointment) => ({
+    appointment,
+    items: appointment.items ?? [],
+  }));
 
   if (appointments.length === 0) {
     return (
@@ -44,7 +50,7 @@ export default function AppointmentList({
 
   return (
     <div className="grid gap-4">
-      {appointments.map((appointment) => (
+      {appointmentItemsById.map(({ appointment, items }) => (
         <div
           key={appointment.id}
           className={`rounded-2xl border p-5 shadow-lg ${c.border} ${c.card}`}
@@ -74,17 +80,34 @@ export default function AppointmentList({
               <p className={`text-sm ${c.textSoft}`}>
                 Funcionario: {funcionariosById[appointment.funcionario_id] ?? "Nao encontrado"}
               </p>
+              <p className={`text-sm ${c.textSoft}`}>
+                Pet: {petsById[appointment.pet_id] ?? `Pet #${appointment.pet_id}`}
+              </p>
               <div className="space-y-2">
                 <p className={`text-sm ${c.textSoft}`}>Servicos:</p>
-                {(servicosPorAtendimento[appointment.id] ?? []).length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
-                    {(servicosPorAtendimento[appointment.id] ?? []).map((servicoNome) => (
-                      <span
-                        key={`${appointment.id}-${servicoNome}`}
-                        className="rounded-full border border-[#1c46f3]/30 bg-[#1c46f3]/10 px-3 py-1 text-xs font-medium text-[#8fb1ff]"
+                {items.length > 0 ? (
+                  <div className="space-y-2">
+                    {items.map((item) => (
+                      <div
+                        key={`${appointment.id}-${item.service_id}-${item.order_date}`}
+                        className={`rounded-xl border px-3 py-2 text-sm ${c.border} ${c.cardSoft}`}
                       >
-                        {servicoNome}
-                      </span>
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <span className={`font-medium ${c.text}`}>
+                            {servicosById[item.service_id] ?? `Servico #${item.service_id}`}
+                          </span>
+                          <span className={c.textSoft}>
+                            R$ {Number(item.charged_value).toFixed(2)}
+                          </span>
+                        </div>
+                        <div className={`mt-1 flex flex-wrap gap-3 text-xs ${c.textMuted}`}>
+                          <span>Pedido: {formatDateTime(item.order_date)}</span>
+                          <span>Entrega: {formatDateTime(item.delivery_date ?? undefined)}</span>
+                        </div>
+                        {item.observations && (
+                          <p className={`mt-1 text-xs ${c.textSoft}`}>{item.observations}</p>
+                        )}
+                      </div>
                     ))}
                   </div>
                 ) : (
