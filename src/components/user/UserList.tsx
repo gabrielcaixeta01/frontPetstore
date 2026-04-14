@@ -1,9 +1,9 @@
 import { apexTheme } from "../../lib/theme";
-import type { User } from "../../types/user";
+import type { Usuario } from "../../types/usuario";
 
 interface UserListProps {
-  users: User[];
-  onEdit: (user: User) => void;
+  users: Usuario[];
+  onEdit: (user: Usuario) => void;
   onDelete: (id: number) => Promise<void>;
 }
 

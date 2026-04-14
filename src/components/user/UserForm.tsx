@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { apexTheme } from "../../lib/theme";
-import type { CreateUserDTO, UpdateUserDTO, User } from "../../types/user";
+import type { CreateUsuarioDTO, UpdateUsuarioDTO, Usuario } from "../../types/usuario";
 
 interface UserFormProps {
-  userBeingEdited: User | null;
-  onCreate: (data: CreateUserDTO) => Promise<void>;
-  onUpdate: (id: number, data: UpdateUserDTO) => Promise<void>;
+  userBeingEdited: Usuario | null;
+  onCreate: (data: CreateUsuarioDTO) => Promise<void>;
+  onUpdate: (id: number, data: UpdateUsuarioDTO) => Promise<void>;
   onCancelEdit: () => void;
 }
 
@@ -39,7 +39,7 @@ export default function UserForm({
     }
 
     if (userBeingEdited) {
-      const payload: UpdateUserDTO = {
+      const payload: UpdateUsuarioDTO = {
         nome: nome.trim(),
         email: email.trim(),
         telefone: telefone.trim(),
@@ -57,7 +57,7 @@ export default function UserForm({
         return;
       }
 
-      const payload: CreateUserDTO = {
+      const payload: CreateUsuarioDTO = {
         nome: nome.trim(),
         email: email.trim(),
         senha_hash: senhaHash.trim(),

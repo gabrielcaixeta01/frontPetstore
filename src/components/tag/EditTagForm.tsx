@@ -1,9 +1,9 @@
 import TagForm from "./TagForm";
-import type { Tag, UpdateTagDTO } from "../../types/tag";
+import type { Etiqueta, UpdateEtiquetaDTO } from "../../types/tag";
 
 interface EditTagFormProps {
-  tag: Tag;
-  onUpdate: (id: number, data: UpdateTagDTO) => Promise<void>;
+  tag: Etiqueta;
+  onUpdate: (id: number, data: UpdateEtiquetaDTO) => Promise<void>;
   onCancel: () => void;
 }
 

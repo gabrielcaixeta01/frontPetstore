@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { apexTheme } from "../../lib/theme";
-import type { CreateTagDTO, Tag, UpdateTagDTO } from "../../types/tag";
+import type { CreateEtiquetaDTO, Etiqueta, UpdateEtiquetaDTO } from "../../types/tag";
 
 interface TagFormProps {
-  tagBeingEdited: Tag | null;
-  onCreate: (data: CreateTagDTO) => Promise<void>;
-  onUpdate: (id: number, data: UpdateTagDTO) => Promise<void>;
+  tagBeingEdited: Etiqueta | null;
+  onCreate: (data: CreateEtiquetaDTO) => Promise<void>;
+  onUpdate: (id: number, data: UpdateEtiquetaDTO) => Promise<void>;
   onCancelEdit: () => void;
 }
 

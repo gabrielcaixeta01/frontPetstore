@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getCategories } from "../../services/categoryService";
 import { apexTheme } from "../../lib/theme";
-import type { Category } from "../../types/category";
+import type { Categoria } from "../../types/categoria";
 import type { CreatePetDTO, Pet, UpdatePetDTO } from "../../types/pet";
 
 interface PetFormProps {
@@ -18,7 +18,7 @@ export default function PetForm({
   onCancelEdit,
 }: PetFormProps) {
   const c = apexTheme.colors;
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<Categoria[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
 
   const [nome, setNome] = useState("");

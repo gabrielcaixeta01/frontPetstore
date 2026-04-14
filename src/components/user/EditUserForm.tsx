@@ -1,9 +1,9 @@
 import UserForm from "./UserForm";
-import type { UpdateUserDTO, User } from "../../types/user";
+import type { UpdateUsuarioDTO, Usuario } from "../../types/usuario";
 
 interface EditUserFormProps {
-  user: User;
-  onUpdate: (id: number, data: UpdateUserDTO) => Promise<void>;
+  user: Usuario;
+  onUpdate: (id: number, data: UpdateUsuarioDTO) => Promise<void>;
   onCancel: () => void;
 }
 

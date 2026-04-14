@@ -1,22 +1,22 @@
 import { api } from "./api";
-import type { CreateTagDTO, Tag, UpdateTagDTO } from "../types/tag";
+import type { CreateEtiquetaDTO, Etiqueta, UpdateEtiquetaDTO } from "../types/tag";
 
-export async function getTags(): Promise<Tag[]> {
+export async function getTags(): Promise<Etiqueta[]> {
   const response = await api.get("/tag");
   return response.data;
 }
 
-export async function getTagById(id: number): Promise<Tag> {
+export async function getTagById(id: number): Promise<Etiqueta> {
   const response = await api.get(`/tag/${id}`);
   return response.data;
 }
 
-export async function createTag(data: CreateTagDTO): Promise<Tag> {
+export async function createTag(data: CreateEtiquetaDTO): Promise<Etiqueta> {
   const response = await api.post("/tag", data);
   return response.data;
 }
 
-export async function updateTag(id: number, data: UpdateTagDTO): Promise<Tag> {
+export async function updateTag(id: number, data: UpdateEtiquetaDTO): Promise<Etiqueta> {
   const response = await api.put(`/tag/${id}`, data);
   return response.data;
 }

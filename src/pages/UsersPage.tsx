@@ -9,12 +9,12 @@ import {
   getUsers,
   updateUser,
 } from "../services/userService";
-import type { CreateUserDTO, UpdateUserDTO, User } from "../types/user";
+import type { CreateUsuarioDTO, UpdateUsuarioDTO, Usuario } from "../types/usuario";
 
 export default function UsersPage() {
   const c = apexTheme.colors;
-  const [users, setUsers] = useState<User[]>([]);
-  const [userBeingEdited, setUserBeingEdited] = useState<User | null>(null);
+  const [users, setUsers] = useState<Usuario[]>([]);
+  const [userBeingEdited, setUserBeingEdited] = useState<Usuario | null>(null);
   const [loading, setLoading] = useState(true);
   const [feedback, setFeedback] = useState("");
   const [error, setError] = useState("");
@@ -37,7 +37,7 @@ export default function UsersPage() {
     loadUsers();
   }, []);
 
-  async function handleCreateUser(data: CreateUserDTO) {
+  async function handleCreateUser(data: CreateUsuarioDTO) {
     try {
       await createUser(data);
       setFeedback("Usuário cadastrado com sucesso.");
@@ -49,7 +49,7 @@ export default function UsersPage() {
     }
   }
 
-  async function handleUpdateUser(id: number, data: UpdateUserDTO) {
+  async function handleUpdateUser(id: number, data: UpdateUsuarioDTO) {
     try {
       await updateUser(id, data);
       setFeedback("Usuário atualizado com sucesso.");

@@ -1,15 +1,15 @@
-export interface Tag {
+export interface Etiqueta {
   id: number;
   nome: string;
   descricao?: string;
 }
 
-export interface CreateTagDTO {
+export interface CreateEtiquetaDTO {
   nome: string;
   descricao?: string;
 }
 
-export interface UpdateTagDTO {
+export interface UpdateEtiquetaDTO {
   nome?: string;
   descricao?: string;
 }

@@ -9,12 +9,12 @@ import {
   getTags,
   updateTag,
 } from "../services/tagService";
-import type { CreateTagDTO, Tag, UpdateTagDTO } from "../types/tag";
+import type { CreateEtiquetaDTO, Etiqueta, UpdateEtiquetaDTO } from "../types/tag";
 
 export default function TagsPage() {
   const c = apexTheme.colors;
-  const [tags, setTags] = useState<Tag[]>([]);
-  const [tagBeingEdited, setTagBeingEdited] = useState<Tag | null>(null);
+  const [tags, setTags] = useState<Etiqueta[]>([]);
+  const [tagBeingEdited, setTagBeingEdited] = useState<Etiqueta | null>(null);
   const [loading, setLoading] = useState(true);
   const [feedback, setFeedback] = useState("");
   const [error, setError] = useState("");
@@ -37,7 +37,7 @@ export default function TagsPage() {
     loadTags();
   }, []);
 
-  async function handleCreateTag(data: CreateTagDTO) {
+  async function handleCreateTag(data: CreateEtiquetaDTO) {
     try {
       await createTag(data);
       setFeedback("Tag cadastrada com sucesso.");
@@ -49,7 +49,7 @@ export default function TagsPage() {
     }
   }
 
-  async function handleUpdateTag(id: number, data: UpdateTagDTO) {
+  async function handleUpdateTag(id: number, data: UpdateEtiquetaDTO) {
     try {
       await updateTag(id, data);
       setFeedback("Tag atualizada com sucesso.");

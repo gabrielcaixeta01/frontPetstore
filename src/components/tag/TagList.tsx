@@ -1,9 +1,9 @@
-import type { Tag } from "../../types/tag";
+import type { Etiqueta } from "../../types/tag";
 import { apexTheme } from "../../lib/theme";
 
 interface TagListProps {
-  tags: Tag[];
-  onEdit: (tag: Tag) => void;
+  tags: Etiqueta[];
+  onEdit: (tag: Etiqueta) => void;
   onDelete: (id: number) => Promise<void>;
 }
 
