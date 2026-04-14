@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import EditModal from "../components/EditModal";
 import EditOrderForm from "../components/order/EditOrderForm";
 import OrderForm from "../components/order/OrderForm";
 import OrderList from "../components/order/OrderList";
@@ -105,13 +106,19 @@ export default function OrdersPage() {
           onCancelEdit={() => setOrderBeingEdited(null)}
         />
 
-        {orderBeingEdited && (
-          <EditOrderForm
-            order={orderBeingEdited}
-            onUpdate={handleUpdateOrder}
-            onCancel={() => setOrderBeingEdited(null)}
-          />
-        )}
+        <EditModal
+          isOpen={Boolean(orderBeingEdited)}
+          title="Editar Atendimento"
+          onClose={() => setOrderBeingEdited(null)}
+        >
+          {orderBeingEdited && (
+            <EditOrderForm
+              order={orderBeingEdited}
+              onUpdate={handleUpdateOrder}
+              onCancel={() => setOrderBeingEdited(null)}
+            />
+          )}
+        </EditModal>
 
         <section className="space-y-4">
           <div className="flex items-center justify-between">

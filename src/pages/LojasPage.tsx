@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import EditModal from "../components/EditModal";
 import { apexTheme } from "../lib/theme";
 import {
   createLoja,
@@ -17,6 +18,18 @@ export default function LojasPage() {
   const [error, setError] = useState("");
 
   const [form, setForm] = useState<CreateLojaDTO>({
+    nome: "",
+    cnpj: "",
+    telefone: "",
+    email: "",
+    end_cep: "",
+    end_cidade: "",
+    end_estado: "",
+    end_rua: "",
+    end_bairro: "",
+    end_numero: "",
+  });
+  const [editForm, setEditForm] = useState<CreateLojaDTO>({
     nome: "",
     cnpj: "",
     telefone: "",
@@ -49,7 +62,7 @@ export default function LojasPage() {
 
   useEffect(() => {
     if (!lojaBeingEdited) {
-      setForm({
+      setEditForm({
         nome: "",
         cnpj: "",
         telefone: "",
@@ -64,7 +77,7 @@ export default function LojasPage() {
       return;
     }
 
-    setForm({
+    setEditForm({
       nome: lojaBeingEdited.nome,
       cnpj: lojaBeingEdited.cnpj,
       telefone: lojaBeingEdited.telefone,
@@ -82,7 +95,11 @@ export default function LojasPage() {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  function updateEditField<K extends keyof CreateLojaDTO>(field: K, value: CreateLojaDTO[K]) {
+    setEditForm((prev) => ({ ...prev, [field]: value }));
+  }
+
+  async function handleCreateSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     if (!form.nome.trim() || !form.cnpj.trim() || !form.telefone.trim() || !form.email.trim()) {
@@ -91,30 +108,56 @@ export default function LojasPage() {
     }
 
     try {
-      if (lojaBeingEdited) {
-        const payload: UpdateLojaDTO = {
-          nome: form.nome,
-          telefone: form.telefone,
-          email: form.email,
-          end_cep: form.end_cep,
-          end_cidade: form.end_cidade,
-          end_estado: form.end_estado,
-          end_rua: form.end_rua,
-          end_bairro: form.end_bairro,
-          end_numero: form.end_numero,
-        };
-        await updateLoja(lojaBeingEdited.id, payload);
-        setFeedback("Loja atualizada com sucesso.");
-      } else {
-        await createLoja(form);
-        setFeedback("Loja cadastrada com sucesso.");
-      }
+      await createLoja(form);
+      setFeedback("Loja cadastrada com sucesso.");
+      setForm({
+        nome: "",
+        cnpj: "",
+        telefone: "",
+        email: "",
+        end_cep: "",
+        end_cidade: "",
+        end_estado: "",
+        end_rua: "",
+        end_bairro: "",
+        end_numero: "",
+      });
+      await loadLojas();
+    } catch (err) {
+      console.error(err);
+      setError("Erro ao cadastrar loja.");
+    }
+  }
 
+  async function handleUpdateSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+
+    if (!lojaBeingEdited) return;
+
+    if (!editForm.nome.trim() || !editForm.telefone.trim() || !editForm.email.trim()) {
+      alert("Preencha os campos obrigatórios da loja.");
+      return;
+    }
+
+    try {
+      const payload: UpdateLojaDTO = {
+        nome: editForm.nome,
+        telefone: editForm.telefone,
+        email: editForm.email,
+        end_cep: editForm.end_cep,
+        end_cidade: editForm.end_cidade,
+        end_estado: editForm.end_estado,
+        end_rua: editForm.end_rua,
+        end_bairro: editForm.end_bairro,
+        end_numero: editForm.end_numero,
+      };
+      await updateLoja(lojaBeingEdited.id, payload);
+      setFeedback("Loja atualizada com sucesso.");
       setLojaBeingEdited(null);
       await loadLojas();
     } catch (err) {
       console.error(err);
-      setError(lojaBeingEdited ? "Erro ao atualizar loja." : "Erro ao cadastrar loja.");
+      setError("Erro ao atualizar loja.");
     }
   }
 
@@ -156,12 +199,10 @@ export default function LojasPage() {
         )}
 
         <form
-          onSubmit={handleSubmit}
+          onSubmit={handleCreateSubmit}
           className={`space-y-4 rounded-2xl border ${c.border} ${c.card} p-6 shadow-lg`}
         >
-          <h2 className={`text-2xl font-bold ${c.text}`}>
-            {lojaBeingEdited ? "Editar Loja" : "Cadastrar Loja"}
-          </h2>
+          <h2 className={`text-2xl font-bold ${c.text}`}>Cadastrar Loja</h2>
 
           <div className="grid gap-4 md:grid-cols-2">
             <input
@@ -242,20 +283,39 @@ export default function LojasPage() {
               type="submit"
               className={`rounded-xl ${c.primary} ${c.primaryText} px-5 py-3 font-semibold transition hover:opacity-90`}
             >
-              {lojaBeingEdited ? "Salvar alterações" : "Cadastrar"}
+              Cadastrar
             </button>
-
-            {lojaBeingEdited && (
-              <button
-                type="button"
-                onClick={() => setLojaBeingEdited(null)}
-                className={`rounded-xl border ${c.border} px-5 py-3 font-semibold ${c.text} transition hover:${c.bgSoft}`}
-              >
-                Cancelar edição
-              </button>
-            )}
           </div>
         </form>
+
+        <EditModal
+          isOpen={Boolean(lojaBeingEdited)}
+          title="Editar Loja"
+          onClose={() => setLojaBeingEdited(null)}
+        >
+          <form onSubmit={handleUpdateSubmit} className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <input placeholder="Nome" value={editForm.nome} onChange={(e) => updateEditField("nome", e.target.value)} required className={`rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`} />
+              <input placeholder="CNPJ" value={editForm.cnpj} onChange={(e) => updateEditField("cnpj", e.target.value)} required className={`rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`} />
+              <input placeholder="Telefone" value={editForm.telefone} onChange={(e) => updateEditField("telefone", e.target.value)} required className={`rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`} />
+              <input type="email" placeholder="Email" value={editForm.email} onChange={(e) => updateEditField("email", e.target.value)} required className={`rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`} />
+              <input placeholder="CEP" value={editForm.end_cep} onChange={(e) => updateEditField("end_cep", e.target.value)} required className={`rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`} />
+              <input placeholder="Cidade" value={editForm.end_cidade} onChange={(e) => updateEditField("end_cidade", e.target.value)} required className={`rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`} />
+              <input placeholder="Estado" value={editForm.end_estado} onChange={(e) => updateEditField("end_estado", e.target.value)} required className={`rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`} />
+              <input placeholder="Rua" value={editForm.end_rua} onChange={(e) => updateEditField("end_rua", e.target.value)} required className={`rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`} />
+              <input placeholder="Bairro" value={editForm.end_bairro} onChange={(e) => updateEditField("end_bairro", e.target.value)} required className={`rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`} />
+              <input placeholder="Número" value={editForm.end_numero} onChange={(e) => updateEditField("end_numero", e.target.value)} required className={`rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`} />
+            </div>
+            <div className="flex gap-3">
+              <button type="submit" className={`rounded-xl ${c.primary} ${c.primaryText} px-5 py-3 font-semibold transition hover:opacity-90`}>
+                Salvar alterações
+              </button>
+              <button type="button" onClick={() => setLojaBeingEdited(null)} className={`rounded-xl border ${c.border} px-5 py-3 font-semibold ${c.text} transition hover:${c.bgSoft}`}>
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </EditModal>
 
         <section className="space-y-4">
           <div className="flex items-center justify-between">

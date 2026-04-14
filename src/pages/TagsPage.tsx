@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import EditModal from "../components/EditModal";
 import EditTagForm from "../components/tag/EditTagForm";
 import TagForm from "../components/tag/TagForm";
 import TagList from "../components/tag/TagList";
@@ -105,13 +106,19 @@ export default function TagsPage() {
           onCancelEdit={() => setTagBeingEdited(null)}
         />
 
-        {tagBeingEdited && (
-          <EditTagForm
-            tag={tagBeingEdited}
-            onUpdate={handleUpdateTag}
-            onCancel={() => setTagBeingEdited(null)}
-          />
-        )}
+        <EditModal
+          isOpen={Boolean(tagBeingEdited)}
+          title="Editar Tag"
+          onClose={() => setTagBeingEdited(null)}
+        >
+          {tagBeingEdited && (
+            <EditTagForm
+              tag={tagBeingEdited}
+              onUpdate={handleUpdateTag}
+              onCancel={() => setTagBeingEdited(null)}
+            />
+          )}
+        </EditModal>
 
         <section className="space-y-4">
           <div className="flex items-center justify-between">

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import EditModal from "../components/EditModal";
 import { apexTheme } from "../lib/theme";
 import {
   createServico,
@@ -19,6 +20,9 @@ export default function ServicosPage() {
   const [nome, setNome] = useState("");
   const [descricao, setDescricao] = useState("");
   const [preco, setPreco] = useState("");
+  const [editNome, setEditNome] = useState("");
+  const [editDescricao, setEditDescricao] = useState("");
+  const [editPreco, setEditPreco] = useState("");
 
   async function loadServicos() {
     try {
@@ -40,18 +44,18 @@ export default function ServicosPage() {
 
   useEffect(() => {
     if (!servicoBeingEdited) {
-      setNome("");
-      setDescricao("");
-      setPreco("");
+      setEditNome("");
+      setEditDescricao("");
+      setEditPreco("");
       return;
     }
 
-    setNome(servicoBeingEdited.nome);
-    setDescricao(servicoBeingEdited.descricao ?? "");
-    setPreco(String(servicoBeingEdited.preco));
+    setEditNome(servicoBeingEdited.nome);
+    setEditDescricao(servicoBeingEdited.descricao ?? "");
+    setEditPreco(String(servicoBeingEdited.preco));
   }, [servicoBeingEdited]);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleCreateSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     if (!nome.trim()) {
@@ -71,20 +75,47 @@ export default function ServicosPage() {
     };
 
     try {
-      if (servicoBeingEdited) {
-        const updatePayload: UpdateServicoDTO = payload;
-        await updateServico(servicoBeingEdited.id, updatePayload);
-        setFeedback("Serviço atualizado com sucesso.");
-      } else {
-        await createServico(payload);
-        setFeedback("Serviço cadastrado com sucesso.");
-      }
+      await createServico(payload);
+      setFeedback("Serviço cadastrado com sucesso.");
+      setNome("");
+      setDescricao("");
+      setPreco("");
+      await loadServicos();
+    } catch (err) {
+      console.error(err);
+      setError("Erro ao cadastrar serviço.");
+    }
+  }
 
+  async function handleUpdateSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+
+    if (!servicoBeingEdited) return;
+
+    if (!editNome.trim()) {
+      alert("Informe o nome do serviço.");
+      return;
+    }
+
+    if (!editPreco.trim() || Number.isNaN(Number(editPreco))) {
+      alert("Informe um preço válido.");
+      return;
+    }
+
+    const updatePayload: UpdateServicoDTO = {
+      nome: editNome.trim(),
+      descricao: editDescricao.trim() || undefined,
+      preco: Number(editPreco),
+    };
+
+    try {
+      await updateServico(servicoBeingEdited.id, updatePayload);
+      setFeedback("Serviço atualizado com sucesso.");
       setServicoBeingEdited(null);
       await loadServicos();
     } catch (err) {
       console.error(err);
-      setError(servicoBeingEdited ? "Erro ao atualizar serviço." : "Erro ao cadastrar serviço.");
+      setError("Erro ao atualizar serviço.");
     }
   }
 
@@ -126,12 +157,10 @@ export default function ServicosPage() {
         )}
 
         <form
-          onSubmit={handleSubmit}
+          onSubmit={handleCreateSubmit}
           className={`space-y-4 rounded-2xl border ${c.border} ${c.card} p-6 shadow-lg`}
         >
-          <h2 className={`text-2xl font-bold ${c.text}`}>
-            {servicoBeingEdited ? "Editar Serviço" : "Cadastrar Serviço"}
-          </h2>
+          <h2 className={`text-2xl font-bold ${c.text}`}>Cadastrar Serviço</h2>
 
           <div className="grid gap-4 md:grid-cols-3">
             <div>
@@ -181,20 +210,74 @@ export default function ServicosPage() {
               type="submit"
               className={`rounded-xl ${c.primary} ${c.primaryText} px-5 py-3 font-semibold transition hover:opacity-90`}
             >
-              {servicoBeingEdited ? "Salvar alterações" : "Cadastrar"}
+              Cadastrar
             </button>
+          </div>
+        </form>
 
-            {servicoBeingEdited && (
+        <EditModal
+          isOpen={Boolean(servicoBeingEdited)}
+          title="Editar Serviço"
+          onClose={() => setServicoBeingEdited(null)}
+        >
+          <form onSubmit={handleUpdateSubmit} className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-3">
+              <div>
+                <label htmlFor="servico-edit-nome" className={`mb-1 block text-sm ${c.textSoft}`}>
+                  Nome
+                </label>
+                <input
+                  id="servico-edit-nome"
+                  value={editNome}
+                  onChange={(e) => setEditNome(e.target.value)}
+                  required
+                  className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
+                />
+              </div>
+              <div>
+                <label htmlFor="servico-edit-descricao" className={`mb-1 block text-sm ${c.textSoft}`}>
+                  Descrição
+                </label>
+                <input
+                  id="servico-edit-descricao"
+                  value={editDescricao}
+                  onChange={(e) => setEditDescricao(e.target.value)}
+                  className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
+                />
+              </div>
+              <div>
+                <label htmlFor="servico-edit-preco" className={`mb-1 block text-sm ${c.textSoft}`}>
+                  Preço
+                </label>
+                <input
+                  id="servico-edit-preco"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={editPreco}
+                  onChange={(e) => setEditPreco(e.target.value)}
+                  required
+                  className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
+                />
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button
+                type="submit"
+                className={`rounded-xl ${c.primary} ${c.primaryText} px-5 py-3 font-semibold transition hover:opacity-90`}
+              >
+                Salvar alterações
+              </button>
               <button
                 type="button"
                 onClick={() => setServicoBeingEdited(null)}
                 className={`rounded-xl border ${c.border} px-5 py-3 font-semibold ${c.text} transition hover:${c.bgSoft}`}
               >
-                Cancelar edição
+                Cancelar
               </button>
-            )}
-          </div>
-        </form>
+            </div>
+          </form>
+        </EditModal>
 
         <section className="space-y-4">
           <div className="flex items-center justify-between">

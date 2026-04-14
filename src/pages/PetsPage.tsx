@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import EditModal from "../components/EditModal";
 import EditPetForm from "../components/pet/EditPetForm";
 import PetForm from "../components/pet/PetForm";
 import PetList from "../components/pet/PetList";
@@ -105,13 +106,19 @@ export default function PetsPage() {
           onCancelEdit={() => setPetBeingEdited(null)}
         />
 
-        {petBeingEdited && (
-          <EditPetForm
-            pet={petBeingEdited}
-            onUpdate={handleUpdatePet}
-            onCancel={() => setPetBeingEdited(null)}
-          />
-        )}
+        <EditModal
+          isOpen={Boolean(petBeingEdited)}
+          title="Editar Pet"
+          onClose={() => setPetBeingEdited(null)}
+        >
+          {petBeingEdited && (
+            <EditPetForm
+              pet={petBeingEdited}
+              onUpdate={handleUpdatePet}
+              onCancel={() => setPetBeingEdited(null)}
+            />
+          )}
+        </EditModal>
 
         <section className="space-y-4">
           <div className="flex items-center justify-between">

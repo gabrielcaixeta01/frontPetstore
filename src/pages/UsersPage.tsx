@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import EditModal from "../components/EditModal";
 import EditUserForm from "../components/user/EditUserForm";
 import UserForm from "../components/user/UserForm";
 import UserList from "../components/user/UserList";
@@ -105,13 +106,19 @@ export default function UsersPage() {
           onCancelEdit={() => setUserBeingEdited(null)}
         />
 
-        {userBeingEdited && (
-          <EditUserForm
-            user={userBeingEdited}
-            onUpdate={handleUpdateUser}
-            onCancel={() => setUserBeingEdited(null)}
-          />
-        )}
+        <EditModal
+          isOpen={Boolean(userBeingEdited)}
+          title="Editar Usuário"
+          onClose={() => setUserBeingEdited(null)}
+        >
+          {userBeingEdited && (
+            <EditUserForm
+              user={userBeingEdited}
+              onUpdate={handleUpdateUser}
+              onCancel={() => setUserBeingEdited(null)}
+            />
+          )}
+        </EditModal>
 
         <section className="space-y-4">
           <div className="flex items-center justify-between">

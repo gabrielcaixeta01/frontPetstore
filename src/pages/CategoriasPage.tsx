@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import EditModal from "../components/EditModal";
 import { apexTheme } from "../lib/theme";
 import {
   createCategory,
@@ -20,6 +21,8 @@ export default function CategoriasPage() {
 
   const [nome, setNome] = useState("");
   const [descricao, setDescricao] = useState("");
+  const [editNome, setEditNome] = useState("");
+  const [editDescricao, setEditDescricao] = useState("");
 
   async function loadCategorias() {
     try {
@@ -41,16 +44,16 @@ export default function CategoriasPage() {
 
   useEffect(() => {
     if (!categoriaBeingEdited) {
-      setNome("");
-      setDescricao("");
+      setEditNome("");
+      setEditDescricao("");
       return;
     }
 
-    setNome(categoriaBeingEdited.name);
-    setDescricao("");
+    setEditNome(categoriaBeingEdited.name);
+    setEditDescricao("");
   }, [categoriaBeingEdited]);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleCreateSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     if (!nome.trim()) {
@@ -59,27 +62,43 @@ export default function CategoriasPage() {
     }
 
     try {
-      if (categoriaBeingEdited) {
-        const payload: UpdateCategoriaDTO = {
-          name: nome.trim(),
-          description: descricao.trim() || undefined,
-        };
-        await updateCategory(categoriaBeingEdited.id, payload);
-        setFeedback("Categoria atualizada com sucesso.");
-      } else {
-        const payload: CreateCategoriaDTO = {
-          name: nome.trim(),
-          description: descricao.trim() || undefined,
-        };
-        await createCategory(payload);
-        setFeedback("Categoria cadastrada com sucesso.");
-      }
+      const payload: CreateCategoriaDTO = {
+        name: nome.trim(),
+        description: descricao.trim() || undefined,
+      };
+      await createCategory(payload);
+      setFeedback("Categoria cadastrada com sucesso.");
+      setNome("");
+      setDescricao("");
+      await loadCategorias();
+    } catch (err) {
+      console.error(err);
+      setError("Erro ao cadastrar categoria.");
+    }
+  }
 
+  async function handleUpdateSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+
+    if (!categoriaBeingEdited) return;
+
+    if (!editNome.trim()) {
+      alert("Informe o nome da categoria.");
+      return;
+    }
+
+    try {
+      const payload: UpdateCategoriaDTO = {
+        name: editNome.trim(),
+        description: editDescricao.trim() || undefined,
+      };
+      await updateCategory(categoriaBeingEdited.id, payload);
+      setFeedback("Categoria atualizada com sucesso.");
       setCategoriaBeingEdited(null);
       await loadCategorias();
     } catch (err) {
       console.error(err);
-      setError(categoriaBeingEdited ? "Erro ao atualizar categoria." : "Erro ao cadastrar categoria.");
+      setError("Erro ao atualizar categoria.");
     }
   }
 
@@ -121,12 +140,10 @@ export default function CategoriasPage() {
         )}
 
         <form
-          onSubmit={handleSubmit}
+          onSubmit={handleCreateSubmit}
           className={`space-y-4 rounded-2xl border ${c.border} ${c.card} p-6 shadow-lg`}
         >
-          <h2 className={`text-2xl font-bold ${c.text}`}>
-            {categoriaBeingEdited ? "Editar Categoria" : "Cadastrar Categoria"}
-          </h2>
+          <h2 className={`text-2xl font-bold ${c.text}`}>Cadastrar Categoria</h2>
 
           <div className="grid gap-4 md:grid-cols-2">
             <div>
@@ -160,20 +177,59 @@ export default function CategoriasPage() {
               type="submit"
               className={`rounded-xl ${c.primary} ${c.primaryText} px-5 py-3 font-semibold transition hover:opacity-90`}
             >
-              {categoriaBeingEdited ? "Salvar alterações" : "Cadastrar"}
+              Cadastrar
             </button>
+          </div>
+        </form>
 
-            {categoriaBeingEdited && (
+        <EditModal
+          isOpen={Boolean(categoriaBeingEdited)}
+          title="Editar Categoria"
+          onClose={() => setCategoriaBeingEdited(null)}
+        >
+          <form onSubmit={handleUpdateSubmit} className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <label htmlFor="categoria-edit-nome" className={`mb-1 block text-sm ${c.textSoft}`}>
+                  Nome
+                </label>
+                <input
+                  id="categoria-edit-nome"
+                  value={editNome}
+                  onChange={(e) => setEditNome(e.target.value)}
+                  required
+                  className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
+                />
+              </div>
+              <div>
+                <label htmlFor="categoria-edit-descricao" className={`mb-1 block text-sm ${c.textSoft}`}>
+                  Descrição
+                </label>
+                <input
+                  id="categoria-edit-descricao"
+                  value={editDescricao}
+                  onChange={(e) => setEditDescricao(e.target.value)}
+                  className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
+                />
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button
+                type="submit"
+                className={`rounded-xl ${c.primary} ${c.primaryText} px-5 py-3 font-semibold transition hover:opacity-90`}
+              >
+                Salvar alterações
+              </button>
               <button
                 type="button"
                 onClick={() => setCategoriaBeingEdited(null)}
                 className={`rounded-xl border ${c.border} px-5 py-3 font-semibold ${c.text} transition hover:${c.bgSoft}`}
               >
-                Cancelar edição
+                Cancelar
               </button>
-            )}
-          </div>
-        </form>
+            </div>
+          </form>
+        </EditModal>
 
         <section className="space-y-4">
           <div className="flex items-center justify-between">
