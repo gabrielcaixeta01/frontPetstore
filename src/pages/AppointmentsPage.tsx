@@ -5,10 +5,15 @@ import AppointmentList from "../components/appointment/AppointmentList";
 import EditAppointmentForm from "../components/appointment/EditAppointmentForm";
 import { apexTheme } from "../lib/theme";
 import { getLojas } from "../services/lojaService";
+import { getServicos } from "../services/servicoService";
 import {
+  createAtendimentoServico,
   createAppointment,
+  deleteAtendimentoServico,
   deleteAppointment,
+  getAtendimentoServicos,
   getAppointments,
+  updateAtendimentoServico,
   updateAppointment,
 } from "../services/atendimentoService";
 import { getUsuarios } from "../services/usuarioService";
@@ -24,6 +29,7 @@ export default function AppointmentsPage() {
   const [lojasById, setLojasById] = useState<Record<number, string>>({});
   const [clientesById, setClientesById] = useState<Record<number, string>>({});
   const [funcionariosById, setFuncionariosById] = useState<Record<number, string>>({});
+  const [precoServicoById, setPrecoServicoById] = useState<Record<number, number>>({});
 
   async function loadAtendimentos() {
     try {
@@ -46,7 +52,11 @@ export default function AppointmentsPage() {
   useEffect(() => {
     async function loadRelacionamentos() {
       try {
-        const [lojas, usuarios] = await Promise.all([getLojas(), getUsuarios()]);
+        const [lojas, usuarios, servicos] = await Promise.all([
+          getLojas(),
+          getUsuarios(),
+          getServicos(),
+        ]);
 
         const lojasMap: Record<number, string> = {};
         lojas.forEach((loja) => {
@@ -67,6 +77,13 @@ export default function AppointmentsPage() {
         setLojasById(lojasMap);
         setClientesById(clientesMap);
         setFuncionariosById(funcionariosMap);
+
+        const precoServicoMap: Record<number, number> = {};
+        servicos.forEach((servico) => {
+          const preco = Number(servico.preco);
+          precoServicoMap[servico.id] = Number.isFinite(preco) ? preco : 0;
+        });
+        setPrecoServicoById(precoServicoMap);
       } catch (err) {
         console.error("Erro ao carregar relacionamentos de atendimento:", err);
       }
@@ -75,9 +92,44 @@ export default function AppointmentsPage() {
     loadRelacionamentos();
   }, []);
 
-  async function handleCreateAtendimento(data: CreateAppointmentDTO) {
+  async function syncServicosAtendimento(atendimentoId: number, servicoIdsSelecionados: number[]) {
+    const itensAtuais = await getAtendimentoServicos(atendimentoId);
+    const servicosAtuais = new Set(itensAtuais.map((item) => item.servico_id));
+    const servicosSelecionados = new Set(servicoIdsSelecionados);
+
+    const idsParaRemover = itensAtuais
+      .filter((item) => !servicosSelecionados.has(item.servico_id))
+      .map((item) => item.servico_id);
+
+    const idsParaCriar = servicoIdsSelecionados.filter((id) => !servicosAtuais.has(id));
+    const idsParaAtualizar = servicoIdsSelecionados.filter((id) => servicosAtuais.has(id));
+
+    await Promise.all(
+      idsParaRemover.map((servicoId) => deleteAtendimentoServico(atendimentoId, servicoId))
+    );
+
+    await Promise.all(
+      idsParaCriar.map((servicoId) =>
+        createAtendimentoServico(atendimentoId, {
+          servico_id: servicoId,
+          valor_cobrado: precoServicoById[servicoId] ?? 0,
+        })
+      )
+    );
+
+    await Promise.all(
+      idsParaAtualizar.map((servicoId) =>
+        updateAtendimentoServico(atendimentoId, servicoId, {
+          valor_cobrado: precoServicoById[servicoId] ?? 0,
+        })
+      )
+    );
+  }
+
+  async function handleCreateAtendimento(data: CreateAppointmentDTO, servicoIdsSelecionados: number[]) {
     try {
-      await createAppointment(data);
+      const atendimento = await createAppointment(data);
+      await syncServicosAtendimento(atendimento.id, servicoIdsSelecionados);
       setFeedback("Atendimento cadastrado com sucesso.");
       setAtendimentoBeingEdited(null);
       await loadAtendimentos();
@@ -87,9 +139,14 @@ export default function AppointmentsPage() {
     }
   }
 
-  async function handleUpdateAtendimento(id: number, data: UpdateAppointmentDTO) {
+  async function handleUpdateAtendimento(
+    id: number,
+    data: UpdateAppointmentDTO,
+    servicoIdsSelecionados: number[]
+  ) {
     try {
       await updateAppointment(id, data);
+      await syncServicosAtendimento(id, servicoIdsSelecionados);
       setFeedback("Atendimento atualizado com sucesso.");
       setAtendimentoBeingEdited(null);
       await loadAtendimentos();

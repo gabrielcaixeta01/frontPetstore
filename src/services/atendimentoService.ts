@@ -14,6 +14,21 @@ type ApiAppointment = {
   worker_id: number;
 };
 
+type ApiAppointmentService = {
+  atendimento_id?: number;
+  appointment_id?: number;
+  servico_id?: number;
+  service_id?: number;
+  valor_cobrado?: number;
+  charged_value?: number;
+  data_pedido?: string;
+  order_date?: string;
+  data_entrega?: string | null;
+  delivery_date?: string | null;
+  observacoes?: string | null;
+  observations?: string | null;
+};
+
 function toAtendimento(appointment: ApiAppointment): Atendimento {
   return {
     id: appointment.id,
@@ -27,6 +42,32 @@ function toAtendimento(appointment: ApiAppointment): Atendimento {
     cliente_id: appointment.client_id,
     funcionario_id: appointment.worker_id,
   };
+}
+
+function toAtendimentoServico(item: ApiAppointmentService): AtendimentoServico {
+  return {
+    atendimento_id: item.atendimento_id ?? item.appointment_id ?? 0,
+    servico_id: item.servico_id ?? item.service_id ?? 0,
+    valor_cobrado: item.valor_cobrado ?? item.charged_value ?? 0,
+    data_pedido: item.data_pedido ?? item.order_date ?? "",
+    data_entrega: item.data_entrega ?? item.delivery_date ?? undefined,
+    observacoes: item.observacoes ?? item.observations ?? undefined,
+  };
+}
+
+async function requestWithFallback<T>(requests: Array<() => Promise<{ data: T }>>): Promise<T> {
+  let lastError: unknown;
+
+  for (const request of requests) {
+    try {
+      const response = await request();
+      return response.data;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError;
 }
 
 export async function getAppointments(): Promise<Atendimento[]> {
@@ -95,21 +136,41 @@ export async function deleteAtendimento(id: number): Promise<{ message: string }
 }
 
 export async function getAtendimentoServicos(atendimentoId: number): Promise<AtendimentoServico[]> {
-  const response = await api.get(`/atendimento/${atendimentoId}/servicos`);
-  return response.data;
+  const data = await requestWithFallback<ApiAppointmentService[]>([
+    () => api.get(`/appointment/${atendimentoId}/services`),
+    () => api.get(`/appointment/${atendimentoId}/servicos`),
+    () => api.get(`/atendimento/${atendimentoId}/servicos`),
+  ]);
+
+  return data.map(toAtendimentoServico);
 }
 
 export async function createAtendimentoServico(atendimentoId: number, data: CreateAtendimentoServicoDTO): Promise<AtendimentoServico> {
-  const response = await api.post(`/atendimento/${atendimentoId}/servico`, data);
-  return response.data;
+  const response = await requestWithFallback<ApiAppointmentService>([
+    () => api.post(`/appointment/${atendimentoId}/service`, data),
+    () => api.post(`/appointment/${atendimentoId}/servico`, data),
+    () => api.post(`/atendimento/${atendimentoId}/servico`, data),
+  ]);
+
+  return toAtendimentoServico(response);
 }
 
 export async function updateAtendimentoServico(atendimentoId: number, servicoId: number, data: UpdateAtendimentoServicoDTO): Promise<AtendimentoServico> {
-  const response = await api.put(`/atendimento/${atendimentoId}/servico/${servicoId}`, data);
-  return response.data;
+  const response = await requestWithFallback<ApiAppointmentService>([
+    () => api.put(`/appointment/${atendimentoId}/service/${servicoId}`, data),
+    () => api.put(`/appointment/${atendimentoId}/servico/${servicoId}`, data),
+    () => api.put(`/atendimento/${atendimentoId}/servico/${servicoId}`, data),
+  ]);
+
+  return toAtendimentoServico(response);
 }
 
 export async function deleteAtendimentoServico(atendimentoId: number, servicoId: number): Promise<{ message: string }> {
-  const response = await api.delete(`/atendimento/${atendimentoId}/servico/${servicoId}`);
-  return response.data;
+  const data = await requestWithFallback<{ message: string }>([
+    () => api.delete(`/appointment/${atendimentoId}/service/${servicoId}`),
+    () => api.delete(`/appointment/${atendimentoId}/servico/${servicoId}`),
+    () => api.delete(`/atendimento/${atendimentoId}/servico/${servicoId}`),
+  ]);
+
+  return data;
 }

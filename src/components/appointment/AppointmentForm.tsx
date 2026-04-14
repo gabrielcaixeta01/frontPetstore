@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { apexTheme } from "../../lib/theme";
+import { getAtendimentoServicos } from "../../services/atendimentoService";
 import { getLojas } from "../../services/lojaService";
+import { getServicos } from "../../services/servicoService";
 import { getUsuarios } from "../../services/usuarioService";
 import type {
   Appointment,
@@ -8,12 +10,13 @@ import type {
   UpdateAppointmentDTO,
 } from "../../types/atendimento";
 import type { Loja } from "../../types/loja";
+import type { Servico } from "../../types/servico";
 import type { Usuario } from "../../types/usuario";
 
 type AppointmentFormProps = {
   appointmentBeingEdited: Appointment | null;
-  onCreate: (data: CreateAppointmentDTO) => Promise<void>;
-  onUpdate: (id: number, data: UpdateAppointmentDTO) => Promise<void>;
+  onCreate: (data: CreateAppointmentDTO, servicoIds: number[]) => Promise<void>;
+  onUpdate: (id: number, data: UpdateAppointmentDTO, servicoIds: number[]) => Promise<void>;
   onCancelEdit: () => void;
 };
 
@@ -27,7 +30,9 @@ export default function AppointmentForm({
   const [lojas, setLojas] = useState<Loja[]>([]);
   const [clientes, setClientes] = useState<Usuario[]>([]);
   const [funcionarios, setFuncionarios] = useState<Usuario[]>([]);
+  const [servicos, setServicos] = useState<Servico[]>([]);
   const [loadingRelacionamentos, setLoadingRelacionamentos] = useState(true);
+  const [loadingServicosAtendimento, setLoadingServicosAtendimento] = useState(false);
 
   const [formaPagamento, setFormaPagamento] = useState<Appointment["forma_pagamento"]>(
     appointmentBeingEdited?.forma_pagamento ?? "pix"
@@ -56,22 +61,30 @@ export default function AppointmentForm({
       ? String(appointmentBeingEdited.funcionario_id)
       : ""
   );
+  const [servicoIdsSelecionados, setServicoIdsSelecionados] = useState<number[]>([]);
+
+  function getPrecoSeguro(preco: number): number {
+    const valor = Number(preco);
+    return Number.isFinite(valor) ? valor : 0;
+  }
 
   useEffect(() => {
     async function loadRelacionamentos() {
       try {
         setLoadingRelacionamentos(true);
 
-        const [lojasData, usuariosData] = await Promise.all([
+        const [lojasData, usuariosData, servicosData] = await Promise.all([
           getLojas(),
           getUsuarios(),
+          getServicos(),
         ]);
 
         setLojas(lojasData);
         setClientes(usuariosData.filter((u) => u.tipo_perfil === "cliente"));
         setFuncionarios(usuariosData.filter((u) => u.tipo_perfil === "funcionario"));
+        setServicos(servicosData);
       } catch (error) {
-        console.error("Erro ao carregar lojas/clientes/funcionarios:", error);
+        console.error("Erro ao carregar relacionamentos e servicos:", error);
       } finally {
         setLoadingRelacionamentos(false);
       }
@@ -81,25 +94,72 @@ export default function AppointmentForm({
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+
+    async function loadServicosDoAtendimento(atendimentoId: number) {
+      try {
+        setLoadingServicosAtendimento(true);
+        const itens = await getAtendimentoServicos(atendimentoId);
+        if (cancelled) return;
+        setServicoIdsSelecionados(itens.map((item) => item.servico_id));
+      } catch (error) {
+        console.error("Erro ao carregar servicos do atendimento:", error);
+        if (!cancelled) {
+          setServicoIdsSelecionados([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoadingServicosAtendimento(false);
+        }
+      }
+    }
+
     if (appointmentBeingEdited) {
       setLojaId(String(appointmentBeingEdited.loja_id ?? ""));
       setClienteId(String(appointmentBeingEdited.cliente_id ?? ""));
       setFuncionarioId(String(appointmentBeingEdited.funcionario_id ?? ""));
-      return;
+      void loadServicosDoAtendimento(appointmentBeingEdited.id);
+    } else {
+      setServicoIdsSelecionados([]);
+      setLoadingServicosAtendimento(false);
+
+      if (!lojaId && lojas.length > 0) setLojaId(String(lojas[0].id));
+      if (!clienteId && clientes.length > 0) setClienteId(String(clientes[0].id));
+      if (!funcionarioId && funcionarios.length > 0) {
+        setFuncionarioId(String(funcionarios[0].id));
+      }
     }
 
-    if (!lojaId && lojas.length > 0) setLojaId(String(lojas[0].id));
-    if (!clienteId && clientes.length > 0) setClienteId(String(clientes[0].id));
-    if (!funcionarioId && funcionarios.length > 0) {
-      setFuncionarioId(String(funcionarios[0].id));
-    }
+    return () => {
+      cancelled = true;
+    };
   }, [appointmentBeingEdited, lojaId, clienteId, funcionarioId, lojas, clientes, funcionarios]);
+
+  const valorTotalSelecionado = servicoIdsSelecionados.reduce((total, servicoId) => {
+    const servico = servicos.find((item) => item.id === servicoId);
+    return total + getPrecoSeguro(servico?.preco ?? 0);
+  }, 0);
+
+  function toggleServico(servicoId: number) {
+    setServicoIdsSelecionados((atual) => {
+      if (atual.includes(servicoId)) {
+        return atual.filter((id) => id !== servicoId);
+      }
+
+      return [...atual, servicoId];
+    });
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     if (!lojaId.trim() || !clienteId.trim() || !funcionarioId.trim()) {
       alert("Informe loja, cliente e funcionario.");
+      return;
+    }
+
+    if (servicoIdsSelecionados.length === 0) {
+      alert("Selecione pelo menos um servico para o atendimento.");
       return;
     }
 
@@ -113,7 +173,7 @@ export default function AppointmentForm({
         cliente_id: Number(clienteId),
         funcionario_id: Number(funcionarioId),
       };
-      await onUpdate(appointmentBeingEdited.id, payload);
+      await onUpdate(appointmentBeingEdited.id, payload, servicoIdsSelecionados);
       return;
     }
 
@@ -127,7 +187,7 @@ export default function AppointmentForm({
       funcionario_id: Number(funcionarioId),
     };
 
-    await onCreate(payload);
+    await onCreate(payload, servicoIdsSelecionados);
     setFormaPagamento("pix");
     setStatus("agendado");
     setOnline(false);
@@ -135,6 +195,7 @@ export default function AppointmentForm({
     setLojaId(lojas.length > 0 ? String(lojas[0].id) : "");
     setClienteId(clientes.length > 0 ? String(clientes[0].id) : "");
     setFuncionarioId(funcionarios.length > 0 ? String(funcionarios[0].id) : "");
+    setServicoIdsSelecionados([]);
   }
 
   return (
@@ -283,6 +344,51 @@ export default function AppointmentForm({
           <label htmlFor="online" className={`text-sm ${c.textSoft}`}>
             Online
           </label>
+        </div>
+
+        <div className="md:col-span-2">
+          <div className="mb-2 flex items-center justify-between">
+            <label className={`block text-sm ${c.textSoft}`}>Servicos do atendimento</label>
+            <span className={`text-sm font-semibold ${c.text}`}>
+              Total selecionado: R$ {valorTotalSelecionado.toFixed(2)}
+            </span>
+          </div>
+
+          {loadingRelacionamentos || loadingServicosAtendimento ? (
+            <div className={`rounded-xl border px-4 py-3 text-sm ${c.border} ${c.cardSoft} ${c.textSoft}`}>
+              Carregando servicos...
+            </div>
+          ) : servicos.length === 0 ? (
+            <div className={`rounded-xl border px-4 py-3 text-sm ${c.border} ${c.cardSoft} ${c.textSoft}`}>
+              Nenhum servico encontrado.
+            </div>
+          ) : (
+            <div className={`grid gap-2 rounded-xl border p-3 ${c.border} ${c.cardSoft}`}>
+              {servicos.map((servico) => {
+                const checked = servicoIdsSelecionados.includes(servico.id);
+
+                return (
+                  <label
+                    key={servico.id}
+                    className={`flex cursor-pointer items-center justify-between rounded-lg border px-3 py-2 transition ${checked ? "border-[#1c46f3] bg-[#1c46f3]/10" : `${c.border} ${c.card}`}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => toggleServico(servico.id)}
+                        className="h-4 w-4"
+                      />
+                      <span className={`font-medium ${c.text}`}>{servico.nome}</span>
+                    </div>
+                    <span className={`text-sm ${c.textSoft}`}>
+                      R$ {getPrecoSeguro(servico.preco).toFixed(2)}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 

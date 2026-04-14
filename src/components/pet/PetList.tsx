@@ -5,9 +5,17 @@ interface PetListProps {
   pets: Pet[];
   onEdit: (pet: Pet) => void;
   onDelete: (id: number) => Promise<void>;
+  categoriasById: Record<number, string>;
+  donosById: Record<number, string>;
 }
 
-export default function PetList({ pets, onEdit, onDelete }: PetListProps) {
+export default function PetList({
+  pets,
+  onEdit,
+  onDelete,
+  categoriasById,
+  donosById,
+}: PetListProps) {
   const c = apexTheme.colors;
 
   if (pets.length === 0) {
@@ -39,8 +47,12 @@ export default function PetList({ pets, onEdit, onDelete }: PetListProps) {
               <p className={`text-sm ${c.textSoft} break-all`}>
                 Peso: {pet.peso ?? "-"}
               </p>
-              <p className={`text-sm ${c.textSoft}`}>Categoria ID: {pet.categoria_id}</p>
-              <p className={`text-sm ${c.textSoft}`}>Dono ID: {pet.dono_id}</p>
+              <p className={`text-sm ${c.textSoft}`}>
+                Categoria: {categoriasById[pet.categoria_id] ?? "Não encontrada"}
+              </p>
+              <p className={`text-sm ${c.textSoft}`}>
+                Dono: {donosById[pet.dono_id] ?? "Não encontrado"}
+              </p>
               <p className={`text-sm ${c.textSoft} break-all`}>
                 Observações: {pet.observacoes_saude || "Não informada"}
               </p>

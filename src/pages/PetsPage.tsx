@@ -3,6 +3,7 @@ import EditModal from "../components/EditModal";
 import EditPetForm from "../components/pet/EditPetForm";
 import PetForm from "../components/pet/PetForm";
 import PetList from "../components/pet/PetList";
+import { getCategories } from "../services/categoriaService";
 import { apexTheme } from "../lib/theme";
 import {
   createPet,
@@ -10,6 +11,7 @@ import {
   getPets,
   updatePet,
 } from "../services/petService";
+import { getUsuarios } from "../services/usuarioService";
 import type { CreatePetDTO, Pet, UpdatePetDTO } from "../types/pet";
 
 export default function PetsPage() {
@@ -19,6 +21,8 @@ export default function PetsPage() {
   const [loading, setLoading] = useState(true);
   const [feedback, setFeedback] = useState("");
   const [error, setError] = useState("");
+  const [categoriasById, setCategoriasById] = useState<Record<number, string>>({});
+  const [donosById, setDonosById] = useState<Record<number, string>>({});
 
   async function loadPets() {
     try {
@@ -36,6 +40,34 @@ export default function PetsPage() {
 
   useEffect(() => {
     loadPets();
+  }, []);
+
+  useEffect(() => {
+    async function loadRelacionamentos() {
+      try {
+        const [categorias, usuarios] = await Promise.all([
+          getCategories(),
+          getUsuarios(),
+        ]);
+
+        const categoriasMap: Record<number, string> = {};
+        categorias.forEach((categoria) => {
+          categoriasMap[categoria.id] = categoria.name;
+        });
+
+        const donosMap: Record<number, string> = {};
+        usuarios.forEach((usuario) => {
+          donosMap[usuario.id] = usuario.nome;
+        });
+
+        setCategoriasById(categoriasMap);
+        setDonosById(donosMap);
+      } catch (err) {
+        console.error("Erro ao carregar relacionamentos de pets:", err);
+      }
+    }
+
+    loadRelacionamentos();
   }, []);
 
   async function handleCreatePet(data: CreatePetDTO) {
@@ -140,6 +172,8 @@ export default function PetsPage() {
               pets={pets}
               onEdit={setPetBeingEdited}
               onDelete={handleDeletePet}
+              categoriasById={categoriasById}
+              donosById={donosById}
             />
           )}
         </section>

@@ -5,15 +5,17 @@ type ApiService = {
   id: number;
   name: string;
   description?: string | null;
-  price: number;
+  price: number | string | null;
 };
 
 function toServico(service: ApiService): Servico {
+  const precoNormalizado = Number(service.price ?? 0);
+
   return {
     id: service.id,
     nome: service.name,
     descricao: service.description ?? undefined,
-    preco: service.price,
+    preco: Number.isFinite(precoNormalizado) ? precoNormalizado : 0,
   };
 }
 

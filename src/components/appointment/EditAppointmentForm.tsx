@@ -3,7 +3,7 @@ import type { Appointment, UpdateAppointmentDTO } from "../../types/atendimento"
 
 type EditAppointmentFormProps = {
   appointment: Appointment;
-  onUpdate: (id: number, data: UpdateAppointmentDTO) => Promise<void>;
+  onUpdate: (id: number, data: UpdateAppointmentDTO, servicoIds: number[]) => Promise<void>;
   onCancel: () => void;
 };
 
