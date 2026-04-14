@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getCategories } from "../../services/categoryService";
+import { getCategories } from "../../services/categoriaService";
 import { apexTheme } from "../../lib/theme";
 import type { Categoria } from "../../types/categoria";
 import type { CreatePetDTO, Pet, UpdatePetDTO } from "../../types/pet";

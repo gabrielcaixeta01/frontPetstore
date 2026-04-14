@@ -1,9 +1,9 @@
 import OrderForm from "./OrderForm";
-import type { Order, UpdateOrderDTO } from "../../types/order";
+import type { Appointment, UpdateAppointmentDTO } from "../../types/atendimento";
 
 interface EditOrderFormProps {
-  order: Order;
-  onUpdate: (id: number, data: UpdateOrderDTO) => Promise<void>;
+  order: Appointment;
+  onUpdate: (id: number, data: UpdateAppointmentDTO) => Promise<void>;
   onCancel: () => void;
 }
 

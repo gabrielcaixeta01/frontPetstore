@@ -4,17 +4,17 @@ import OrderForm from "../components/order/OrderForm";
 import OrderList from "../components/order/OrderList";
 import { apexTheme } from "../lib/theme";
 import {
-  createOrder,
-  deleteOrder,
-  getOrders,
-  updateOrder,
-} from "../services/orderService";
-import type { CreateOrderDTO, Order, UpdateOrderDTO } from "../types/order";
+  createAppointment,
+  deleteAppointment,
+  getAppointments,
+  updateAppointment,
+} from "../services/atendimentoService";
+import type { Appointment, CreateAppointmentDTO, UpdateAppointmentDTO } from "../types/atendimento";
 
 export default function OrdersPage() {
   const c = apexTheme.colors;
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [orderBeingEdited, setOrderBeingEdited] = useState<Order | null>(null);
+  const [orders, setOrders] = useState<Appointment[]>([]);
+  const [orderBeingEdited, setOrderBeingEdited] = useState<Appointment | null>(null);
   const [loading, setLoading] = useState(true);
   const [feedback, setFeedback] = useState("");
   const [error, setError] = useState("");
@@ -22,7 +22,7 @@ export default function OrdersPage() {
   async function loadOrders() {
     try {
       setLoading(true);
-      const data = await getOrders();
+      const data = await getAppointments();
       setOrders(data);
       setError("");
     } catch (err) {
@@ -37,9 +37,9 @@ export default function OrdersPage() {
     loadOrders();
   }, []);
 
-  async function handleCreateOrder(data: CreateOrderDTO) {
+  async function handleCreateOrder(data: CreateAppointmentDTO) {
     try {
-      await createOrder(data);
+      await createAppointment(data);
       setFeedback("Pedido cadastrado com sucesso.");
       setOrderBeingEdited(null);
       await loadOrders();
@@ -49,9 +49,9 @@ export default function OrdersPage() {
     }
   }
 
-  async function handleUpdateOrder(id: number, data: UpdateOrderDTO) {
+  async function handleUpdateOrder(id: number, data: UpdateAppointmentDTO) {
     try {
-      await updateOrder(id, data);
+      await updateAppointment(id, data);
       setFeedback("Pedido atualizado com sucesso.");
       setOrderBeingEdited(null);
       await loadOrders();
@@ -65,7 +65,7 @@ export default function OrdersPage() {
     if (!window.confirm("Tem certeza que deseja excluir este pedido?")) return;
 
     try {
-      await deleteOrder(id);
+      await deleteAppointment(id);
       setFeedback("Pedido excluído com sucesso.");
       if (orderBeingEdited?.id === id) setOrderBeingEdited(null);
       await loadOrders();

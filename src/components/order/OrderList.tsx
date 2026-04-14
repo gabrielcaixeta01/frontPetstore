@@ -1,9 +1,9 @@
 import { apexTheme } from "../../lib/theme";
-import type { Order } from "../../types/order";
+import type { Appointment } from "../../types/atendimento";
 
 interface OrderListProps {
-  orders: Order[];
-  onEdit: (order: Order) => void;
+  orders: Appointment[];
+  onEdit: (order: Appointment) => void;
   onDelete: (id: number) => Promise<void>;
 }
 

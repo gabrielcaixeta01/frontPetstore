@@ -26,6 +26,9 @@ export interface UpdateAtendimentoDTO {
   status?: 'agendado' | 'concluido' | 'cancelado';
   online?: boolean;
   observacoes?: string;
+  loja_id?: number;
+  cliente_id?: number;
+  funcionario_id?: number;
 }
 
 export interface AtendimentoServico {
@@ -48,3 +51,7 @@ export interface UpdateAtendimentoServicoDTO {
   data_entrega?: string;
   observacoes?: string;
 }
+
+export type Appointment = Atendimento;
+export type CreateAppointmentDTO = CreateAtendimentoDTO;
+export type UpdateAppointmentDTO = UpdateAtendimentoDTO;

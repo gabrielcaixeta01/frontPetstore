@@ -4,11 +4,11 @@ import UserForm from "../components/user/UserForm";
 import UserList from "../components/user/UserList";
 import { apexTheme } from "../lib/theme";
 import {
-  createUser,
-  deleteUser,
-  getUsers,
-  updateUser,
-} from "../services/userService";
+  createUsuario,
+  deleteUsuario,
+  getUsuarios,
+  updateUsuario,
+} from "../services/usuarioService";
 import type { CreateUsuarioDTO, UpdateUsuarioDTO, Usuario } from "../types/usuario";
 
 export default function UsersPage() {
@@ -22,7 +22,7 @@ export default function UsersPage() {
   async function loadUsers() {
     try {
       setLoading(true);
-      const data = await getUsers();
+      const data = await getUsuarios();
       setUsers(data);
       setError("");
     } catch (err) {
@@ -39,7 +39,7 @@ export default function UsersPage() {
 
   async function handleCreateUser(data: CreateUsuarioDTO) {
     try {
-      await createUser(data);
+      await createUsuario(data);
       setFeedback("Usuário cadastrado com sucesso.");
       setUserBeingEdited(null);
       await loadUsers();
@@ -51,7 +51,7 @@ export default function UsersPage() {
 
   async function handleUpdateUser(id: number, data: UpdateUsuarioDTO) {
     try {
-      await updateUser(id, data);
+      await updateUsuario(id, data);
       setFeedback("Usuário atualizado com sucesso.");
       setUserBeingEdited(null);
       await loadUsers();
@@ -65,7 +65,7 @@ export default function UsersPage() {
     if (!window.confirm("Tem certeza que deseja excluir este usuário?")) return;
 
     try {
-      await deleteUser(id);
+      await deleteUsuario(id);
       setFeedback("Usuário excluído com sucesso.");
       if (userBeingEdited?.id === id) setUserBeingEdited(null);
       await loadUsers();

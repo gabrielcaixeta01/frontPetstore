@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { apexTheme } from "../../lib/theme";
-import type { CreateOrderDTO, Order, UpdateOrderDTO } from "../../types/order";
+import type { Appointment, CreateAppointmentDTO, UpdateAppointmentDTO } from "../../types/atendimento";
 
 interface OrderFormProps {
-  orderBeingEdited: Order | null;
-  onCreate: (data: CreateOrderDTO) => Promise<void>;
-  onUpdate: (id: number, data: UpdateOrderDTO) => Promise<void>;
+  orderBeingEdited: Appointment | null;
+  onCreate: (data: CreateAppointmentDTO) => Promise<void>;
+  onUpdate: (id: number, data: UpdateAppointmentDTO) => Promise<void>;
   onCancelEdit: () => void;
 }
 
@@ -16,10 +16,10 @@ export default function OrderForm({
   onCancelEdit,
 }: OrderFormProps) {
   const c = apexTheme.colors;
-  const [formaPagamento, setFormaPagamento] = useState<Order["forma_pagamento"]>(
+  const [formaPagamento, setFormaPagamento] = useState<Appointment["forma_pagamento"]>(
     orderBeingEdited?.forma_pagamento ?? "pix"
   );
-  const [status, setStatus] = useState<Order["status"]>(
+  const [status, setStatus] = useState<Appointment["status"]>(
     orderBeingEdited?.status ?? "agendado"
   );
   const [online, setOnline] = useState(orderBeingEdited?.online ?? false);
@@ -53,7 +53,7 @@ export default function OrderForm({
     }
 
     if (orderBeingEdited) {
-      const payload: UpdateOrderDTO = {
+      const payload: UpdateAppointmentDTO = {
         forma_pagamento: formaPagamento,
         status,
         online,
@@ -65,7 +65,7 @@ export default function OrderForm({
 
       await onUpdate(orderBeingEdited.id, payload);
     } else {
-      const payload: CreateOrderDTO = {
+      const payload: CreateAppointmentDTO = {
         forma_pagamento: formaPagamento,
         status,
         online,
@@ -104,7 +104,7 @@ export default function OrderForm({
           <select
             id="formaPagamento"
             value={formaPagamento}
-            onChange={(e) => setFormaPagamento(e.target.value as Order["forma_pagamento"])}
+            onChange={(e) => setFormaPagamento(e.target.value as Appointment["forma_pagamento"])}
             className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3]`}
           >
             <option value="pix">pix</option>
@@ -121,7 +121,7 @@ export default function OrderForm({
           <select
             id="status"
             value={status}
-            onChange={(e) => setStatus(e.target.value as Order["status"])}
+            onChange={(e) => setStatus(e.target.value as Appointment["status"])}
             className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3]`}
           >
             <option value="agendado">agendado</option>
