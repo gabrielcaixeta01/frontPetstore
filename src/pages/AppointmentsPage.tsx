@@ -30,6 +30,8 @@ export default function AppointmentsPage() {
   const [clientesById, setClientesById] = useState<Record<number, string>>({});
   const [funcionariosById, setFuncionariosById] = useState<Record<number, string>>({});
   const [precoServicoById, setPrecoServicoById] = useState<Record<number, number>>({});
+  const [servicosById, setServicosById] = useState<Record<number, string>>({});
+  const [servicosPorAtendimento, setServicosPorAtendimento] = useState<Record<number, string[]>>({});
 
   async function loadAtendimentos() {
     try {
@@ -79,11 +81,14 @@ export default function AppointmentsPage() {
         setFuncionariosById(funcionariosMap);
 
         const precoServicoMap: Record<number, number> = {};
+        const servicosMap: Record<number, string> = {};
         servicos.forEach((servico) => {
           const preco = Number(servico.preco);
           precoServicoMap[servico.id] = Number.isFinite(preco) ? preco : 0;
+          servicosMap[servico.id] = servico.nome;
         });
         setPrecoServicoById(precoServicoMap);
+        setServicosById(servicosMap);
       } catch (err) {
         console.error("Erro ao carregar relacionamentos de atendimento:", err);
       }
@@ -91,6 +96,47 @@ export default function AppointmentsPage() {
 
     loadRelacionamentos();
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadServicosDaLista() {
+      if (atendimentos.length === 0) {
+        setServicosPorAtendimento({});
+        return;
+      }
+
+      const pairs = await Promise.all(
+        atendimentos.map(async (atendimento) => {
+          try {
+            const itens = await getAtendimentoServicos(atendimento.id);
+            const nomes = itens.map((item) => {
+              return servicosById[item.servico_id] ?? `Servico #${item.servico_id}`;
+            });
+
+            return [atendimento.id, nomes] as const;
+          } catch (error) {
+            console.error(
+              `Erro ao carregar servicos do atendimento ${atendimento.id}:`,
+              error
+            );
+            return [atendimento.id, []] as const;
+          }
+        })
+      );
+
+      if (cancelled) return;
+
+      const servicosMap = Object.fromEntries(pairs);
+      setServicosPorAtendimento(servicosMap);
+    }
+
+    void loadServicosDaLista();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [atendimentos, servicosById]);
 
   async function syncServicosAtendimento(atendimentoId: number, servicoIdsSelecionados: number[]) {
     const itensAtuais = await getAtendimentoServicos(atendimentoId);
@@ -237,6 +283,7 @@ export default function AppointmentsPage() {
               lojasById={lojasById}
               clientesById={clientesById}
               funcionariosById={funcionariosById}
+              servicosPorAtendimento={servicosPorAtendimento}
             />
           )}
         </section>

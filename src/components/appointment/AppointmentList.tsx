@@ -8,6 +8,7 @@ type AppointmentListProps = {
   lojasById: Record<number, string>;
   clientesById: Record<number, string>;
   funcionariosById: Record<number, string>;
+  servicosPorAtendimento: Record<number, string[]>;
 };
 
 function formatDateTime(dateValue?: string) {
@@ -29,6 +30,7 @@ export default function AppointmentList({
   lojasById,
   clientesById,
   funcionariosById,
+  servicosPorAtendimento,
 }: AppointmentListProps) {
   const c = apexTheme.colors;
 
@@ -72,6 +74,23 @@ export default function AppointmentList({
               <p className={`text-sm ${c.textSoft}`}>
                 Funcionario: {funcionariosById[appointment.funcionario_id] ?? "Nao encontrado"}
               </p>
+              <div className="space-y-2">
+                <p className={`text-sm ${c.textSoft}`}>Servicos:</p>
+                {(servicosPorAtendimento[appointment.id] ?? []).length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {(servicosPorAtendimento[appointment.id] ?? []).map((servicoNome) => (
+                      <span
+                        key={`${appointment.id}-${servicoNome}`}
+                        className="rounded-full border border-[#1c46f3]/30 bg-[#1c46f3]/10 px-3 py-1 text-xs font-medium text-[#8fb1ff]"
+                      >
+                        {servicoNome}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p className={`text-sm ${c.textSoft}`}>Nenhum servico vinculado</p>
+                )}
+              </div>
               <p className={`text-sm ${c.textSoft}`}>
                 {appointment.observacoes ?? "Sem observacoes"}
               </p>
