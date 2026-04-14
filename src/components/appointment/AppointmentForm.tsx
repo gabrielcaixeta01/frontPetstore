@@ -116,7 +116,7 @@ export default function AppointmentForm({
       }
       setServicoIdsSelecionados([]);
     }
-  }, [appointmentBeingEdited, lojas, clientes, funcionarios]);
+  }, [appointmentBeingEdited, lojas, clientes, funcionarios, lojaId, clienteId, funcionarioId]);
 
   useEffect(() => {
     if (appointmentBeingEdited) return;

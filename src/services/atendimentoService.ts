@@ -11,27 +11,47 @@ import type {
 
 type ApiAppointment = {
   id: number;
-  value_final: number;
-  service_at: string;
-  payment_type: 'pix' | 'cartao_credito' | 'cartao_debito' | 'dinheiro';
+  value_final?: number;
+  final_value?: number;
+  valor_final?: number;
+  service_at?: string;
+  atendimento_em?: string;
+  created_at?: string;
+  payment_type?: 'pix' | 'cartao_credito' | 'cartao_debito' | 'dinheiro';
+  forma_pagamento?: 'pix' | 'cartao_credito' | 'cartao_debito' | 'dinheiro';
   status: 'agendado' | 'concluido' | 'cancelado';
   online: boolean;
   observations?: string | null;
-  store_id: number;
-  client_id: number;
-  worker_id: number;
-  pet_id: number;
+  observacoes?: string | null;
+  store_id?: number;
+  loja_id?: number;
+  client_id?: number;
+  cliente_id?: number;
+  worker_id?: number;
+  funcionario_id?: number;
+  pet_id?: number;
   items?: ApiAppointmentItem[];
+  services?: ApiAppointmentItem[];
 };
 
 type ApiAppointmentItem = {
-  appointment_id: number;
-  service_id: number;
-  charged_value: number;
-  order_date: string;
-  delivery_date: string | null;
-  observations: string | null;
+  appointment_id?: number;
+  atendimento_id?: number;
+  service_id?: number;
+  servico_id?: number;
+  charged_value?: number;
+  valor_cobrado?: number;
+  order_date?: string;
+  data_pedido?: string;
+  delivery_date?: string | null;
+  data_entrega?: string | null;
+  observations?: string | null;
+  observacoes?: string | null;
 };
+
+type ApiAppointmentListResponse =
+  | ApiAppointment[]
+  | { appointments?: ApiAppointment[]; atendimentos?: ApiAppointment[]; data?: ApiAppointment[] };
 
 type ApiAppointmentService = {
   atendimento_id?: number;
@@ -50,30 +70,49 @@ type ApiAppointmentService = {
 
 function toAppointmentItem(item: ApiAppointmentItem): AppointmentItem {
   return {
-    appointment_id: item.appointment_id,
-    service_id: item.service_id,
-    charged_value: item.charged_value,
-    order_date: item.order_date,
-    delivery_date: item.delivery_date,
-    observations: item.observations,
+    appointment_id: item.appointment_id ?? item.atendimento_id ?? 0,
+    service_id: item.service_id ?? item.servico_id ?? 0,
+    charged_value: item.charged_value ?? item.valor_cobrado ?? 0,
+    order_date: item.order_date ?? item.data_pedido ?? "",
+    delivery_date: item.delivery_date ?? item.data_entrega ?? null,
+    observations: item.observations ?? item.observacoes ?? null,
   };
 }
 
 function toAtendimento(appointment: ApiAppointment): Atendimento {
+  const rawItems = appointment.items ?? appointment.services ?? [];
+
   return {
     id: appointment.id,
-    valor_final: appointment.value_final,
-    data_atendimento: appointment.service_at,
-    forma_pagamento: appointment.payment_type,
+    valor_final:
+      appointment.value_final ??
+      appointment.final_value ??
+      appointment.valor_final ??
+      0,
+    data_atendimento:
+      appointment.service_at ??
+      appointment.atendimento_em ??
+      appointment.created_at ??
+      "",
+    forma_pagamento:
+      appointment.payment_type ?? appointment.forma_pagamento ?? "pix",
     status: appointment.status,
     online: appointment.online,
-    observacoes: appointment.observations ?? undefined,
-    loja_id: appointment.store_id,
-    cliente_id: appointment.client_id,
-    funcionario_id: appointment.worker_id,
-    pet_id: appointment.pet_id,
-    items: (appointment.items ?? []).map(toAppointmentItem),
+    observacoes: appointment.observations ?? appointment.observacoes ?? undefined,
+    loja_id: appointment.store_id ?? appointment.loja_id ?? 0,
+    cliente_id: appointment.client_id ?? appointment.cliente_id ?? 0,
+    funcionario_id: appointment.worker_id ?? appointment.funcionario_id ?? 0,
+    pet_id: appointment.pet_id ?? 0,
+    items: rawItems.map(toAppointmentItem),
   };
+}
+
+function toAppointmentList(data: ApiAppointmentListResponse): ApiAppointment[] {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data.appointments)) return data.appointments;
+  if (Array.isArray(data.atendimentos)) return data.atendimentos;
+  if (Array.isArray(data.data)) return data.data;
+  return [];
 }
 
 function toAtendimentoServico(item: ApiAppointmentService): AtendimentoServico {
@@ -103,8 +142,15 @@ async function requestWithFallback<T>(requests: Array<() => Promise<{ data: T }>
 }
 
 export async function getAppointments(): Promise<Atendimento[]> {
-  const response = await api.get<ApiAppointment[]>("/appointment/appointments");
-  return response.data.map(toAtendimento);
+  const data = await requestWithFallback<ApiAppointmentListResponse>([
+    () => api.get("/appointment/appointments"),
+    () => api.get("/appointments"),
+    () => api.get("/appointment"),
+    () => api.get("/atendimento/atendimentos"),
+    () => api.get("/atendimento"),
+  ]);
+
+  return toAppointmentList(data).map(toAtendimento);
 }
 
 export async function getAppointmentById(id: number): Promise<Atendimento> {
