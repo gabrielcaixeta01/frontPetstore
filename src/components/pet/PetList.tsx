@@ -55,7 +55,7 @@ export default function PetList({ pets, onEdit, onDelete }: PetListProps) {
               </button>
               <button
                 onClick={() => onDelete(pet.id)}
-                className={`rounded-xl ${c.danger}`}
+                className="rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 hover:text-red-700"
               >
                 Excluir
               </button>

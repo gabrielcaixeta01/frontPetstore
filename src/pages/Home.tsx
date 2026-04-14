@@ -6,6 +6,9 @@ export default function Home() {
 
   const modules = [
     { title: "Pets", to: "/pets", description: "Cadastro de animais, raça, porte e dono." },
+    { title: "Categorias", to: "/categorias", description: "Organização e classificação dos tipos de pet." },
+    { title: "Serviços", to: "/servicos", description: "Catálogo com nome, descrição e preço." },
+    { title: "Lojas", to: "/lojas", description: "Unidades com endereço e contato." },
     { title: "Usuários", to: "/usuarios", description: "Pessoas do sistema com perfil e status." },
     { title: "Tags", to: "/tags", description: "Classificação e organização de pets." },
     { title: "Atendimentos", to: "/atendimentos", description: "Pagamento, loja, cliente e funcionário." },
@@ -48,7 +51,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {modules.map((module) => (
                 <Link
                   key={module.to}

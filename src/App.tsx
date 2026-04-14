@@ -2,8 +2,11 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { apexTheme } from "./lib/theme";
 import AppNavbar from "./components/AppNavbar";
 import Home from "./pages/Home";
+import CategoriasPage from "./pages/CategoriasPage";
+import LojasPage from "./pages/LojasPage";
 import OrdersPage from "./pages/OrdersPage";
 import PetsPage from "./pages/PetsPage";
+import ServicosPage from "./pages/ServicosPage";
 import TagsPage from "./pages/TagsPage";
 import UsersPage from "./pages/UsersPage";
 
@@ -17,6 +20,9 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/pets" element={<PetsPage />} />
+          <Route path="/servicos" element={<ServicosPage />} />
+          <Route path="/lojas" element={<LojasPage />} />
+          <Route path="/categorias" element={<CategoriasPage />} />
           <Route path="/usuarios" element={<UsersPage />} />
           <Route path="/users" element={<UsersPage />} />
           <Route path="/tags" element={<TagsPage />} />

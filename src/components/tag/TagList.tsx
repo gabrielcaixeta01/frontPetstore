@@ -43,7 +43,7 @@ export default function TagList({ tags, onEdit, onDelete }: TagListProps) {
               </button>
               <button
                 onClick={() => onDelete(tag.id)}
-                className={`rounded-xl ${c.danger}`}
+                className="rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 hover:text-red-700"
               >
                 Excluir
               </button>
