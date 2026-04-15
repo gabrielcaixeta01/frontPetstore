@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { apexTheme } from "../../lib/theme";
 import { getPets } from "../../services/petService";
 import { getLojas } from "../../services/lojaService";
@@ -30,7 +30,6 @@ export default function AppointmentForm({
   const c = apexTheme.colors;
   const [lojas, setLojas] = useState<Loja[]>([]);
   const [clientes, setClientes] = useState<Usuario[]>([]);
-  const [funcionarios, setFuncionarios] = useState<Usuario[]>([]);
   const [pets, setPets] = useState<Pet[]>([]);
   const [servicos, setServicos] = useState<Servico[]>([]);
   const [loadingRelacionamentos, setLoadingRelacionamentos] = useState(true);
@@ -69,6 +68,14 @@ export default function AppointmentForm({
   );
   const [servicoIdsSelecionados, setServicoIdsSelecionados] = useState<number[]>([]);
 
+  const lojaSelecionada = useMemo(() => {
+    return lojas.find((loja) => String(loja.id) === lojaId);
+  }, [lojas, lojaId]);
+
+  const funcionariosDaLoja = useMemo(() => {
+    return lojaSelecionada?.funcionarios ?? [];
+  }, [lojaSelecionada]);
+
   function getPrecoSeguro(preco: number): number {
     const valor = Number(preco);
     return Number.isFinite(valor) ? valor : 0;
@@ -88,7 +95,6 @@ export default function AppointmentForm({
 
         setLojas(lojasData);
         setClientes(usuariosData.filter((u) => u.tipo_perfil === "cliente"));
-        setFuncionarios(usuariosData.filter((u) => u.tipo_perfil === "funcionario"));
         setPets(petsData);
         setServicos(servicosData);
       } catch (error) {
@@ -111,12 +117,9 @@ export default function AppointmentForm({
     } else {
       if (!lojaId && lojas.length > 0) setLojaId(String(lojas[0].id));
       if (!clienteId && clientes.length > 0) setClienteId(String(clientes[0].id));
-      if (!funcionarioId && funcionarios.length > 0) {
-        setFuncionarioId(String(funcionarios[0].id));
-      }
       setServicoIdsSelecionados([]);
     }
-  }, [appointmentBeingEdited, lojas, clientes, funcionarios, lojaId, clienteId, funcionarioId]);
+  }, [appointmentBeingEdited, lojas, clientes, lojaId, clienteId]);
 
   useEffect(() => {
     if (appointmentBeingEdited) return;
@@ -134,6 +137,20 @@ export default function AppointmentForm({
       setPetId(String(petsDoCliente[0].id));
     }
   }, [appointmentBeingEdited, clienteId, pets, petId]);
+
+  useEffect(() => {
+    if (funcionariosDaLoja.length === 0) {
+      setFuncionarioId("");
+      return;
+    }
+
+    if (
+      !funcionarioId ||
+      !funcionariosDaLoja.some((funcionario) => String(funcionario.usuario_id) === funcionarioId)
+    ) {
+      setFuncionarioId(String(funcionariosDaLoja[0].usuario_id));
+    }
+  }, [funcionariosDaLoja, funcionarioId]);
 
   const valorTotalSelecionado = servicoIdsSelecionados.reduce((total, servicoId) => {
     const servico = servicos.find((item) => item.id === servicoId);
@@ -207,7 +224,6 @@ export default function AppointmentForm({
     setObservacoes("");
     setLojaId(lojas.length > 0 ? String(lojas[0].id) : "");
     setClienteId(clientes.length > 0 ? String(clientes[0].id) : "");
-    setFuncionarioId(funcionarios.length > 0 ? String(funcionarios[0].id) : "");
     setPetId("");
     setServicoIdsSelecionados([]);
   }
@@ -320,18 +336,20 @@ export default function AppointmentForm({
             id="funcionarioId"
             value={funcionarioId}
             onChange={(e) => setFuncionarioId(e.target.value)}
-            disabled={loadingRelacionamentos || funcionarios.length === 0}
+            disabled={loadingRelacionamentos || funcionariosDaLoja.length === 0}
             required
             className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3] disabled:opacity-60`}
           >
             {loadingRelacionamentos ? (
               <option value="">Carregando funcionarios...</option>
-            ) : funcionarios.length === 0 ? (
+            ) : !lojaSelecionada ? (
+              <option value="">Selecione uma loja primeiro</option>
+            ) : funcionariosDaLoja.length === 0 ? (
               <option value="">Nenhum funcionario encontrado</option>
             ) : (
-              funcionarios.map((funcionario) => (
-                <option key={funcionario.id} value={String(funcionario.id)}>
-                  {funcionario.nome}
+              funcionariosDaLoja.map((funcionario) => (
+                <option key={funcionario.usuario_id} value={String(funcionario.usuario_id)}>
+                  {funcionario.nome} - {funcionario.cargo}
                 </option>
               ))
             )}
