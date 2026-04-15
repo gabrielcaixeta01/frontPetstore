@@ -83,14 +83,16 @@ export default function AppointmentList({
               <p className={`text-sm ${c.textSoft}`}>
                 Pet: {petsById[appointment.pet_id] ?? `Pet #${appointment.pet_id}`}
               </p>
+              <p className={`text-sm ${c.textSoft} pb-2`}>
+                Observações: {appointment.observacoes ?? "Sem observacoes"}
+              </p>
               <div className="space-y-2">
-                <p className={`text-sm ${c.textSoft}`}>Servicos:</p>
                 {items.length > 0 ? (
-                  <div className="space-y-2">
+                  <div className="flex gap-2 overflow-x-auto pb-1">
                     {items.map((item) => (
                       <div
                         key={`${appointment.id}-${item.service_id}-${item.order_date}`}
-                        className={`rounded-xl border px-3 py-2 text-sm ${c.border} ${c.cardSoft}`}
+                        className={`min-w-65 rounded-xl border px-3 py-2 text-sm ${c.border} ${c.cardSoft}`}
                       >
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <span className={`font-medium ${c.text}`}>
@@ -114,9 +116,6 @@ export default function AppointmentList({
                   <p className={`text-sm ${c.textSoft}`}>Nenhum servico vinculado</p>
                 )}
               </div>
-              <p className={`text-sm ${c.textSoft}`}>
-                {appointment.observacoes ?? "Sem observacoes"}
-              </p>
             </div>
 
             <div className="flex gap-3">
