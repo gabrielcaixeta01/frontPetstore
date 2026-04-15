@@ -1,3 +1,13 @@
+export interface FuncionarioLoja {
+  usuario_id: number;
+  nome: string;
+  matricula: string;
+  cargo: string;
+  salario: number;
+  data_contratacao: string;
+  loja_id: number;
+}
+
 export interface Loja {
   id: number;
   nome: string;
@@ -12,6 +22,7 @@ export interface Loja {
   end_rua: string;
   end_bairro: string;
   end_numero: string;
+  funcionarios: FuncionarioLoja[];
 }
 
 export interface CreateLojaDTO {

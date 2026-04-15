@@ -4,7 +4,8 @@ import AppNavbar from "./components/AppNavbar";
 import Home from "./pages/Home";
 import CategoriasPage from "./pages/CategoriasPage";
 import LojasPage from "./pages/LojasPage";
-import AppointmentsPage from "./pages/AppointmentsPage";
+import LojaPage from "./pages/LojaPage";
+import AtendimentosPage from "./pages/AtendimentosPage";
 import PetsPage from "./pages/PetsPage";
 import ServicosPage from "./pages/ServicosPage";
 import TagsPage from "./pages/TagsPage";
@@ -22,11 +23,12 @@ function App() {
           <Route path="/pets" element={<PetsPage />} />
           <Route path="/servicos" element={<ServicosPage />} />
           <Route path="/lojas" element={<LojasPage />} />
+          <Route path="/lojas/:id" element={<LojaPage />} />
           <Route path="/categorias" element={<CategoriasPage />} />
           <Route path="/usuarios" element={<UsersPage />} />
           <Route path="/users" element={<UsersPage />} />
           <Route path="/tags" element={<TagsPage />} />
-          <Route path="/atendimentos" element={<AppointmentsPage />} />
+          <Route path="/atendimentos" element={<AtendimentosPage />} />
         </Routes>
       </div>
     </BrowserRouter>

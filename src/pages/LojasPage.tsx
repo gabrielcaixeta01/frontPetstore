@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import EditModal from "../components/EditModal";
 import { apexTheme } from "../lib/theme";
 import {
@@ -11,6 +12,7 @@ import type { CreateLojaDTO, Loja, UpdateLojaDTO } from "../types/loja";
 
 export default function LojasPage() {
   const c = apexTheme.colors;
+  const navigate = useNavigate();
   const [lojas, setLojas] = useState<Loja[]>([]);
   const [lojaBeingEdited, setLojaBeingEdited] = useState<Loja | null>(null);
   const [loading, setLoading] = useState(true);
@@ -341,6 +343,7 @@ export default function LojasPage() {
               {lojas.map((loja) => (
                 <div
                   key={loja.id}
+                  onClick={() => navigate(`/lojas/${loja.id}`)}
                   className={`rounded-2xl border ${c.border} ${c.card} p-5 shadow-lg`}
                 >
                   <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
@@ -358,13 +361,19 @@ export default function LojasPage() {
 
                     <div className="flex gap-3">
                       <button
-                        onClick={() => setLojaBeingEdited(loja)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setLojaBeingEdited(loja);
+                        }}
                         className={`rounded-xl border px-4 py-2 text-sm font-medium transition ${c.border} ${c.text} hover:${c.bgSoft}`}
                       >
                         Editar
                       </button>
                       <button
-                        onClick={() => handleDeleteLoja(loja.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteLoja(loja.id);
+                        }}
                         className="rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 hover:text-red-700"
                       >
                         Excluir

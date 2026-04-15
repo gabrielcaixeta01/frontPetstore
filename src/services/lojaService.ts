@@ -1,6 +1,16 @@
 import { api } from "./api";
 import type { Loja, CreateLojaDTO, UpdateLojaDTO } from "../types/loja";
 
+type ApiStoreEmployee = {
+  user_id: number;
+  employee_name?: string;
+  matricula: string;
+  job_title: string;
+  salary: string | number;
+  hired_at: string;
+  store_id: number;
+};
+
 type ApiStore = {
   id: number;
   name: string;
@@ -15,6 +25,7 @@ type ApiStore = {
   number: string;
   active: boolean;
   created_at: string;
+  employees?: ApiStoreEmployee[];
 };
 
 function toLoja(store: ApiStore): Loja {
@@ -32,6 +43,15 @@ function toLoja(store: ApiStore): Loja {
     end_rua: store.address,
     end_bairro: store.neighborhood,
     end_numero: store.number,
+    funcionarios: (store.employees ?? []).map((employee) => ({
+      usuario_id: employee.user_id,
+      nome: employee.employee_name ?? `Usuário #${employee.user_id}`,
+      matricula: employee.matricula,
+      cargo: employee.job_title,
+      salario: Number(employee.salary),
+      data_contratacao: employee.hired_at,
+      loja_id: employee.store_id,
+    })),
   };
 }
 
