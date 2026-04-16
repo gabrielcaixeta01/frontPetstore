@@ -21,6 +21,7 @@ function toCategoria(category: ApiCategory): Categoria {
   return {
     id: category.id,
     name: category.name,
+    description: category.description ?? undefined,
   };
 }
 

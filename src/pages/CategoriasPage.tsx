@@ -50,7 +50,7 @@ export default function CategoriasPage() {
     }
 
     setEditNome(categoriaBeingEdited.name);
-    setEditDescricao("");
+    setEditDescricao(categoriaBeingEdited.description ?? "");
   }, [categoriaBeingEdited]);
 
   async function handleCreateSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -260,6 +260,9 @@ export default function CategoriasPage() {
                   <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div className="space-y-1">
                       <h3 className={`text-xl font-bold ${c.text}`}>{categoria.name}</h3>
+                      {categoria.description && (
+                        <p className={`text-sm ${c.textSoft}`}>{categoria.description}</p>
+                      )}
                       <p className={`text-sm ${c.textSoft}`}>ID: {categoria.id}</p>
                     </div>
 
