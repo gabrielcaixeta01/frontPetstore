@@ -3,15 +3,17 @@ import type { CreateEtiquetaDTO, Etiqueta, UpdateEtiquetaDTO } from "../types/ta
 
 type ApiTag = {
   id: number;
-  name: string;
+  name?: string;
+  nome?: string;
   description?: string | null;
+  descricao?: string | null;
 };
 
 function toEtiqueta(tag: ApiTag): Etiqueta {
   return {
     id: tag.id,
-    nome: tag.name,
-    descricao: tag.description ?? undefined,
+    nome: tag.name ?? tag.nome ?? "",
+    descricao: tag.description ?? tag.descricao ?? undefined,
   };
 }
 
@@ -26,20 +28,44 @@ export async function getTagById(id: number): Promise<Etiqueta> {
 }
 
 export async function createTag(data: CreateEtiquetaDTO): Promise<Etiqueta> {
-  const response = await api.post<ApiTag>("/tag", null, {
-    params: {
-      name: data.nome,
-      description: data.descricao,
-    },
+  const payload = {
+    name: data.nome,
+    nome: data.nome,
+    description: data.descricao,
+    descricao: data.descricao,
+  };
+
+  const response = await api.post<ApiTag>("/tag", payload, {
+    params: payload,
   });
-  return toEtiqueta(response.data);
+  const created = toEtiqueta(response.data);
+
+  const descricaoInformada = data.descricao?.trim();
+  const descricaoPersistida = created.descricao?.trim();
+
+  // Fallback: alguns backends ignoram descricao no create, mas aceitam no update.
+  if (descricaoInformada && !descricaoPersistida) {
+    try {
+      return await updateTag(created.id, {
+        nome: created.nome || data.nome,
+        descricao: descricaoInformada,
+      });
+    } catch (error) {
+      console.warn("Falha ao aplicar fallback de descricao da tag apos create:", error);
+      return created;
+    }
+  }
+
+  return created;
 }
 
 export async function updateTag(id: number, data: UpdateEtiquetaDTO): Promise<Etiqueta> {
   const response = await api.put<ApiTag>(`/tag/${id}`, null, {
     params: {
       name: data.nome,
+      nome: data.nome,
       description: data.descricao,
+      descricao: data.descricao,
     },
   });
   return toEtiqueta(response.data);
