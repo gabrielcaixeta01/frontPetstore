@@ -42,6 +42,7 @@ export interface UpdateAtendimentoDTO {
   cliente_id?: number;
   funcionario_id?: number;
   pet_id?: number;
+  service_ids?: number[];
 }
 
 export interface AtendimentoServico {

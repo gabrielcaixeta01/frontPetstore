@@ -108,22 +108,36 @@ export default function AppointmentForm({
   }, []);
 
   useEffect(() => {
+    if (!appointmentBeingEdited) {
+      return;
+    }
+
+    setFormaPagamento(appointmentBeingEdited.forma_pagamento ?? "pix");
+    setStatus(appointmentBeingEdited.status ?? "agendado");
+    setOnline(Boolean(appointmentBeingEdited.online));
+    setObservacoes(appointmentBeingEdited.observacoes ?? "");
+    setLojaId(String(appointmentBeingEdited.loja_id ?? ""));
+    setClienteId(String(appointmentBeingEdited.cliente_id ?? ""));
+    setFuncionarioId(String(appointmentBeingEdited.funcionario_id ?? ""));
+    setPetId(String(appointmentBeingEdited.pet_id ?? ""));
+    setServicoIdsSelecionados(appointmentBeingEdited.items?.map((item) => item.service_id) ?? []);
+  }, [appointmentBeingEdited]);
+
+  useEffect(() => {
     if (appointmentBeingEdited) {
-      setLojaId(String(appointmentBeingEdited.loja_id ?? ""));
-      setClienteId(String(appointmentBeingEdited.cliente_id ?? ""));
-      setFuncionarioId(String(appointmentBeingEdited.funcionario_id ?? ""));
-      setPetId(String(appointmentBeingEdited.pet_id ?? ""));
-      setServicoIdsSelecionados(appointmentBeingEdited.items?.map((item) => item.service_id) ?? []);
-    } else {
-      if (!lojaId && lojas.length > 0) setLojaId(String(lojas[0].id));
-      if (!clienteId && clientes.length > 0) setClienteId(String(clientes[0].id));
-      setServicoIdsSelecionados([]);
+      return;
+    }
+
+    if (!lojaId && lojas.length > 0) {
+      setLojaId(String(lojas[0].id));
+    }
+
+    if (!clienteId && clientes.length > 0) {
+      setClienteId(String(clientes[0].id));
     }
   }, [appointmentBeingEdited, lojas, clientes, lojaId, clienteId]);
 
   useEffect(() => {
-    if (appointmentBeingEdited) return;
-
     const petsDoCliente = clienteId
       ? pets.filter((pet) => String(pet.dono_id) === clienteId)
       : [];
@@ -136,7 +150,7 @@ export default function AppointmentForm({
     if (!petId || !petsDoCliente.some((pet) => String(pet.id) === petId)) {
       setPetId(String(petsDoCliente[0].id));
     }
-  }, [appointmentBeingEdited, clienteId, pets, petId]);
+  }, [clienteId, pets, petId]);
 
   useEffect(() => {
     if (funcionariosDaLoja.length === 0) {
@@ -285,7 +299,6 @@ export default function AppointmentForm({
             value={lojaId}
             onChange={(e) => setLojaId(e.target.value)}
             disabled={loadingRelacionamentos || lojas.length === 0}
-            required
             className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3] disabled:opacity-60`}
           >
             {loadingRelacionamentos ? (
@@ -311,7 +324,6 @@ export default function AppointmentForm({
             value={clienteId}
             onChange={(e) => setClienteId(e.target.value)}
             disabled={loadingRelacionamentos || clientes.length === 0}
-            required
             className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3] disabled:opacity-60`}
           >
             {loadingRelacionamentos ? (
@@ -337,7 +349,6 @@ export default function AppointmentForm({
             value={funcionarioId}
             onChange={(e) => setFuncionarioId(e.target.value)}
             disabled={loadingRelacionamentos || funcionariosDaLoja.length === 0}
-            required
             className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3] disabled:opacity-60`}
           >
             {loadingRelacionamentos ? (
@@ -365,7 +376,6 @@ export default function AppointmentForm({
             value={petId}
             onChange={(e) => setPetId(e.target.value)}
             disabled={loadingRelacionamentos || petsDoCliente.length === 0}
-            required
             className={`w-full rounded-xl border px-4 py-3 outline-none ${c.border} ${c.cardSoft} ${c.text} focus:ring-2 focus:ring-[#1c46f3] disabled:opacity-60`}
           >
             {loadingRelacionamentos ? (

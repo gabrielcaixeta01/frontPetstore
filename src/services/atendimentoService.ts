@@ -185,6 +185,7 @@ export async function updateAppointment(id: number, data: UpdateAtendimentoDTO):
       client_id: data.cliente_id,
       worker_id: data.funcionario_id,
       pet_id: data.pet_id,
+      service_ids: data.service_ids,
     },
   });
   return toAtendimento(response.data);

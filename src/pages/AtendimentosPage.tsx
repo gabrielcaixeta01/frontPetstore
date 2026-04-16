@@ -158,9 +158,12 @@ export default function AppointmentsPage() {
     servicoIdsSelecionados: number[]
   ) {
     try {
-      await updateAppointment(id, data);
-      await syncServicosAtendimento(id, servicoIdsSelecionados);
+      await updateAppointment(id, {
+        ...data,
+        service_ids: servicoIdsSelecionados,
+      });
       setFeedback("Atendimento atualizado com sucesso.");
+
       setAtendimentoBeingEdited(null);
       await loadAtendimentos();
     } catch (err) {
