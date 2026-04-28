@@ -1,5 +1,6 @@
-import { NavLink, useNavigate } from "react-router-dom";
-import { apexTheme } from "../lib/theme";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useEffect, useMemo, useRef, useState } from "react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 
 const links = [
   { to: "/pets", label: "Pets" },
@@ -11,89 +12,173 @@ const links = [
   { to: "/atendimentos", label: "Atendimentos" },
 ];
 
+type Pill = {
+  left: number;
+  width: number;
+  opacity: number;
+};
+
 export default function Navbar() {
   const navigate = useNavigate();
-  const c = apexTheme.colors;
+  const location = useLocation();
 
-  const token = localStorage.getItem("token");
-  const isLogged = !!token;
+  const navRef = useRef<HTMLElement | null>(null);
+  const itemRefs = useRef<Record<string, HTMLElement | null>>({});
+
+  const [isLogged, setIsLogged] = useState(() => {
+    return !!localStorage.getItem("token");
+  });
+
+  const [hoveredPath, setHoveredPath] = useState<string | null>(null);
+
+  const [pill, setPill] = useState<Pill>({
+    left: 0,
+    width: 0,
+    opacity: 0,
+  });
+
+  const visibleLinks = useMemo(() => {
+    if (isLogged) {
+      return [...links, { to: "/perfil", label: "Perfil" }];
+    }
+
+    return [
+      { to: "/login", label: "Login" },
+      { to: "/register", label: "Cadastro" },
+    ];
+  }, [isLogged]);
+
+  function movePillTo(path: string) {
+    const nav = navRef.current;
+    const item = itemRefs.current[path];
+
+    if (!nav || !item) return;
+
+    const navRect = nav.getBoundingClientRect();
+    const itemRect = item.getBoundingClientRect();
+
+    setPill({
+      left: itemRect.left - navRect.left,
+      width: itemRect.width,
+      opacity: 1,
+    });
+  }
+
+  function movePillToActive() {
+    const activeItem = visibleLinks.find((link) => link.to === location.pathname);
+
+    if (activeItem) {
+      movePillTo(activeItem.to);
+      return;
+    }
+
+    setPill((prev) => ({
+      ...prev,
+      opacity: 0,
+    }));
+  }
 
   function handleLogout() {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    setIsLogged(false);
     navigate("/");
   }
 
+  useEffect(() => {
+    setIsLogged(!!localStorage.getItem("token"));
+  }, [location.pathname]);
+
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      movePillToActive();
+    });
+  }, [location.pathname, isLogged, visibleLinks]);
+
   return (
-    <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm">
+    <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/85 shadow-sm backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
-        
-        {/* Logo */}
         <NavLink to="/" className="flex items-center gap-2">
-          <div className="text-2xl font-bold bg-linear-to-r from-[#1c46f3] to-[#00bb69] bg-clip-text text-transparent">
+          <div className="bg-linear-to-r from-[#1c46f3] to-[#00bb69] bg-clip-text text-2xl font-bold text-transparent">
             Apex
           </div>
-          <div className="text-2xl font-light text-gray-900">Petstore</div>
+
+          <div className="text-2xl font-light text-gray-900">
+            Petstore
+          </div>
         </NavLink>
 
-        {/* NAV */}
-        <nav className="flex items-center gap-2">
-          
-          {/* 🔒 Usuário logado → mostrar navegação */}
-          {isLogged && (
-            <>
-              {links.map((link) => (
-                <NavLink
-                  key={link.to}
-                  to={link.to}
-                  className={({ isActive }) =>
-                    isActive
-                      ? "bg-[#1c46f3] text-white px-4 py-2 rounded-lg text-sm font-semibold transition"
-                      : "text-gray-700 hover:text-[#1c46f3] px-4 py-2 rounded-lg text-sm font-medium transition hover:bg-gray-50"
+        <nav
+          ref={navRef}
+          onMouseLeave={() => {
+            setHoveredPath(null);
+            movePillToActive();
+          }}
+          className="relative flex items-center gap-1 rounded-full border border-gray-200 bg-white/90 p-1 shadow-sm"
+        >
+          <div
+            className="pointer-events-none absolute top-1 bottom-1 rounded-full bg-linear-to-r from-[#1c46f3] to-[#00bb69] shadow-[0_10px_26px_rgba(28,70,243,0.28)] transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+            style={{
+              left: pill.left,
+              width: pill.width,
+              opacity: pill.opacity,
+            }}
+          />
+
+          {visibleLinks.map((link) => {
+            const isActive = location.pathname === link.to;
+            const isPillHere = hoveredPath ? hoveredPath === link.to : isActive;
+
+            return (
+              <NavLink
+                key={link.to}
+                to={link.to}
+                ref={(el) => {
+                  itemRefs.current[link.to] = el;
+                }}
+                onMouseEnter={() => {
+                  setHoveredPath(link.to);
+                  movePillTo(link.to);
+                }}
+                className={`
+                  relative z-10 rounded-full px-4 py-2 text-sm font-semibold
+                  transition-all duration-300 hover:scale-[1.03]
+                  ${
+                    isPillHere
+                      ? "text-white"
+                      : isActive
+                        ? "text-[#1c46f3]"
+                        : "text-gray-700 hover:text-[#1c46f3]"
                   }
-                >
-                  {link.label}
-                </NavLink>
-              ))}
-            </>
-          )}
-
-          {/* 🔓 NÃO LOGADO → Login + Cadastro */}
-          {!isLogged && (
-            <>
-              <NavLink
-                to="/login"
-                className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${c.outlineButton}`}
+                `}
               >
-                Login
+                {link.label}
               </NavLink>
+            );
+          })}
 
-              <NavLink
-                to="/register"
-                className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${c.primary} ${c.primaryHover} ${c.primaryText}`}
-              >
-                Cadastro
-              </NavLink>
-            </>
-          )}
-
-          {/* 🔒 LOGADO → Perfil + Logout */}
           {isLogged && (
-            <>
-              <NavLink
-                to="/perfil"
-                className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${c.outlineButton}`}
-              >
-                Perfil
-              </NavLink>
-
-              <button
-                onClick={handleLogout}
-                className={`rounded-lg px-4 py-2 text-sm font-semibold transition border border-red-500 text-red-600 hover:bg-red-50`}
-              >
-                Sair
-              </button>
-            </>
+            <button
+              ref={(el) => {
+                itemRefs.current["/logout"] = el;
+              }}
+              onMouseEnter={() => {
+                setHoveredPath("/logout");
+                movePillTo("/logout");
+              }}
+              onClick={handleLogout}
+              className={`
+                relative z-10 rounded-full px-4 py-2 text-sm font-semibold
+                transition-all duration-300 hover:scale-[1.03]
+                ${
+                  hoveredPath === "/logout"
+                    ? "text-white"
+                    : "text-gray-700 hover:text-[#1c46f3]"
+                }
+              `}
+            >
+              Sair
+            </button>
           )}
         </nav>
       </div>
