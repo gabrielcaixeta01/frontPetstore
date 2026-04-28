@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { apexTheme } from "../lib/theme";
 
 const API_URL = "http://127.0.0.1:8000";
 
@@ -15,6 +16,7 @@ type User = {
 
 export default function ProfilePage() {
   const navigate = useNavigate();
+  const c = apexTheme.colors;
 
   const [user, setUser] = useState<User | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -92,16 +94,16 @@ export default function ProfilePage() {
   if (!user) return null;
 
   return (
-    <main className="min-h-screen bg-[#f5f7f2] px-4 py-10">
+    <main className={`min-h-screen ${c.bgSoft} px-4 py-10`}>
       <div className="mx-auto max-w-3xl">
         
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-[#003c2f]">
+            <h1 className={`text-3xl font-bold ${c.text}`}>
               Meu Perfil
             </h1>
-            <p className="text-gray-600 mt-2">
+            <p className={`${c.textMuted} mt-2`}>
               Visualize e edite suas informações
             </p>
           </div>
@@ -109,7 +111,7 @@ export default function ProfilePage() {
           {!isEditing && (
             <button
               onClick={() => setIsEditing(true)}
-              className="px-4 py-2 rounded-xl bg-[#007a53] text-white font-semibold hover:bg-[#006445] transition"
+              className={`px-4 py-2 rounded-xl font-semibold transition ${c.primary} ${c.primaryHover} ${c.primaryText}`}
             >
               Editar perfil
             </button>
@@ -117,7 +119,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-3xl shadow-lg p-8 space-y-6">
+        <div className={`bg-white rounded-3xl shadow-lg p-8 space-y-6 border ${c.border}`}>
           
           {/* Nome */}
           <div>
@@ -126,7 +128,7 @@ export default function ProfilePage() {
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="mt-2 w-full rounded-xl border px-4 py-3"
+                className={`mt-2 w-full rounded-xl border ${c.border} px-4 py-3`}
               />
             ) : (
               <p className="text-lg font-semibold">{user.name}</p>
@@ -140,7 +142,7 @@ export default function ProfilePage() {
               <input
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-2 w-full rounded-xl border px-4 py-3"
+                className={`mt-2 w-full rounded-xl border ${c.border} px-4 py-3`}
               />
             ) : (
               <p className="text-lg font-semibold">{user.email}</p>
@@ -154,7 +156,7 @@ export default function ProfilePage() {
               <input
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="mt-2 w-full rounded-xl border px-4 py-3"
+                className={`mt-2 w-full rounded-xl border ${c.border} px-4 py-3`}
               />
             ) : (
               <p className="text-lg font-semibold">
@@ -173,7 +175,7 @@ export default function ProfilePage() {
 
           {/* Status */}
           <div>
-            <p className="text-sm text-gray-500">Status</p>
+            <p className={`text-sm ${c.textMuted}`}>Status</p>
             <span
               className={`inline-block mt-1 px-3 py-1 text-sm rounded-full ${
                 user.active
@@ -192,7 +194,7 @@ export default function ProfilePage() {
               <>
                 <button
                   onClick={() => setIsEditing(false)}
-                  className="px-5 py-2 rounded-xl border"
+                  className={`px-5 py-2 rounded-xl border ${c.border} text-gray-700`}
                 >
                   Cancelar
                 </button>
@@ -200,7 +202,7 @@ export default function ProfilePage() {
                 <button
                   onClick={handleSave}
                   disabled={loading}
-                  className="px-5 py-2 rounded-xl bg-[#007a53] text-white font-semibold hover:bg-[#006445]"
+                  className={`px-5 py-2 rounded-xl font-semibold transition ${c.primary} ${c.primaryHover} ${c.primaryText}`}
                 >
                   {loading ? "Salvando..." : "Salvar"}
                 </button>
@@ -209,14 +211,14 @@ export default function ProfilePage() {
               <>
                 <button
                   onClick={() => navigate("/")}
-                  className="px-5 py-2 rounded-xl border"
+                  className={`px-5 py-2 rounded-xl border ${c.border} text-gray-700`}
                 >
                   Voltar
                 </button>
 
                 <button
                   onClick={handleLogout}
-                  className="px-5 py-2 rounded-xl bg-red-500 text-white font-semibold hover:bg-red-600"
+                  className={`px-5 py-2 rounded-xl font-semibold transition border border-red-500 text-red-600 hover:bg-red-50`}
                 >
                   Sair
                 </button>

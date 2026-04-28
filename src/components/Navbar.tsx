@@ -1,4 +1,4 @@
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { apexTheme } from "../lib/theme";
 
 const links = [
@@ -12,19 +12,16 @@ const links = [
 ];
 
 export default function Navbar() {
-  const location = useLocation();
   const navigate = useNavigate();
   const c = apexTheme.colors;
 
   const token = localStorage.getItem("token");
   const isLogged = !!token;
 
-  const isHome = location.pathname === "/";
-
   function handleLogout() {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    navigate("/login");
+    navigate("/");
   }
 
   return (
@@ -42,8 +39,8 @@ export default function Navbar() {
         {/* NAV */}
         <nav className="flex items-center gap-2">
           
-          {/* 🔒 Usuário logado → mostrar navegação (exceto na home, se quiser esconder) */}
-          {isLogged && !isHome && (
+          {/* 🔒 Usuário logado → mostrar navegação */}
+          {isLogged && (
             <>
               {links.map((link) => (
                 <NavLink
@@ -85,14 +82,14 @@ export default function Navbar() {
             <>
               <NavLink
                 to="/perfil"
-                className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${c.secondary} ${c.secondaryHover} ${c.secondaryText}`}
+                className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${c.outlineButton}`}
               >
                 Perfil
               </NavLink>
 
               <button
                 onClick={handleLogout}
-                className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${c.danger}`}
+                className={`rounded-lg px-4 py-2 text-sm font-semibold transition border border-red-500 text-red-600 hover:bg-red-50`}
               >
                 Sair
               </button>
