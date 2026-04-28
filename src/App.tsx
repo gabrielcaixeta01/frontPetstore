@@ -1,7 +1,9 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { apexTheme } from "./lib/theme";
-import AppNavbar from "./components/AppNavbar";
+import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
 import CategoriasPage from "./pages/CategoriasPage";
 import LojasPage from "./pages/LojasPage";
 import LojaPage from "./pages/LojaPage";
@@ -17,9 +19,12 @@ function App() {
   return (
     <BrowserRouter>
       <div className={`min-h-screen ${c.bg}`}>
-        <AppNavbar />
+        <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/dashboard" element={<Navigate to="/" replace />} />
           <Route path="/pets" element={<PetsPage />} />
           <Route path="/servicos" element={<ServicosPage />} />
           <Route path="/lojas" element={<LojasPage />} />
