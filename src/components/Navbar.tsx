@@ -1,4 +1,5 @@
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { apexTheme } from "../lib/theme";
 
 const links = [
   { to: "/pets", label: "Pets" },
@@ -13,6 +14,7 @@ const links = [
 export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
+  const c = apexTheme.colors;
 
   const token = localStorage.getItem("token");
   const isLogged = !!token;
@@ -64,14 +66,14 @@ export default function Navbar() {
             <>
               <NavLink
                 to="/login"
-                className="text-gray-700 hover:text-[#1c46f3] px-4 py-2 text-sm font-medium"
+                className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${c.outlineButton}`}
               >
                 Login
               </NavLink>
 
               <NavLink
                 to="/register"
-                className="bg-[#007a53] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#006445] transition"
+                className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${c.primary} ${c.primaryHover} ${c.primaryText}`}
               >
                 Cadastro
               </NavLink>
@@ -83,14 +85,14 @@ export default function Navbar() {
             <>
               <NavLink
                 to="/perfil"
-                className="text-gray-700 hover:text-[#1c46f3] px-4 py-2 text-sm font-medium"
+                className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${c.secondary} ${c.secondaryHover} ${c.secondaryText}`}
               >
                 Perfil
               </NavLink>
 
               <button
                 onClick={handleLogout}
-                className="bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-600 transition"
+                className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${c.danger}`}
               >
                 Sair
               </button>

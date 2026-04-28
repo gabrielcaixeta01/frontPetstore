@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { apexTheme } from "./lib/theme";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
@@ -12,6 +12,7 @@ import PetsPage from "./pages/PetsPage";
 import ServicosPage from "./pages/ServicosPage";
 import TagsPage from "./pages/TagsPage";
 import UsersPage from "./pages/UsersPage";
+import ProfilePage from "./pages/ProfilePage";
 
 function App() {
   const c = apexTheme.colors;
@@ -24,7 +25,6 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route path="/dashboard" element={<Navigate to="/" replace />} />
           <Route path="/pets" element={<PetsPage />} />
           <Route path="/servicos" element={<ServicosPage />} />
           <Route path="/lojas" element={<LojasPage />} />
@@ -34,6 +34,7 @@ function App() {
           <Route path="/users" element={<UsersPage />} />
           <Route path="/tags" element={<TagsPage />} />
           <Route path="/atendimentos" element={<AtendimentosPage />} />
+          <Route path="/perfil" element={<ProfilePage />} />
         </Routes>
       </div>
     </BrowserRouter>

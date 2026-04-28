@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { apexTheme } from "../lib/theme";
 
 const API_URL = "http://127.0.0.1:8000";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const c = apexTheme.colors;
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -42,7 +44,7 @@ export default function RegisterPage() {
       localStorage.setItem("token", data.access_token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
-      navigate("/dashboard");
+      navigate("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro inesperado.");
     } finally {
@@ -51,11 +53,11 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f5f7f2] flex items-center justify-center px-4">
-      <section className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 bg-white rounded-3xl shadow-xl overflow-hidden">
-        <div className="bg-[#003c2f] p-10 text-white flex flex-col justify-between">
+    <main className={`min-h-screen ${c.bgSoft} flex items-center justify-center px-4 py-10`}>
+      <section className={`w-full max-w-5xl overflow-hidden rounded-3xl border ${c.border} bg-white shadow-xl`}>
+        <div className="flex flex-col justify-between bg-linear-to-br from-[#1c46f3] via-[#1840e0] to-[#00bb69] p-10 text-white">
           <div>
-            <span className="inline-block text-sm font-semibold tracking-[0.25em] uppercase text-[#f5c542]">
+            <span className="inline-block rounded-full bg-[#ffd200] px-3 py-1 text-sm font-semibold uppercase tracking-[0.25em] text-gray-900">
               Petstore Apex
             </span>
 
@@ -70,21 +72,22 @@ export default function RegisterPage() {
           </div>
 
           <div className="mt-10 border-t border-white/20 pt-6">
-            <p className="text-sm text-white/70">
-              Gestão moderna para uma experiência mais simples no petshop.
+            <p className="text-sm text-white/80">
+              Cadastro com a mesma linguagem visual do restante do projeto:
+              direto, limpo e institucional.
             </p>
           </div>
         </div>
 
         <div className="p-8 md:p-10">
-          <h2 className="text-2xl font-bold text-[#003c2f]">Cadastro</h2>
-          <p className="mt-2 text-sm text-gray-500">
+          <h2 className={`text-2xl font-bold ${c.text}`}>Cadastro</h2>
+          <p className={`mt-2 text-sm ${c.textMuted}`}>
             Preencha os dados abaixo para começar.
           </p>
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className={`block text-sm font-medium ${c.textSoft}`}>
                 Nome completo
               </label>
               <input
@@ -93,12 +96,12 @@ export default function RegisterPage() {
                 placeholder="Seu nome"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="mt-2 w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-[#007a53] focus:ring-2 focus:ring-[#007a53]/20"
+                className={`mt-2 w-full rounded-xl border ${c.border} px-4 py-3 outline-none transition focus:border-[#1c46f3] focus:ring-2 focus:ring-[#1c46f3]/20`}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className={`block text-sm font-medium ${c.textSoft}`}>
                 E-mail
               </label>
               <input
@@ -107,12 +110,12 @@ export default function RegisterPage() {
                 placeholder="seuemail@exemplo.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-2 w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-[#007a53] focus:ring-2 focus:ring-[#007a53]/20"
+                className={`mt-2 w-full rounded-xl border ${c.border} px-4 py-3 outline-none transition focus:border-[#1c46f3] focus:ring-2 focus:ring-[#1c46f3]/20`}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className={`block text-sm font-medium ${c.textSoft}`}>
                 Telefone
               </label>
               <input
@@ -120,12 +123,12 @@ export default function RegisterPage() {
                 placeholder="(61) 99999-9999"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="mt-2 w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-[#007a53] focus:ring-2 focus:ring-[#007a53]/20"
+                className={`mt-2 w-full rounded-xl border ${c.border} px-4 py-3 outline-none transition focus:border-[#1c46f3] focus:ring-2 focus:ring-[#1c46f3]/20`}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className={`block text-sm font-medium ${c.textSoft}`}>
                 Senha
               </label>
               <input
@@ -135,7 +138,7 @@ export default function RegisterPage() {
                 placeholder="Mínimo de 8 caracteres"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-2 w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-[#007a53] focus:ring-2 focus:ring-[#007a53]/20"
+                className={`mt-2 w-full rounded-xl border ${c.border} px-4 py-3 outline-none transition focus:border-[#1c46f3] focus:ring-2 focus:ring-[#1c46f3]/20`}
               />
             </div>
 
@@ -148,17 +151,17 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-xl bg-[#007a53] px-4 py-3 font-semibold text-white transition hover:bg-[#006445] disabled:cursor-not-allowed disabled:opacity-70"
+              className={`w-full rounded-xl px-4 py-3 font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-70 ${c.primary} ${c.primaryHover} ${c.primaryText}`}
             >
               {loading ? "Criando conta..." : "Criar conta"}
             </button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-gray-600">
+          <p className={`mt-6 text-center text-sm ${c.textMuted}`}>
             Já tem conta?{" "}
             <Link
               to="/login"
-              className="font-semibold text-[#007a53] hover:underline"
+              className="font-semibold text-[#1c46f3] hover:underline"
             >
               Entrar
             </Link>

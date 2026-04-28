@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { apexTheme } from "../lib/theme";
 
 const API_URL = "http://127.0.0.1:8000";
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const c = apexTheme.colors;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -34,7 +36,7 @@ export default function LoginPage() {
       localStorage.setItem("token", data.access_token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
-      navigate("/dashboard");
+      navigate("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro inesperado.");
     } finally {
@@ -43,11 +45,11 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f5f7f2] flex items-center justify-center px-4">
-      <section className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 bg-white rounded-3xl shadow-xl overflow-hidden">
-        <div className="bg-[#003c2f] p-10 text-white flex flex-col justify-between">
+    <main className={`min-h-screen ${c.bgSoft} flex items-center justify-center px-4 py-10`}>
+      <section className={`w-full max-w-5xl overflow-hidden rounded-3xl border ${c.border} bg-white shadow-xl`}>
+        <div className="flex flex-col justify-between bg-linear-to-br from-[#1c46f3] via-[#1840e0] to-[#00bb69] p-10 text-white">
           <div>
-            <span className="inline-block text-sm font-semibold tracking-[0.25em] uppercase text-[#f5c542]">
+            <span className="inline-block rounded-full bg-[#ffd200] px-3 py-1 text-sm font-semibold uppercase tracking-[0.25em] text-gray-900">
               Petstore Apex
             </span>
 
@@ -62,22 +64,22 @@ export default function LoginPage() {
           </div>
 
           <div className="mt-10 border-t border-white/20 pt-6">
-            <p className="text-sm text-white/70">
-              Inspirado na identidade visual institucional da ApexBrasil:
-              moderno, limpo e profissional.
+            <p className="text-sm text-white/80">
+              Visual alinhado ao sistema: cores institucionais, contraste claro
+              e foco em leitura rápida.
             </p>
           </div>
         </div>
 
         <div className="p-8 md:p-10">
-          <h2 className="text-2xl font-bold text-[#003c2f]">Entrar</h2>
-          <p className="mt-2 text-sm text-gray-500">
+          <h2 className={`text-2xl font-bold ${c.text}`}>Entrar</h2>
+          <p className={`mt-2 text-sm ${c.textMuted}`}>
             Informe seus dados para continuar.
           </p>
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className={`block text-sm font-medium ${c.textSoft}`}>
                 E-mail
               </label>
               <input
@@ -86,12 +88,12 @@ export default function LoginPage() {
                 placeholder="seuemail@exemplo.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-2 w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-[#007a53] focus:ring-2 focus:ring-[#007a53]/20"
+                className={`mt-2 w-full rounded-xl border ${c.border} px-4 py-3 outline-none transition focus:border-[#1c46f3] focus:ring-2 focus:ring-[#1c46f3]/20`}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className={`block text-sm font-medium ${c.textSoft}`}>
                 Senha
               </label>
               <input
@@ -101,7 +103,7 @@ export default function LoginPage() {
                 placeholder="Digite sua senha"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-2 w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-[#007a53] focus:ring-2 focus:ring-[#007a53]/20"
+                className={`mt-2 w-full rounded-xl border ${c.border} px-4 py-3 outline-none transition focus:border-[#1c46f3] focus:ring-2 focus:ring-[#1c46f3]/20`}
               />
             </div>
 
@@ -114,17 +116,17 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-xl bg-[#007a53] px-4 py-3 font-semibold text-white transition hover:bg-[#006445] disabled:cursor-not-allowed disabled:opacity-70"
+              className={`w-full rounded-xl px-4 py-3 font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-70 ${c.primary} ${c.primaryHover} ${c.primaryText}`}
             >
               {loading ? "Entrando..." : "Entrar"}
             </button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-gray-600">
+          <p className={`mt-6 text-center text-sm ${c.textMuted}`}>
             Ainda não tem conta?{" "}
             <Link
               to="/register"
-              className="font-semibold text-[#007a53] hover:underline"
+              className="font-semibold text-[#1c46f3] hover:underline"
             >
               Criar cadastro
             </Link>
