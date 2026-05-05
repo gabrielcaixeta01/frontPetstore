@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { api } from "../services/api";
 import { apexTheme } from "../lib/theme";
 
-const API_URL = "http://127.0.0.1:8000";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -19,26 +19,15 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.detail || "Erro ao fazer login.");
-      }
+      const data = await api.post("/auth/login", { email, password }).then(r => r.data);
 
       localStorage.setItem("token", data.access_token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
       navigate("/");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro inesperado.");
+    } catch (err: any) {
+      const msg = err?.response?.data?.detail || err?.message || "Erro ao fazer login.";
+      setError(msg);
     } finally {
       setLoading(false);
     }

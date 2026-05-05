@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { api } from "../services/api";
 import { apexTheme } from "../lib/theme";
 
-const API_URL = "http://127.0.0.1:8000";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -21,32 +21,16 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/auth/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          phone,
-          password,
-          role: "cliente",
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.detail || "Erro ao criar conta.");
-      }
+      const payload = { name, email, phone, password, role: "cliente" };
+      const data = await api.post("/auth/register", payload).then(r => r.data);
 
       localStorage.setItem("token", data.access_token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
       navigate("/");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro inesperado.");
+    } catch (err: any) {
+      const msg = err?.response?.data?.detail || err?.message || "Erro ao criar conta.";
+      setError(msg);
     } finally {
       setLoading(false);
     }

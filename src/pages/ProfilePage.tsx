@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apexTheme } from "../lib/theme";
+import { api } from "../services/api";
 
-const API_URL = "http://127.0.0.1:8000";
 
 type User = {
   id: number;
@@ -55,29 +55,8 @@ export default function ProfilePage() {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem("token");
-
-      const params = new URLSearchParams({
-        name,
-        email,
-        phone,
-      });
-
-      const response = await fetch(
-        `${API_URL}/user/${user.id}?${params.toString()}`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.detail || "Erro ao atualizar perfil");
-      }
+      const params = { name, email, phone };
+      const data = await api.put(`/user/${user.id}`, null, { params }).then(r => r.data);
 
       // atualizar localStorage
       localStorage.setItem("user", JSON.stringify(data));
