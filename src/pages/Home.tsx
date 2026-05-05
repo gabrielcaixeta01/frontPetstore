@@ -40,7 +40,7 @@ export default function Home() {
   ];
 
   const stats = [
-    { icon: PawPrint, label: "Pets", value: "Gestão completa", color: "text-[#1c46f3]", bg: "bg-[#1c46f3]/10" },
+    { icon: PawPrint, label: "Pets", value: "Gestão completa", color: "text-[#1c46f3]", bg: "bg-white" },
     { icon: CalendarCheck, label: "Atendimentos", value: "Histórico detalhado", color: "text-[#00bb69]", bg: "bg-[#00bb69]/10" },
     { icon: Star, label: "Serviços", value: "Catálogo de preços", color: "text-yellow-600", bg: "bg-yellow-100" },
     { icon: Clock, label: "Tempo real", value: "Dados atualizados", color: "text-purple-600", bg: "bg-purple-100" },
