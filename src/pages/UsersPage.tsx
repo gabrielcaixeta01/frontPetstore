@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Users, RefreshCw } from "lucide-react";
 import EditModal from "../components/EditModal";
 import EditUserForm from "../components/user/EditUserForm";
 import UserForm from "../components/user/UserForm";
@@ -80,11 +81,17 @@ export default function UsersPage() {
     <div className={`min-h-screen ${c.bg} px-4 py-10 ${c.text}`}>
       <div className="mx-auto max-w-6xl space-y-8">
         <header className={`rounded-3xl border ${c.border} ${c.card} p-8`}>
-          <p className={`text-sm ${c.textMuted}`}>Módulo</p>
-          <h1 className="mt-2 text-4xl font-bold">Usuários</h1>
-          <p className={`mt-3 ${c.textSoft}`}>
-            Gerencie pessoas do sistema com perfil, documentos e status.
-          </p>
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#1c46f3]/10">
+              <Users size={26} className="text-[#1c46f3]" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold">Usuários</h1>
+              <p className={`mt-1 text-sm ${c.textSoft}`}>
+                Gerencie pessoas do sistema com perfil, documentos e status.
+              </p>
+            </div>
+          </div>
         </header>
 
         {feedback && (
@@ -125,8 +132,9 @@ export default function UsersPage() {
             <h2 className="text-2xl font-bold">Lista de usuários</h2>
             <button
               onClick={loadUsers}
-              className={`rounded-2xl px-4 py-2 font-medium transition ${c.outlineButton}`}
+              className={`flex items-center gap-2 rounded-2xl px-4 py-2 font-medium transition ${c.outlineButton}`}
             >
+              <RefreshCw size={14} />
               Atualizar
             </button>
           </div>

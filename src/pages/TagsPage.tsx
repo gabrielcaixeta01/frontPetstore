@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Tag, RefreshCw } from "lucide-react";
 import EditModal from "../components/EditModal";
 import EditTagForm from "../components/tag/EditTagForm";
 import TagForm from "../components/tag/TagForm";
@@ -80,11 +81,17 @@ export default function TagsPage() {
     <div className={`min-h-screen ${c.bg} px-4 py-10 ${c.text}`}>
       <div className="mx-auto max-w-6xl space-y-8">
         <header className={`rounded-3xl border ${c.border} ${c.card} p-8`}>
-          <p className={`text-sm ${c.textMuted}`}>Módulo</p>
-          <h1 className="mt-2 text-4xl font-bold">Tags</h1>
-          <p className={`mt-3 ${c.textSoft}`}>
-            Organize e classifique entidades do sistema com tags reutilizáveis.
-          </p>
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-pink-100">
+              <Tag size={26} className="text-pink-600" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold">Tags</h1>
+              <p className={`mt-1 text-sm ${c.textSoft}`}>
+                Organize e classifique entidades do sistema com tags reutilizáveis.
+              </p>
+            </div>
+          </div>
         </header>
 
         {feedback && (
@@ -125,8 +132,9 @@ export default function TagsPage() {
             <h2 className="text-2xl font-bold">Lista de tags</h2>
             <button
               onClick={loadTags}
-              className={`rounded-2xl px-4 py-2 font-medium transition ${c.outlineButton}`}
+              className={`flex items-center gap-2 rounded-2xl px-4 py-2 font-medium transition ${c.outlineButton}`}
             >
+              <RefreshCw size={14} />
               Atualizar
             </button>
           </div>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { CalendarCheck, RefreshCw } from "lucide-react";
 import EditModal from "../components/EditModal";
 import AppointmentForm from "../components/appointment/AppointmentForm";
 import AppointmentList from "../components/appointment/AppointmentList";
@@ -190,11 +191,17 @@ export default function AppointmentsPage() {
     <div className={`min-h-screen ${c.bg} px-4 py-10 ${c.text}`}>
       <div className="mx-auto max-w-6xl space-y-8">
         <header className={`rounded-3xl border ${c.border} ${c.card} p-8`}>
-          <p className={`text-sm ${c.textMuted}`}>Módulo</p>
-          <h1 className="mt-2 text-4xl font-bold">Atendimentos</h1>
-          <p className={`mt-3 ${c.textSoft}`}>
-            Controle atendimentos, pagamento, status e vínculos com loja, cliente e funcionário.
-          </p>
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#00bb69]/10">
+              <CalendarCheck size={26} className="text-[#00bb69]" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold">Atendimentos</h1>
+              <p className={`mt-1 text-sm ${c.textSoft}`}>
+                Controle atendimentos, pagamento, status e vínculos com loja, cliente e funcionário.
+              </p>
+            </div>
+          </div>
         </header>
 
         {feedback && (
@@ -235,8 +242,9 @@ export default function AppointmentsPage() {
             <h2 className="text-2xl font-bold">Lista de atendimentos</h2>
             <button
               onClick={loadAtendimentos}
-              className={`rounded-2xl px-4 py-2 font-medium transition ${c.outlineButton}`}
+              className={`flex items-center gap-2 rounded-2xl px-4 py-2 font-medium transition ${c.outlineButton}`}
             >
+              <RefreshCw size={14} />
               Atualizar
             </button>
           </div>

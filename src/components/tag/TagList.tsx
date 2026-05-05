@@ -1,3 +1,4 @@
+import { Pencil, Trash2 } from "lucide-react";
 import type { Etiqueta } from "../../types/tag";
 import { apexTheme } from "../../lib/theme";
 
@@ -19,33 +20,34 @@ export default function TagList({ tags, onEdit, onDelete }: TagListProps) {
   }
 
   return (
-    <div className="grid gap-4">
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {tags.map((tag) => (
         <div
           key={tag.id}
-          className={`rounded-2xl border ${c.border} ${c.card} p-5 shadow-lg`}
+          className={`rounded-2xl border ${c.border} ${c.card} p-4 shadow-sm transition hover:shadow-md`}
         >
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <h3 className={`text-xl font-bold ${c.text}`}>{tag.nome}</h3>
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h3 className={`truncate font-bold ${c.text}`}>{tag.nome}</h3>
               {tag.descricao && (
-                <p className={`mt-1 text-sm ${c.textSoft}`}>{tag.descricao}</p>
+                <p className={`mt-1 text-sm ${c.textSoft} line-clamp-2`}>{tag.descricao}</p>
               )}
-              <p className={`text-sm ${c.textSoft}`}>ID: {tag.id}</p>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex shrink-0 gap-1.5">
               <button
                 onClick={() => onEdit(tag)}
-                className={`rounded-xl border ${c.border} px-4 py-2 text-sm font-medium ${c.text} transition hover:${c.bgSoft}`}
+                title="Editar"
+                className={`rounded-lg border ${c.border} p-2 text-sm transition hover:bg-gray-50`}
               >
-                Editar
+                <Pencil size={13} className={c.text} />
               </button>
               <button
                 onClick={() => onDelete(tag.id)}
-                className="rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 hover:text-red-700"
+                title="Excluir"
+                className="rounded-lg border border-red-200 bg-white p-2 transition hover:bg-red-50"
               >
-                Excluir
+                <Trash2 size={13} className="text-red-600" />
               </button>
             </div>
           </div>

@@ -1,15 +1,30 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
+import {
+  PawPrint,
+  LayoutGrid,
+  Scissors,
+  Store,
+  Users,
+  Tag,
+  CalendarCheck,
+  User,
+  LogIn,
+  UserPlus,
+  type LucideIcon,
+} from "lucide-react";
 
-const links = [
-  { to: "/pets", label: "Pets" },
-  { to: "/categorias", label: "Categorias" },
-  { to: "/servicos", label: "Serviços" },
-  { to: "/lojas", label: "Lojas" },
-  { to: "/usuarios", label: "Usuários" },
-  { to: "/tags", label: "Tags" },
-  { to: "/atendimentos", label: "Atendimentos" },
+type NavItem = { to: string; label: string; icon: LucideIcon };
+
+const links: NavItem[] = [
+  { to: "/pets", label: "Pets", icon: PawPrint },
+  { to: "/categorias", label: "Categorias", icon: LayoutGrid },
+  { to: "/servicos", label: "Serviços", icon: Scissors },
+  { to: "/lojas", label: "Lojas", icon: Store },
+  { to: "/usuarios", label: "Usuários", icon: Users },
+  { to: "/tags", label: "Tags", icon: Tag },
+  { to: "/atendimentos", label: "Atendimentos", icon: CalendarCheck },
 ];
 
 type Pill = {
@@ -36,14 +51,14 @@ export default function Navbar() {
     opacity: 0,
   });
 
-  const visibleLinks = useMemo(() => {
+  const visibleLinks = useMemo((): NavItem[] => {
     if (isLogged) {
-      return [...links, { to: "/perfil", label: "Perfil" }];
+      return [...links, { to: "/perfil", label: "Perfil", icon: User }];
     }
 
     return [
-      { to: "/login", label: "Login" },
-      { to: "/register", label: "Cadastro" },
+      { to: "/login", label: "Login", icon: LogIn },
+      { to: "/register", label: "Cadastro", icon: UserPlus },
     ];
   }, [isLogged]);
 
@@ -133,7 +148,7 @@ export default function Navbar() {
                   movePillTo(link.to);
                 }}
                 className={`
-                  relative z-10 rounded-full px-4 py-2 text-sm font-semibold
+                  relative z-10 flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold
                   transition-all duration-300 hover:scale-[1.03]
                   ${
                     isPillHere
@@ -144,6 +159,7 @@ export default function Navbar() {
                   }
                 `}
               >
+                <link.icon size={14} />
                 {link.label}
               </NavLink>
             );

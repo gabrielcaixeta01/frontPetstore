@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Store, Plus, RefreshCw, Pencil, Trash2, ChevronRight } from "lucide-react";
 import EditModal from "../components/EditModal";
 import { apexTheme } from "../lib/theme";
 import {
@@ -181,11 +182,17 @@ export default function LojasPage() {
     <div className={`min-h-screen ${c.bg} px-4 py-10 ${c.text}`}>
       <div className="mx-auto max-w-6xl space-y-8">
         <header className={`rounded-3xl border ${c.border} ${c.card} p-8`}>
-          <p className={`text-sm ${c.textMuted}`}>Módulo</p>
-          <h1 className="mt-2 text-4xl font-bold">Lojas</h1>
-          <p className={`mt-3 ${c.textSoft}`}>
-            Gerencie unidades da empresa com dados de contato e endereço.
-          </p>
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-100">
+              <Store size={26} className="text-purple-600" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold">Lojas</h1>
+              <p className={`mt-1 text-sm ${c.textSoft}`}>
+                Gerencie unidades da empresa com dados de contato e endereço.
+              </p>
+            </div>
+          </div>
         </header>
 
         {feedback && (
@@ -283,8 +290,9 @@ export default function LojasPage() {
           <div className="flex flex-wrap gap-3">
             <button
               type="submit"
-              className={`rounded-xl ${c.primary} ${c.primaryText} px-5 py-3 font-semibold transition hover:opacity-90`}
+              className={`flex items-center gap-2 rounded-xl ${c.primary} ${c.primaryText} px-5 py-3 font-semibold transition hover:opacity-90`}
             >
+              <Plus size={16} />
               Cadastrar
             </button>
           </div>
@@ -324,8 +332,9 @@ export default function LojasPage() {
             <h2 className="text-2xl font-bold">Lista de lojas</h2>
             <button
               onClick={loadLojas}
-              className={`rounded-2xl px-4 py-2 font-medium transition ${c.outlineButton}`}
+              className={`flex items-center gap-2 rounded-2xl px-4 py-2 font-medium transition ${c.outlineButton}`}
             >
+              <RefreshCw size={14} />
               Atualizar
             </button>
           </div>
@@ -344,29 +353,33 @@ export default function LojasPage() {
                 <div
                   key={loja.id}
                   onClick={() => navigate(`/lojas/${loja.id}`)}
-                  className={`rounded-2xl border ${c.border} ${c.card} p-5 shadow-lg`}
+                  className={`cursor-pointer rounded-2xl border ${c.border} ${c.card} p-5 shadow-sm transition hover:shadow-md`}
                 >
                   <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                     <div className="space-y-1">
-                      <h3 className={`text-xl font-bold ${c.text}`}>{loja.nome}</h3>
-                      <p className={`text-sm ${c.textSoft}`}>CNPJ: {loja.cnpj}</p>
-                      <p className={`text-sm ${c.textSoft}`}>Telefone: {loja.telefone}</p>
-                      <p className={`text-sm ${c.textSoft}`}>Email: {loja.email}</p>
+                      <div className="flex items-center gap-2">
+                        <h3 className={`text-lg font-bold ${c.text}`}>{loja.nome}</h3>
+                        <ChevronRight size={16} className={c.textMuted} />
+                      </div>
                       <p className={`text-sm ${c.textSoft}`}>
-                        Endereço: {loja.end_rua}, {loja.end_numero} - {loja.end_bairro}, {loja.end_cidade}/{loja.end_estado}
+                        {loja.end_rua}, {loja.end_numero} — {loja.end_bairro}, {loja.end_cidade}/{loja.end_estado}
                       </p>
-                      <p className={`text-sm ${c.textSoft}`}>CEP: {loja.end_cep}</p>
-                      <p className={`text-sm ${c.textSoft}`}>ID: {loja.id}</p>
+                      <div className="flex flex-wrap gap-3 pt-1">
+                        <span className={`text-xs ${c.textMuted}`}>{loja.telefone}</span>
+                        <span className={`text-xs ${c.textMuted}`}>{loja.email}</span>
+                        <span className={`text-xs ${c.textMuted}`}>CNPJ: {loja.cnpj}</span>
+                      </div>
                     </div>
 
-                    <div className="flex gap-3">
+                    <div className="flex shrink-0 gap-2">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           setLojaBeingEdited(loja);
                         }}
-                        className={`rounded-xl border px-4 py-2 text-sm font-medium transition ${c.border} ${c.text} hover:${c.bgSoft}`}
+                        className={`flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium transition ${c.border} ${c.text} hover:bg-gray-50`}
                       >
+                        <Pencil size={13} />
                         Editar
                       </button>
                       <button
@@ -374,8 +387,9 @@ export default function LojasPage() {
                           e.stopPropagation();
                           handleDeleteLoja(loja.id);
                         }}
-                        className="rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 hover:text-red-700"
+                        className="flex items-center gap-1.5 rounded-xl border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
                       >
+                        <Trash2 size={13} />
                         Excluir
                       </button>
                     </div>

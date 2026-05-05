@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { LayoutGrid, Plus, RefreshCw, Pencil, Trash2 } from "lucide-react";
 import EditModal from "../components/EditModal";
 import { apexTheme } from "../lib/theme";
 import {
@@ -120,11 +121,17 @@ export default function CategoriasPage() {
     <div className={`min-h-screen ${c.bg} px-4 py-10 ${c.text}`}>
       <div className="mx-auto max-w-6xl space-y-8">
         <header className={`rounded-3xl border ${c.border} ${c.card} p-8`}>
-          <p className={`text-sm ${c.textMuted}`}>Módulo</p>
-          <h1 className="mt-2 text-4xl font-bold">Categorias</h1>
-          <p className={`mt-3 ${c.textSoft}`}>
-            Organize os tipos de pet por categoria para facilitar filtros e gestão.
-          </p>
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#00bb69]/10">
+              <LayoutGrid size={26} className="text-[#00bb69]" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold">Categorias</h1>
+              <p className={`mt-1 text-sm ${c.textSoft}`}>
+                Organize os tipos de pet por categoria para facilitar filtros e gestão.
+              </p>
+            </div>
+          </div>
         </header>
 
         {feedback && (
@@ -175,8 +182,9 @@ export default function CategoriasPage() {
           <div className="flex flex-wrap gap-3">
             <button
               type="submit"
-              className={`rounded-xl ${c.primary} ${c.primaryText} px-5 py-3 font-semibold transition hover:opacity-90`}
+              className={`flex items-center gap-2 rounded-xl ${c.primary} ${c.primaryText} px-5 py-3 font-semibold transition hover:opacity-90`}
             >
+              <Plus size={16} />
               Cadastrar
             </button>
           </div>
@@ -216,7 +224,7 @@ export default function CategoriasPage() {
             <div className="flex gap-3">
               <button
                 type="submit"
-                className={`rounded-xl ${c.primary} ${c.primaryText} px-5 py-3 font-semibold transition hover:opacity-90`}
+                className={`flex items-center gap-2 rounded-xl ${c.primary} ${c.primaryText} px-5 py-3 font-semibold transition hover:opacity-90`}
               >
                 Salvar alterações
               </button>
@@ -236,8 +244,9 @@ export default function CategoriasPage() {
             <h2 className="text-2xl font-bold">Lista de categorias</h2>
             <button
               onClick={loadCategorias}
-              className={`rounded-2xl px-4 py-2 font-medium transition ${c.outlineButton}`}
+              className={`flex items-center gap-2 rounded-2xl px-4 py-2 font-medium transition ${c.outlineButton}`}
             >
+              <RefreshCw size={14} />
               Atualizar
             </button>
           </div>
@@ -263,20 +272,21 @@ export default function CategoriasPage() {
                       {categoria.description && (
                         <p className={`text-sm ${c.textSoft}`}>{categoria.description}</p>
                       )}
-                      <p className={`text-sm ${c.textSoft}`}>ID: {categoria.id}</p>
                     </div>
 
-                    <div className="flex gap-3">
+                    <div className="flex gap-2">
                       <button
                         onClick={() => setCategoriaBeingEdited(categoria)}
-                        className={`rounded-xl border px-4 py-2 text-sm font-medium transition ${c.border} ${c.text} hover:${c.bgSoft}`}
+                        className={`flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium transition ${c.border} ${c.text} hover:bg-gray-50`}
                       >
+                        <Pencil size={13} />
                         Editar
                       </button>
                       <button
                         onClick={() => handleDeleteCategoria(categoria.id)}
-                        className="rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 hover:text-red-700"
+                        className="flex items-center gap-1.5 rounded-xl border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
                       >
+                        <Trash2 size={13} />
                         Excluir
                       </button>
                     </div>
