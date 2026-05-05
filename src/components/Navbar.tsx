@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useMemo, useRef, useState } from "react";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 
 const links = [
   { to: "/pets", label: "Pets" },
@@ -19,7 +19,6 @@ type Pill = {
 };
 
 export default function Navbar() {
-  const navigate = useNavigate();
   const location = useLocation();
 
   const navRef = useRef<HTMLElement | null>(null);
@@ -76,13 +75,6 @@ export default function Navbar() {
       ...prev,
       opacity: 0,
     }));
-  }
-
-  function handleLogout() {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setIsLogged(false);
-    navigate("/");
   }
 
   useEffect(() => {
@@ -157,29 +149,7 @@ export default function Navbar() {
             );
           })}
 
-          {isLogged && (
-            <button
-              ref={(el) => {
-                itemRefs.current["/logout"] = el;
-              }}
-              onMouseEnter={() => {
-                setHoveredPath("/logout");
-                movePillTo("/logout");
-              }}
-              onClick={handleLogout}
-              className={`
-                relative z-10 rounded-full px-4 py-2 text-sm font-semibold
-                transition-all duration-300 hover:scale-[1.03]
-                ${
-                  hoveredPath === "/logout"
-                    ? "text-white"
-                    : "text-gray-700 hover:text-[#1c46f3]"
-                }
-              `}
-            >
-              Sair
-            </button>
-          )}
+          
         </nav>
       </div>
     </header>
