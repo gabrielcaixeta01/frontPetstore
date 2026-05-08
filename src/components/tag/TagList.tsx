@@ -5,6 +5,7 @@ interface TagListProps {
   tags: Etiqueta[];
   onEdit?: (tag: Etiqueta) => void;
   onDelete?: (id: number) => Promise<void>;
+  compact?: boolean; // when true, render the compact table-style view without actions
 }
 
 const chipColors = [
@@ -18,8 +19,9 @@ const chipColors = [
   "border-rose-200 bg-rose-50 text-rose-700",
 ];
 
-export default function TagList({ tags, onEdit, onDelete }: TagListProps) {
+export default function TagList({ tags, onEdit, onDelete, compact }: TagListProps) {
   const canEdit = Boolean(onEdit || onDelete);
+  const showCompact = Boolean(compact);
 
   if (tags.length === 0) {
     return (
@@ -30,7 +32,7 @@ export default function TagList({ tags, onEdit, onDelete }: TagListProps) {
   }
 
   // Simple view (read-only): just colorful chips
-  if (!canEdit) {
+  if (!canEdit && !showCompact) {
     return (
       <div className="flex flex-wrap gap-2">
         {tags.map((tag, i) => (
@@ -47,12 +49,12 @@ export default function TagList({ tags, onEdit, onDelete }: TagListProps) {
     );
   }
 
-  // Editable view: compact table
+  // Editable / compact view: compact table (actions shown only when present)
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
       <div className="grid grid-cols-[1fr_auto] gap-4 border-b border-gray-100 bg-gray-50 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
         <span>Tag</span>
-        <span className="text-right">Ações</span>
+        <span className="text-right">{canEdit ? "Ações" : ""}</span>
       </div>
       <div className="divide-y divide-gray-50">
         {tags.map((tag, i) => (
