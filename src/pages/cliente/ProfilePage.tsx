@@ -11,6 +11,8 @@ type UserProfile = {
   name: string;
   email: string;
   phone?: string;
+  cpf?: string;
+  cnpj?: string;
   role: string;
   active: boolean;
   created_at: string;
@@ -205,8 +207,9 @@ export default function ClienteProfilePage() {
 
   const cp = profile.client_profile;
   const clientTypeLabel = cp?.client_type === "pessoa_juridica" ? "Pessoa Jurídica" : "Pessoa Física";
-  const docLabel = cp?.client_type === "pessoa_juridica" ? "CNPJ" : "CPF";
-  const docValue = cp?.cnpj ?? cp?.cpf;
+  const hasCnpj = Boolean(profile.cnpj ?? cp?.cnpj);
+  const docLabel = hasCnpj ? "CNPJ" : "CPF";
+  const docValue = profile.cnpj ?? cp?.cnpj ?? profile.cpf ?? cp?.cpf;
   const cepValue = cp?.cep ?? "";
   const stateValue = cp?.state ?? "";
   const cityValue = cp?.city ?? "";

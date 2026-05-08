@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Store, Plus, RefreshCw, Pencil, Trash2, ChevronRight } from "lucide-react";
 import EditModal from "../../components/EditModal";
-import { apexTheme } from "../../lib/theme";
 import {
   createLoja,
   deleteLoja,
@@ -11,18 +10,7 @@ import {
 } from "../../services/lojaService";
 import type { CreateLojaDTO, Loja, UpdateLojaDTO } from "../../types/loja";
 
-function getIsCliente() {
-  try {
-    const stored = localStorage.getItem("user");
-    return stored ? JSON.parse(stored).role === "cliente" : false;
-  } catch {
-    return false;
-  }
-}
-
 export default function LojasPage() {
-  const c = apexTheme.colors;
-  const isCliente = getIsCliente();
   const navigate = useNavigate();
   const [lojas, setLojas] = useState<Loja[]>([]);
   const [lojaBeingEdited, setLojaBeingEdited] = useState<Loja | null>(null);
@@ -188,40 +176,42 @@ export default function LojasPage() {
     }
   }
 
+  const inputClass = "w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white focus:ring-2 focus:ring-[#1c46f3]/15";
+
   return (
-    <div className={`min-h-screen ${c.bg} px-4 py-10 ${c.text}`}>
+    <div className="px-8 py-8">
       <div className="mx-auto max-w-6xl space-y-8">
-        <header className={`rounded-3xl border ${c.border} ${c.card} p-8`}>
-          <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-100">
-              <Store size={26} className="text-purple-600" />
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-100">
+              <Store size={20} className="text-purple-600" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold">Lojas</h1>
-              <p className={`mt-1 text-sm ${c.textSoft}`}>
+              <h1 className="text-2xl font-bold text-gray-900">Lojas</h1>
+              <p className="mt-0.5 text-sm text-gray-500">
                 Gerencie unidades da empresa com dados de contato e endereço.
               </p>
             </div>
           </div>
-        </header>
+        </div>
 
         {feedback && (
-          <div className="rounded-2xl border border-emerald-800 bg-emerald-950 px-4 py-3 text-emerald-300">
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
             {feedback}
           </div>
         )}
 
         {error && (
-          <div className="rounded-2xl border border-red-800 bg-red-950 px-4 py-3 text-red-300">
+          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
             {error}
           </div>
         )}
 
-        {!isCliente && <form
+        <form
           onSubmit={handleCreateSubmit}
-          className={`space-y-4 rounded-2xl border ${c.border} ${c.card} p-6 shadow-lg`}
+          className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm"
         >
-          <h2 className={`text-2xl font-bold ${c.text}`}>Cadastrar Loja</h2>
+          <h2 className="text-base font-semibold text-gray-800 mb-4">Cadastrar Loja</h2>
 
           <div className="grid gap-4 md:grid-cols-2">
             <input
@@ -229,21 +219,21 @@ export default function LojasPage() {
               value={form.nome}
               onChange={(e) => updateField("nome", e.target.value)}
               required
-              className={`rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
+              className={inputClass}
             />
             <input
               placeholder="CNPJ"
               value={form.cnpj}
               onChange={(e) => updateField("cnpj", e.target.value)}
               required
-              className={`rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
+              className={inputClass}
             />
             <input
               placeholder="Telefone"
               value={form.telefone}
               onChange={(e) => updateField("telefone", e.target.value)}
               required
-              className={`rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
+              className={inputClass}
             />
             <input
               type="email"
@@ -251,98 +241,98 @@ export default function LojasPage() {
               value={form.email}
               onChange={(e) => updateField("email", e.target.value)}
               required
-              className={`rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
+              className={inputClass}
             />
             <input
               placeholder="CEP"
               value={form.end_cep}
               onChange={(e) => updateField("end_cep", e.target.value)}
               required
-              className={`rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
+              className={inputClass}
             />
             <input
               placeholder="Cidade"
               value={form.end_cidade}
               onChange={(e) => updateField("end_cidade", e.target.value)}
               required
-              className={`rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
+              className={inputClass}
             />
             <input
               placeholder="Estado"
               value={form.end_estado}
               onChange={(e) => updateField("end_estado", e.target.value)}
               required
-              className={`rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
+              className={inputClass}
             />
             <input
               placeholder="Rua"
               value={form.end_rua}
               onChange={(e) => updateField("end_rua", e.target.value)}
               required
-              className={`rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
+              className={inputClass}
             />
             <input
               placeholder="Bairro"
               value={form.end_bairro}
               onChange={(e) => updateField("end_bairro", e.target.value)}
               required
-              className={`rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
+              className={inputClass}
             />
             <input
               placeholder="Número"
               value={form.end_numero}
               onChange={(e) => updateField("end_numero", e.target.value)}
               required
-              className={`rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
+              className={inputClass}
             />
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="mt-4 flex flex-wrap gap-3">
             <button
               type="submit"
-              className={`flex items-center gap-2 rounded-xl ${c.primary} ${c.primaryText} px-5 py-3 font-semibold transition hover:opacity-90`}
+              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-[#1c46f3]/20 transition hover:opacity-90"
             >
               <Plus size={16} />
               Cadastrar
             </button>
           </div>
-        </form>}
+        </form>
 
-        {!isCliente && <EditModal
+        <EditModal
           isOpen={Boolean(lojaBeingEdited)}
           title="Editar Loja"
           onClose={() => setLojaBeingEdited(null)}
         >
           <form onSubmit={handleUpdateSubmit} className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
-              <input placeholder="Nome" value={editForm.nome} onChange={(e) => updateEditField("nome", e.target.value)} required className={`rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`} />
-              <input placeholder="CNPJ" value={editForm.cnpj} onChange={(e) => updateEditField("cnpj", e.target.value)} required className={`rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`} />
-              <input placeholder="Telefone" value={editForm.telefone} onChange={(e) => updateEditField("telefone", e.target.value)} required className={`rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`} />
-              <input type="email" placeholder="Email" value={editForm.email} onChange={(e) => updateEditField("email", e.target.value)} required className={`rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`} />
-              <input placeholder="CEP" value={editForm.end_cep} onChange={(e) => updateEditField("end_cep", e.target.value)} required className={`rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`} />
-              <input placeholder="Cidade" value={editForm.end_cidade} onChange={(e) => updateEditField("end_cidade", e.target.value)} required className={`rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`} />
-              <input placeholder="Estado" value={editForm.end_estado} onChange={(e) => updateEditField("end_estado", e.target.value)} required className={`rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`} />
-              <input placeholder="Rua" value={editForm.end_rua} onChange={(e) => updateEditField("end_rua", e.target.value)} required className={`rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`} />
-              <input placeholder="Bairro" value={editForm.end_bairro} onChange={(e) => updateEditField("end_bairro", e.target.value)} required className={`rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`} />
-              <input placeholder="Número" value={editForm.end_numero} onChange={(e) => updateEditField("end_numero", e.target.value)} required className={`rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`} />
+              <input placeholder="Nome" value={editForm.nome} onChange={(e) => updateEditField("nome", e.target.value)} required className={inputClass} />
+              <input placeholder="CNPJ" value={editForm.cnpj} onChange={(e) => updateEditField("cnpj", e.target.value)} required className={inputClass} />
+              <input placeholder="Telefone" value={editForm.telefone} onChange={(e) => updateEditField("telefone", e.target.value)} required className={inputClass} />
+              <input type="email" placeholder="Email" value={editForm.email} onChange={(e) => updateEditField("email", e.target.value)} required className={inputClass} />
+              <input placeholder="CEP" value={editForm.end_cep} onChange={(e) => updateEditField("end_cep", e.target.value)} required className={inputClass} />
+              <input placeholder="Cidade" value={editForm.end_cidade} onChange={(e) => updateEditField("end_cidade", e.target.value)} required className={inputClass} />
+              <input placeholder="Estado" value={editForm.end_estado} onChange={(e) => updateEditField("end_estado", e.target.value)} required className={inputClass} />
+              <input placeholder="Rua" value={editForm.end_rua} onChange={(e) => updateEditField("end_rua", e.target.value)} required className={inputClass} />
+              <input placeholder="Bairro" value={editForm.end_bairro} onChange={(e) => updateEditField("end_bairro", e.target.value)} required className={inputClass} />
+              <input placeholder="Número" value={editForm.end_numero} onChange={(e) => updateEditField("end_numero", e.target.value)} required className={inputClass} />
             </div>
             <div className="flex gap-3">
-              <button type="submit" className={`rounded-xl ${c.primary} ${c.primaryText} px-5 py-3 font-semibold transition hover:opacity-90`}>
+              <button type="submit" className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-[#1c46f3]/20 transition hover:opacity-90">
                 Salvar alterações
               </button>
-              <button type="button" onClick={() => setLojaBeingEdited(null)} className={`rounded-xl border ${c.border} px-5 py-3 font-semibold ${c.text} transition hover:${c.bgSoft}`}>
+              <button type="button" onClick={() => setLojaBeingEdited(null)} className="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50">
                 Cancelar
               </button>
             </div>
           </form>
-        </EditModal>}
+        </EditModal>
 
         <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold">Lista de lojas</h2>
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-gray-800">Lista de lojas</h2>
             <button
               onClick={loadLojas}
-              className={`flex items-center gap-2 rounded-2xl px-4 py-2 font-medium transition ${c.outlineButton}`}
+              className="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
             >
               <RefreshCw size={14} />
               Atualizar
@@ -350,11 +340,11 @@ export default function LojasPage() {
           </div>
 
           {loading ? (
-            <div className={`rounded-2xl border ${c.border} ${c.card} p-6 ${c.textSoft}`}>
+            <div className="rounded-2xl border border-gray-100 bg-white p-6 text-sm text-gray-400">
               Carregando lojas...
             </div>
           ) : lojas.length === 0 ? (
-            <div className={`rounded-2xl border ${c.border} ${c.card} p-6 ${c.textMuted}`}>
+            <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-10 text-center text-sm text-gray-400">
               Nenhuma loja encontrada.
             </div>
           ) : (
@@ -363,32 +353,31 @@ export default function LojasPage() {
                 <div
                   key={loja.id}
                   onClick={() => navigate(`/lojas/${loja.id}`)}
-                  className={`cursor-pointer rounded-2xl border ${c.border} ${c.card} p-5 shadow-sm transition hover:shadow-md`}
+                  className="cursor-pointer rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition hover:shadow-md"
                 >
                   <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <h3 className={`text-lg font-bold ${c.text}`}>{loja.nome}</h3>
-                        <ChevronRight size={16} className={c.textMuted} />
+                        <h3 className="text-base font-semibold text-gray-800">{loja.nome}</h3>
+                        <ChevronRight size={16} className="text-gray-400" />
                       </div>
-                      <p className={`text-sm ${c.textSoft}`}>
+                      <p className="text-sm text-gray-500">
                         {loja.end_rua}, {loja.end_numero} — {loja.end_bairro}, {loja.end_cidade}/{loja.end_estado}
                       </p>
                       <div className="flex flex-wrap gap-3 pt-1">
-                        <span className={`text-xs ${c.textMuted}`}>{loja.telefone}</span>
-                        <span className={`text-xs ${c.textMuted}`}>{loja.email}</span>
-                        <span className={`text-xs ${c.textMuted}`}>CNPJ: {loja.cnpj}</span>
+                        <span className="text-xs text-gray-400">{loja.telefone}</span>
+                        <span className="text-xs text-gray-400">{loja.email}</span>
+                        <span className="text-xs text-gray-400">CNPJ: {loja.cnpj}</span>
                       </div>
                     </div>
 
-                    {!isCliente && (
                     <div className="flex shrink-0 gap-2">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           setLojaBeingEdited(loja);
                         }}
-                        className={`flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium transition ${c.border} ${c.text} hover:bg-gray-50`}
+                        className="flex items-center gap-1.5 rounded-xl border border-gray-200 px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
                       >
                         <Pencil size={13} />
                         Editar
@@ -398,13 +387,12 @@ export default function LojasPage() {
                           e.stopPropagation();
                           handleDeleteLoja(loja.id);
                         }}
-                        className="flex items-center gap-1.5 rounded-xl border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
+                        className="flex items-center gap-1.5 rounded-xl border border-red-100 px-3 py-2 text-sm font-medium text-red-500 transition hover:bg-red-50"
                       >
                         <Trash2 size={13} />
                         Excluir
                       </button>
                     </div>
-                    )}
                   </div>
                 </div>
               ))}

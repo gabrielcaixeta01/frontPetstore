@@ -4,7 +4,6 @@ import EditModal from "../../components/EditModal";
 import EditTagForm from "../../components/tag/EditTagForm";
 import TagForm from "../../components/tag/TagForm";
 import TagList from "../../components/tag/TagList";
-import { apexTheme } from "../../lib/theme";
 import {
   createTag,
   deleteTag,
@@ -13,18 +12,7 @@ import {
 } from "../../services/tagService";
 import type { CreateEtiquetaDTO, Etiqueta, UpdateEtiquetaDTO } from "../../types/tag";
 
-function getIsCliente() {
-  try {
-    const stored = localStorage.getItem("user");
-    return stored ? JSON.parse(stored).role === "cliente" : false;
-  } catch {
-    return false;
-  }
-}
-
 export default function TagsPage() {
-  const c = apexTheme.colors;
-  const isCliente = getIsCliente();
   const [tags, setTags] = useState<Etiqueta[]>([]);
   const [tagBeingEdited, setTagBeingEdited] = useState<Etiqueta | null>(null);
   const [loading, setLoading] = useState(true);
@@ -88,65 +76,61 @@ export default function TagsPage() {
   }
 
   return (
-    <div className={`min-h-screen ${c.bg} px-4 py-10 ${c.text}`}>
+    <div className="px-8 py-8">
       <div className="mx-auto max-w-6xl space-y-8">
-        <header className={`rounded-3xl border ${c.border} ${c.card} p-8`}>
-          <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-pink-100">
-              <Tag size={26} className="text-pink-600" />
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-pink-100">
+              <Tag size={20} className="text-pink-600" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold">Tags</h1>
-              <p className={`mt-1 text-sm ${c.textSoft}`}>
+              <h1 className="text-2xl font-bold text-gray-900">Tags</h1>
+              <p className="mt-0.5 text-sm text-gray-500">
                 Organize e classifique entidades do sistema com tags reutilizáveis.
               </p>
             </div>
           </div>
-        </header>
+        </div>
 
         {feedback && (
-          <div className="rounded-2xl border border-emerald-800 bg-emerald-950 px-4 py-3 text-emerald-300">
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
             {feedback}
           </div>
         )}
 
         {error && (
-          <div className="rounded-2xl border border-red-800 bg-red-950 px-4 py-3 text-red-300">
+          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
             {error}
           </div>
         )}
 
-        {!isCliente && (
-          <TagForm
-            tagBeingEdited={null}
-            onCreate={handleCreateTag}
-            onUpdate={handleUpdateTag}
-            onCancelEdit={() => setTagBeingEdited(null)}
-          />
-        )}
+        <TagForm
+          tagBeingEdited={null}
+          onCreate={handleCreateTag}
+          onUpdate={handleUpdateTag}
+          onCancelEdit={() => setTagBeingEdited(null)}
+        />
 
-        {!isCliente && (
-          <EditModal
-            isOpen={Boolean(tagBeingEdited)}
-            title="Editar Tag"
-            onClose={() => setTagBeingEdited(null)}
-          >
-            {tagBeingEdited && (
-              <EditTagForm
-                tag={tagBeingEdited}
-                onUpdate={handleUpdateTag}
-                onCancel={() => setTagBeingEdited(null)}
-              />
-            )}
-          </EditModal>
-        )}
+        <EditModal
+          isOpen={Boolean(tagBeingEdited)}
+          title="Editar Tag"
+          onClose={() => setTagBeingEdited(null)}
+        >
+          {tagBeingEdited && (
+            <EditTagForm
+              tag={tagBeingEdited}
+              onUpdate={handleUpdateTag}
+              onCancel={() => setTagBeingEdited(null)}
+            />
+          )}
+        </EditModal>
 
         <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold">Lista de tags</h2>
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-gray-800">Lista de tags</h2>
             <button
               onClick={loadTags}
-              className={`flex items-center gap-2 rounded-2xl px-4 py-2 font-medium transition ${c.outlineButton}`}
+              className="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
             >
               <RefreshCw size={14} />
               Atualizar
@@ -154,14 +138,14 @@ export default function TagsPage() {
           </div>
 
           {loading ? (
-            <div className={`rounded-2xl border ${c.border} ${c.card} p-6 ${c.textSoft}`}>
+            <div className="rounded-2xl border border-gray-100 bg-white p-6 text-sm text-gray-400">
               Carregando tags...
             </div>
           ) : (
             <TagList
               tags={tags}
-              onEdit={isCliente ? undefined : setTagBeingEdited}
-              onDelete={isCliente ? undefined : handleDeleteTag}
+              onEdit={setTagBeingEdited}
+              onDelete={handleDeleteTag}
             />
           )}
         </section>

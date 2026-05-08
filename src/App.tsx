@@ -1,13 +1,14 @@
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
-import { apexTheme } from "./lib/theme";
 
-// Shared / public
+// Public shell (unauthenticated)
 import Navbar from "./components/Navbar";
-import Home from "./pages/funcionario/Home";
+import PublicHome from "./pages/funcionario/Home";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 
-// Employee pages (funcionario)
+// Funcionario layout + pages
+import FuncionarioLayout from "./components/funcionario/FuncionarioLayout";
+import FuncionarioHome from "./pages/funcionario/Home";
 import CategoriasPage from "./pages/funcionario/CategoriasPage";
 import LojasPage from "./pages/funcionario/LojasPage";
 import LojaPage from "./pages/funcionario/LojaPage";
@@ -37,11 +38,24 @@ function getStoredRole(): UserRole {
     const stored = localStorage.getItem("user");
     if (!stored) return null;
     const user = JSON.parse(stored);
-    // backend may return role as "role", "profile_type", or "tipo_perfil"
     return user.role ?? user.profile_type ?? user.tipo_perfil ?? null;
   } catch {
     return null;
   }
+}
+
+function PublicShell() {
+  return (
+    <div className="min-h-screen bg-white">
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<PublicHome />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </div>
+  );
 }
 
 function ClienteShell() {
@@ -64,14 +78,10 @@ function ClienteShell() {
 }
 
 function FuncionarioShell() {
-  const c = apexTheme.colors;
   return (
-    <div className={`min-h-screen ${c.bg}`}>
-      <Navbar />
+    <FuncionarioLayout>
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/" element={<FuncionarioHome />} />
         <Route path="/pets" element={<PetsPage />} />
         <Route path="/servicos" element={<ServicosPage />} />
         <Route path="/lojas" element={<LojasPage />} />
@@ -82,21 +92,19 @@ function FuncionarioShell() {
         <Route path="/tags" element={<TagsPage />} />
         <Route path="/atendimentos" element={<AtendimentosPage />} />
         <Route path="/perfil" element={<ProfilePage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </div>
+    </FuncionarioLayout>
   );
 }
 
 function AppShell() {
-  // useLocation causes re-render on every navigation, so reading
-  // localStorage here (synchronously) always gets the latest role
   useLocation();
+  const isLogged = !!localStorage.getItem("token");
   const userRole = getStoredRole();
 
-  if (userRole === "cliente") {
-    return <ClienteShell />;
-  }
-
+  if (!isLogged) return <PublicShell />;
+  if (userRole === "cliente") return <ClienteShell />;
   return <FuncionarioShell />;
 }
 

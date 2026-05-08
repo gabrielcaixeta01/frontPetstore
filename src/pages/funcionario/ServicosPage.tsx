@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Scissors, Plus, RefreshCw, Pencil, Trash2 } from "lucide-react";
 import EditModal from "../../components/EditModal";
-import { apexTheme } from "../../lib/theme";
 import {
   createServico,
   deleteServico,
@@ -10,18 +9,7 @@ import {
 } from "../../services/servicoService";
 import type { CreateServicoDTO, Servico, UpdateServicoDTO } from "../../types/servico";
 
-function getIsCliente() {
-  try {
-    const stored = localStorage.getItem("user");
-    return stored ? JSON.parse(stored).role === "cliente" : false;
-  } catch {
-    return false;
-  }
-}
-
 export default function ServicosPage() {
-  const c = apexTheme.colors;
-  const isCliente = getIsCliente();
   const [servicos, setServicos] = useState<Servico[]>([]);
   const [servicoBeingEdited, setServicoBeingEdited] = useState<Servico | null>(null);
   const [loading, setLoading] = useState(true);
@@ -145,43 +133,43 @@ export default function ServicosPage() {
   }
 
   return (
-    <div className={`min-h-screen ${c.bg} px-4 py-10 ${c.text}`}>
+    <div className="px-8 py-8">
       <div className="mx-auto max-w-6xl space-y-8">
-        <header className={`rounded-3xl border ${c.border} ${c.card} p-8`}>
-          <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-yellow-100">
-              <Scissors size={26} className="text-yellow-600" />
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-yellow-100">
+              <Scissors size={20} className="text-yellow-600" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold">Serviços</h1>
-              <p className={`mt-1 text-sm ${c.textSoft}`}>
+              <h1 className="text-2xl font-bold text-gray-900">Serviços</h1>
+              <p className="mt-0.5 text-sm text-gray-500">
                 Gerencie os serviços oferecidos com descrição e preço.
               </p>
             </div>
           </div>
-        </header>
+        </div>
 
         {feedback && (
-          <div className="rounded-2xl border border-emerald-800 bg-emerald-950 px-4 py-3 text-emerald-300">
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
             {feedback}
           </div>
         )}
 
         {error && (
-          <div className="rounded-2xl border border-red-800 bg-red-950 px-4 py-3 text-red-300">
+          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
             {error}
           </div>
         )}
 
-        {!isCliente && <form
+        <form
           onSubmit={handleCreateSubmit}
-          className={`space-y-4 rounded-2xl border ${c.border} ${c.card} p-6 shadow-lg`}
+          className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm"
         >
-          <h2 className={`text-2xl font-bold ${c.text}`}>Cadastrar Serviço</h2>
+          <h2 className="text-base font-semibold text-gray-800 mb-4">Cadastrar Serviço</h2>
 
           <div className="grid gap-4 md:grid-cols-3">
             <div>
-              <label htmlFor="servico-nome" className={`mb-1 block text-sm ${c.textSoft}`}>
+              <label htmlFor="servico-nome" className="mb-1 block text-xs font-medium text-gray-500">
                 Nome
               </label>
               <input
@@ -189,24 +177,24 @@ export default function ServicosPage() {
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
                 required
-                className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
+                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white focus:ring-2 focus:ring-[#1c46f3]/15"
               />
             </div>
 
             <div>
-              <label htmlFor="servico-descricao" className={`mb-1 block text-sm ${c.textSoft}`}>
+              <label htmlFor="servico-descricao" className="mb-1 block text-xs font-medium text-gray-500">
                 Descrição
               </label>
               <input
                 id="servico-descricao"
                 value={descricao}
                 onChange={(e) => setDescricao(e.target.value)}
-                className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
+                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white focus:ring-2 focus:ring-[#1c46f3]/15"
               />
             </div>
 
             <div>
-              <label htmlFor="servico-preco" className={`mb-1 block text-sm ${c.textSoft}`}>
+              <label htmlFor="servico-preco" className="mb-1 block text-xs font-medium text-gray-500">
                 Preço
               </label>
               <input
@@ -217,23 +205,23 @@ export default function ServicosPage() {
                 value={preco}
                 onChange={(e) => setPreco(e.target.value)}
                 required
-                className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
+                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white focus:ring-2 focus:ring-[#1c46f3]/15"
               />
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="mt-4 flex flex-wrap gap-3">
             <button
               type="submit"
-              className={`flex items-center gap-2 rounded-xl ${c.primary} ${c.primaryText} px-5 py-3 font-semibold transition hover:opacity-90`}
+              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-[#1c46f3]/20 transition hover:opacity-90"
             >
               <Plus size={16} />
               Cadastrar
             </button>
           </div>
-        </form>}
+        </form>
 
-        {!isCliente && <EditModal
+        <EditModal
           isOpen={Boolean(servicoBeingEdited)}
           title="Editar Serviço"
           onClose={() => setServicoBeingEdited(null)}
@@ -241,7 +229,7 @@ export default function ServicosPage() {
           <form onSubmit={handleUpdateSubmit} className="space-y-4">
             <div className="grid gap-4 md:grid-cols-3">
               <div>
-                <label htmlFor="servico-edit-nome" className={`mb-1 block text-sm ${c.textSoft}`}>
+                <label htmlFor="servico-edit-nome" className="mb-1 block text-xs font-medium text-gray-500">
                   Nome
                 </label>
                 <input
@@ -249,22 +237,22 @@ export default function ServicosPage() {
                   value={editNome}
                   onChange={(e) => setEditNome(e.target.value)}
                   required
-                  className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white focus:ring-2 focus:ring-[#1c46f3]/15"
                 />
               </div>
               <div>
-                <label htmlFor="servico-edit-descricao" className={`mb-1 block text-sm ${c.textSoft}`}>
+                <label htmlFor="servico-edit-descricao" className="mb-1 block text-xs font-medium text-gray-500">
                   Descrição
                 </label>
                 <input
                   id="servico-edit-descricao"
                   value={editDescricao}
                   onChange={(e) => setEditDescricao(e.target.value)}
-                  className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white focus:ring-2 focus:ring-[#1c46f3]/15"
                 />
               </div>
               <div>
-                <label htmlFor="servico-edit-preco" className={`mb-1 block text-sm ${c.textSoft}`}>
+                <label htmlFor="servico-edit-preco" className="mb-1 block text-xs font-medium text-gray-500">
                   Preço
                 </label>
                 <input
@@ -275,34 +263,34 @@ export default function ServicosPage() {
                   value={editPreco}
                   onChange={(e) => setEditPreco(e.target.value)}
                   required
-                  className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white focus:ring-2 focus:ring-[#1c46f3]/15"
                 />
               </div>
             </div>
             <div className="flex gap-3">
               <button
                 type="submit"
-                className={`flex items-center gap-2 rounded-xl ${c.primary} ${c.primaryText} px-5 py-3 font-semibold transition hover:opacity-90`}
+                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-[#1c46f3]/20 transition hover:opacity-90"
               >
                 Salvar alterações
               </button>
               <button
                 type="button"
                 onClick={() => setServicoBeingEdited(null)}
-                className={`rounded-xl border ${c.border} px-5 py-3 font-semibold ${c.text} transition hover:${c.bgSoft}`}
+                className="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
               >
                 Cancelar
               </button>
             </div>
           </form>
-        </EditModal>}
+        </EditModal>
 
         <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold">Lista de serviços</h2>
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-gray-800">Lista de serviços</h2>
             <button
               onClick={loadServicos}
-              className={`flex items-center gap-2 rounded-2xl px-4 py-2 font-medium transition ${c.outlineButton}`}
+              className="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
             >
               <RefreshCw size={14} />
               Atualizar
@@ -310,11 +298,11 @@ export default function ServicosPage() {
           </div>
 
           {loading ? (
-            <div className={`rounded-2xl border ${c.border} ${c.card} p-6 ${c.textSoft}`}>
+            <div className="rounded-2xl border border-gray-100 bg-white p-6 text-sm text-gray-400">
               Carregando serviços...
             </div>
           ) : servicos.length === 0 ? (
-            <div className={`rounded-2xl border ${c.border} ${c.card} p-6 ${c.textMuted}`}>
+            <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-10 text-center text-sm text-gray-400">
               Nenhum serviço encontrado.
             </div>
           ) : (
@@ -322,37 +310,35 @@ export default function ServicosPage() {
               {servicos.map((servico) => (
                 <div
                   key={servico.id}
-                  className={`rounded-2xl border ${c.border} ${c.card} p-5 shadow-lg`}
+                  className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition hover:shadow-md"
                 >
                   <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                     <div className="space-y-1">
-                      <h3 className={`text-xl font-bold ${c.text}`}>{servico.nome}</h3>
-                      <p className={`text-sm ${c.textSoft}`}>
+                      <h3 className="text-base font-semibold text-gray-800">{servico.nome}</h3>
+                      <p className="text-sm text-gray-500">
                         Descrição: {servico.descricao ?? "-"}
                       </p>
-                      <p className={`text-sm ${c.textSoft}`}>
+                      <p className="text-sm text-gray-500">
                         Preço: R$ {Number(servico.preco).toFixed(2)}
                       </p>
                     </div>
 
-                    {!isCliente && (
                     <div className="flex gap-2">
                       <button
                         onClick={() => setServicoBeingEdited(servico)}
-                        className={`flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium transition ${c.border} ${c.text} hover:bg-gray-50`}
+                        className="flex items-center gap-1.5 rounded-xl border border-gray-200 px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
                       >
                         <Pencil size={13} />
                         Editar
                       </button>
                       <button
                         onClick={() => handleDeleteServico(servico.id)}
-                        className="flex items-center gap-1.5 rounded-xl border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
+                        className="flex items-center gap-1.5 rounded-xl border border-red-100 px-3 py-2 text-sm font-medium text-red-500 transition hover:bg-red-50"
                       >
                         <Trash2 size={13} />
                         Excluir
                       </button>
                     </div>
-                    )}
                   </div>
                 </div>
               ))}

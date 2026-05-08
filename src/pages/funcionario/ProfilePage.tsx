@@ -14,7 +14,6 @@ import {
   ArrowLeft,
   Calendar,
 } from "lucide-react";
-import { apexTheme } from "../../lib/theme";
 import { api } from "../../services/api";
 
 type UserData = {
@@ -53,7 +52,6 @@ function formatDate(dateStr: string) {
 
 export default function ProfilePage() {
   const navigate = useNavigate();
-  const c = apexTheme.colors;
 
   const [user, setUser] = useState<UserData | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -119,7 +117,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <main className={`min-h-screen ${c.bgSoft} px-4 py-10`}>
+    <div className="px-8 py-8">
       <div className="mx-auto max-w-2xl space-y-6">
 
         {/* Back */}
@@ -132,7 +130,7 @@ export default function ProfilePage() {
         </button>
 
         {/* Avatar + identidade */}
-        <div className={`rounded-3xl border ${c.border} bg-white shadow-sm overflow-hidden`}>
+        <div className="rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden">
           {/* Topo colorido */}
           <div className="h-24 bg-gradient-to-r from-[#1c46f3] to-[#00bb69]" />
 
@@ -183,13 +181,13 @@ export default function ProfilePage() {
 
         {/* Erro */}
         {error && (
-          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
             {error}
           </div>
         )}
 
         {/* Campos */}
-        <div className={`rounded-3xl border ${c.border} bg-white shadow-sm p-8 space-y-6`}>
+        <div className="rounded-2xl border border-gray-100 bg-white shadow-sm p-8 space-y-6">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-400">
             Informações pessoais
           </h2>
@@ -238,14 +236,14 @@ export default function ProfilePage() {
               <button
                 onClick={handleSave}
                 disabled={loading}
-                className="flex items-center gap-2 rounded-xl bg-[#1c46f3] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1538c9] disabled:opacity-60"
+                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-[#1c46f3]/20 transition hover:opacity-90 disabled:opacity-60"
               >
                 <Save size={15} />
                 {loading ? "Salvando..." : "Salvar alterações"}
               </button>
               <button
                 onClick={handleCancelEdit}
-                className="flex items-center gap-2 rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition"
+                className="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
               >
                 <X size={15} />
                 Cancelar
@@ -255,7 +253,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Danger zone */}
-        <div className={`rounded-3xl border border-red-100 bg-white shadow-sm p-6`}>
+        <div className="rounded-2xl border border-red-100 bg-white shadow-sm p-6">
           <h2 className="mb-1 text-sm font-semibold text-gray-800">Encerrar sessão</h2>
           <p className="mb-4 text-sm text-gray-500">
             Você será redirecionado para a tela de login.
@@ -269,7 +267,7 @@ export default function ProfilePage() {
           </button>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
 
@@ -297,7 +295,7 @@ function Field({ icon, label, editing, value, onChange, displayValue, type = "te
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 outline-none focus:border-[#1c46f3] focus:ring-2 focus:ring-[#1c46f3]/20 transition"
+          className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white focus:ring-2 focus:ring-[#1c46f3]/15"
         />
       ) : (
         <p className="text-sm font-semibold text-gray-800">{displayValue}</p>

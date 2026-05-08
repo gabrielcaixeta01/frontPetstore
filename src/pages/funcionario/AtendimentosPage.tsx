@@ -4,7 +4,6 @@ import EditModal from "../../components/EditModal";
 import AppointmentForm from "../../components/appointment/AppointmentForm";
 import AppointmentList from "../../components/appointment/AppointmentList";
 import EditAppointmentForm from "../../components/appointment/EditAppointmentForm";
-import { apexTheme } from "../../lib/theme";
 import { getLojas } from "../../services/lojaService";
 import { getPets } from "../../services/petService";
 import { getServicos } from "../../services/servicoService";
@@ -22,7 +21,6 @@ import { getUsuarios } from "../../services/usuarioService";
 import type { Appointment, CreateAppointmentDTO, UpdateAppointmentDTO } from "../../types/atendimento";
 
 export default function AppointmentsPage() {
-  const c = apexTheme.colors;
   const [atendimentos, setAtendimentos] = useState<Appointment[]>([]);
   const [atendimentoBeingEdited, setAtendimentoBeingEdited] = useState<Appointment | null>(null);
   const [loading, setLoading] = useState(true);
@@ -188,30 +186,30 @@ export default function AppointmentsPage() {
   }
 
   return (
-    <div className={`min-h-screen ${c.bg} px-4 py-10 ${c.text}`}>
+    <div className="px-8 py-8">
       <div className="mx-auto max-w-6xl space-y-8">
-        <header className={`rounded-3xl border ${c.border} ${c.card} p-8`}>
-          <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#00bb69]/10">
-              <CalendarCheck size={26} className="text-[#00bb69]" />
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#00bb69]/10">
+              <CalendarCheck size={20} className="text-[#00bb69]" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold">Atendimentos</h1>
-              <p className={`mt-1 text-sm ${c.textSoft}`}>
+              <h1 className="text-2xl font-bold text-gray-900">Atendimentos</h1>
+              <p className="mt-0.5 text-sm text-gray-500">
                 Controle atendimentos, pagamento, status e vínculos com loja, cliente e funcionário.
               </p>
             </div>
           </div>
-        </header>
+        </div>
 
         {feedback && (
-          <div className="rounded-2xl border border-emerald-800 bg-emerald-950 px-4 py-3 text-emerald-300">
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
             {feedback}
           </div>
         )}
 
         {error && (
-          <div className="rounded-2xl border border-red-800 bg-red-950 px-4 py-3 text-red-300">
+          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
             {error}
           </div>
         )}
@@ -238,11 +236,11 @@ export default function AppointmentsPage() {
         </EditModal>
 
         <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold">Lista de atendimentos</h2>
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-gray-800">Lista de atendimentos</h2>
             <button
               onClick={loadAtendimentos}
-              className={`flex items-center gap-2 rounded-2xl px-4 py-2 font-medium transition ${c.outlineButton}`}
+              className="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
             >
               <RefreshCw size={14} />
               Atualizar
@@ -250,7 +248,7 @@ export default function AppointmentsPage() {
           </div>
 
           {loading ? (
-            <div className={`rounded-2xl border ${c.border} ${c.card} p-6 ${c.textSoft}`}>
+            <div className="rounded-2xl border border-gray-100 bg-white p-6 text-sm text-gray-400">
               Carregando atendimentos...
             </div>
           ) : (
