@@ -9,6 +9,13 @@ function getStoredUser() {
   try { return JSON.parse(localStorage.getItem("user") || "{}"); } catch { return {}; }
 }
 
+function getStoredUserId() {
+  const user = getStoredUser();
+  const rawId = user.id ?? user.user_id ?? user.usuario_id;
+  const parsedId = Number(rawId);
+  return Number.isFinite(parsedId) ? parsedId : null;
+}
+
 const inputCls = "w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white focus:ring-2 focus:ring-[#1c46f3]/15";
 const selectCls = inputCls + " appearance-none";
 
@@ -37,8 +44,7 @@ type PetForm = {
 const emptyForm: PetForm = { nome: "", raca: "", sexo: "", porte: "", peso: "", observacoes_saude: "", categoria_id: "" };
 
 export default function ClientePetsPage() {
-  const user = getStoredUser();
-  const userId: number = user.id;
+  const userId = getStoredUserId();
 
   const [pets, setPets] = useState<Pet[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
@@ -51,6 +57,12 @@ export default function ClientePetsPage() {
   const [error, setError] = useState("");
 
   async function loadPets() {
+    if (userId === null) {
+      setError("Nao foi possivel identificar o cliente logado.");
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       const all = await getPets();
@@ -79,6 +91,12 @@ export default function ClientePetsPage() {
   }, [editingPet]);
 
   function f(obj: PetForm): CreatePetDTO {
+    const resolvedUserId = userId;
+
+    if (resolvedUserId === null) {
+      throw new Error("Cliente logado nao identificado.");
+    }
+
     return {
       nome: obj.nome.trim(),
       raca: obj.raca.trim() || undefined,
@@ -87,13 +105,13 @@ export default function ClientePetsPage() {
       peso: obj.peso ? Number(obj.peso) : undefined,
       observacoes_saude: obj.observacoes_saude.trim() || undefined,
       categoria_id: Number(obj.categoria_id),
-      dono_id: userId,
+      dono_id: resolvedUserId,
     };
   }
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.nome.trim() || !form.categoria_id) { setError("Nome e categoria são obrigatórios."); return; }
+    if (!form.nome.trim() || !form.raca.trim() || !form.categoria_id) { setError("Nome, raça e categoria são obrigatórios."); return; }
     try {
       await createPet(f(form));
       setFeedback("Pet cadastrado com sucesso!");
@@ -106,6 +124,14 @@ export default function ClientePetsPage() {
   async function handleUpdate(e: React.FormEvent) {
     e.preventDefault();
     if (!editingPet) return;
+
+    const resolvedUserId = userId;
+
+    if (resolvedUserId === null) {
+      setError("Nao foi possivel identificar o cliente logado.");
+      return;
+    }
+
     try {
       const payload: UpdatePetDTO = {
         nome: editForm.nome.trim(),
@@ -115,7 +141,7 @@ export default function ClientePetsPage() {
         peso: editForm.peso ? Number(editForm.peso) : undefined,
         observacoes_saude: editForm.observacoes_saude.trim() || undefined,
         categoria_id: Number(editForm.categoria_id),
-        dono_id: userId,
+        dono_id: resolvedUserId,
       };
       await updatePet(editingPet.id, payload);
       setFeedback("Pet atualizado!");
@@ -180,8 +206,8 @@ export default function ClientePetsPage() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-gray-500">Raça</label>
-              <input className={inputCls} placeholder="Ex: Golden Retriever" value={form.raca} onChange={(e) => setForm({ ...form, raca: e.target.value })} />
+              <label className="mb-1 block text-xs font-medium text-gray-500">Raça *</label>
+              <input className={inputCls} placeholder="Ex: Golden Retriever" value={form.raca} onChange={(e) => setForm({ ...form, raca: e.target.value })} required />
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-gray-500">Sexo</label>
@@ -240,7 +266,7 @@ export default function ClientePetsPage() {
                     <option value="">Categoria...</option>
                     {categorias.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                   </select>
-                  <input className={inputCls} placeholder="Raça" value={editForm.raca} onChange={(e) => setEditForm({ ...editForm, raca: e.target.value })} />
+                  <input className={inputCls} placeholder="Raça *" value={editForm.raca} onChange={(e) => setEditForm({ ...editForm, raca: e.target.value })} required />
                   <div className="grid grid-cols-2 gap-2">
                     <select className={selectCls} value={editForm.sexo} onChange={(e) => setEditForm({ ...editForm, sexo: e.target.value })}>
                       {sexoOpts.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}

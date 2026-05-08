@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { apexTheme } from "./lib/theme";
 
@@ -36,7 +35,10 @@ type UserRole = "cliente" | "funcionario" | string | null;
 function getStoredRole(): UserRole {
   try {
     const stored = localStorage.getItem("user");
-    return stored ? JSON.parse(stored).role : null;
+    if (!stored) return null;
+    const user = JSON.parse(stored);
+    // backend may return role as "role", "profile_type", or "tipo_perfil"
+    return user.role ?? user.profile_type ?? user.tipo_perfil ?? null;
   } catch {
     return null;
   }
@@ -86,12 +88,10 @@ function FuncionarioShell() {
 }
 
 function AppShell() {
-  const location = useLocation();
-  const [userRole, setUserRole] = useState<UserRole>(() => getStoredRole());
-
-  useEffect(() => {
-    setUserRole(getStoredRole());
-  }, [location.pathname]);
+  // useLocation causes re-render on every navigation, so reading
+  // localStorage here (synchronously) always gets the latest role
+  useLocation();
+  const userRole = getStoredRole();
 
   if (userRole === "cliente") {
     return <ClienteShell />;

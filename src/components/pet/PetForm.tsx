@@ -4,6 +4,33 @@ import { apexTheme } from "../../lib/theme";
 import type { Categoria } from "../../types/categoria";
 import type { CreatePetDTO, Pet, UpdatePetDTO } from "../../types/pet";
 
+function getStoredUserId(): number | null {
+  try {
+    const stored = localStorage.getItem("user");
+    if (!stored) return null;
+
+    const user = JSON.parse(stored);
+    const rawId = user.id ?? user.user_id ?? user.usuario_id;
+    const parsedId = Number(rawId);
+
+    return Number.isFinite(parsedId) ? parsedId : null;
+  } catch {
+    return null;
+  }
+}
+
+function getStoredRole(): string | null {
+  try {
+    const stored = localStorage.getItem("user");
+    if (!stored) return null;
+
+    const user = JSON.parse(stored);
+    return user.role ?? user.profile_type ?? user.tipo_perfil ?? null;
+  } catch {
+    return null;
+  }
+}
+
 interface PetFormProps {
   petBeingEdited: Pet | null;
   onCreate: (data: CreatePetDTO) => Promise<void>;
@@ -29,6 +56,8 @@ export default function PetForm({
   const [observacoesSaude, setObservacoesSaude] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [ownerId, setOwnerId] = useState("");
+  const isCliente = getStoredRole() === "cliente";
+  const currentUserId = getStoredUserId();
 
   useEffect(() => {
     async function loadCategories() {
@@ -65,7 +94,12 @@ export default function PetForm({
     setPorte("");
     setPeso("");
     setObservacoesSaude("");
-    setOwnerId("");
+
+    if (isCliente && currentUserId !== null) {
+      setOwnerId(String(currentUserId));
+    } else {
+      setOwnerId("");
+    }
 
     if (categories.length > 0) {
       setCategoryId(String(categories[0].id));
@@ -87,9 +121,32 @@ export default function PetForm({
       return;
     }
 
+    if (isCliente && currentUserId === null) {
+      alert("Nao foi possivel identificar o cliente logado.");
+      return;
+    }
+
+    if (!isCliente && !ownerId.trim()) {
+      alert("Informe o dono do pet.");
+      return;
+    }
+
     const sexoValue = sexo || undefined;
     const porteValue = porte || undefined;
     const pesoValue = peso.trim() ? Number(peso) : undefined;
+
+    let ownerValue: number;
+
+    if (isCliente) {
+      if (currentUserId === null) {
+        alert("Nao foi possivel identificar o cliente logado.");
+        return;
+      }
+
+      ownerValue = currentUserId;
+    } else {
+      ownerValue = Number(ownerId);
+    }
 
     try {
       if (petBeingEdited) {
@@ -101,7 +158,7 @@ export default function PetForm({
           peso: pesoValue,
           observacoes_saude: observacoesSaude.trim() || undefined,
           categoria_id: Number(categoryId),
-          dono_id: Number(ownerId),
+          dono_id: ownerValue,
         };
 
         await onUpdate(petBeingEdited.id, payload);
@@ -114,7 +171,7 @@ export default function PetForm({
           peso: pesoValue,
           observacoes_saude: observacoesSaude.trim() || undefined,
           categoria_id: Number(categoryId),
-          dono_id: Number(ownerId),
+          dono_id: ownerValue,
         };
 
         await onCreate(payload);
@@ -127,7 +184,11 @@ export default function PetForm({
         setPorte("");
         setPeso("");
         setObservacoesSaude("");
-        setOwnerId("");
+        if (isCliente && currentUserId !== null) {
+          setOwnerId(String(currentUserId));
+        } else {
+          setOwnerId("");
+        }
         if (categories.length > 0) {
           setCategoryId(String(categories[0].id));
         }
@@ -257,18 +318,20 @@ export default function PetForm({
           </select>
         </div>
 
-        <div>
-          <label htmlFor="ownerId" className={`mb-1 block text-sm ${c.textSoft}`}>
-            Dono ID
-          </label>
-          <input
-            id="ownerId"
-            type="number"
-            value={ownerId}
-            onChange={(e) => setOwnerId(e.target.value)}
-            className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
-          />
-        </div>
+        {!isCliente && (
+          <div>
+            <label htmlFor="ownerId" className={`mb-1 block text-sm ${c.textSoft}`}>
+              Dono ID
+            </label>
+            <input
+              id="ownerId"
+              type="number"
+              value={ownerId}
+              onChange={(e) => setOwnerId(e.target.value)}
+              className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
+            />
+          </div>
+        )}
 
         <div>
           <label htmlFor="observacoes" className={`mb-1 block text-sm ${c.textSoft}`}>
