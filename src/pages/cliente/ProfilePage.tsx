@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, Mail, Phone, Shield, LogOut, CalendarDays } from "lucide-react";
+import { User, Mail, Phone, Shield, LogOut, CalendarDays, Pencil, X, Save } from "lucide-react";
+import EditModal from "../../components/EditModal";
+import { getUsuarios, updateUsuario } from "../../services/usuarioService";
+import { updateCliente } from "../../services/clienteService";
 import { api } from "../../services/api";
 
 type UserProfile = {
@@ -43,6 +46,15 @@ export default function ClienteProfilePage() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [editError, setEditError] = useState("");
+  const [editName, setEditName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+  const [editCep, setEditCep] = useState("");
+  const [editState, setEditState] = useState("");
+  const [editCity, setEditCity] = useState("");
 
   useEffect(() => {
     api.get<UserProfile>("/auth/me")
@@ -54,10 +66,125 @@ export default function ClienteProfilePage() {
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    if (!profile) return;
+
+    setEditName(profile.name);
+    setEditEmail(profile.email);
+    setEditPhone(profile.phone ?? "");
+    setEditCep(profile.client_profile?.cep ?? "");
+    setEditState(profile.client_profile?.state ?? "");
+    setEditCity(profile.client_profile?.city ?? "");
+  }, [profile]);
+
   function logout() {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     navigate("/login");
+  }
+
+  function startEditing() {
+    if (!profile) return;
+
+    setEditError("");
+    setEditName(profile.name);
+    setEditEmail(profile.email);
+    setEditPhone(profile.phone ?? "");
+    setEditCep(profile.client_profile?.cep ?? "");
+    setEditState(profile.client_profile?.state ?? "");
+    setEditCity(profile.client_profile?.city ?? "");
+    setIsEditing(true);
+  }
+
+  function cancelEditing() {
+    if (!profile) return;
+
+    setEditError("");
+    setEditName(profile.name);
+    setEditEmail(profile.email);
+    setEditPhone(profile.phone ?? "");
+    setEditCep(profile.client_profile?.cep ?? "");
+    setEditState(profile.client_profile?.state ?? "");
+    setEditCity(profile.client_profile?.city ?? "");
+    setIsEditing(false);
+  }
+
+  async function saveProfile() {
+    if (!profile) return;
+
+    const normalizedName = editName.trim();
+    const normalizedEmail = editEmail.trim();
+    const normalizedPhone = editPhone.trim();
+    const normalizedCep = editCep.trim();
+    const normalizedState = editState.trim().toUpperCase();
+    const normalizedCity = editCity.trim();
+
+    if (!normalizedName) {
+      setEditError("Informe o nome.");
+      return;
+    }
+
+    if (!normalizedEmail) {
+      setEditError("Informe o e-mail.");
+      return;
+    }
+
+    if (!normalizedPhone) {
+      setEditError("Informe o telefone.");
+      return;
+    }
+
+    if (!normalizedCep) {
+      setEditError("Informe o CEP.");
+      return;
+    }
+
+    if (!normalizedState) {
+      setEditError("Informe o estado.");
+      return;
+    }
+
+    if (!normalizedCity) {
+      setEditError("Informe a cidade.");
+      return;
+    }
+
+    setSaving(true);
+    setEditError("");
+
+    try {
+      const existingUsers = await getUsuarios();
+      const duplicatedEmail = existingUsers.some(
+        (userItem) => userItem.id !== profile.id && userItem.email.trim().toLowerCase() === normalizedEmail.toLowerCase()
+      );
+
+      if (duplicatedEmail) {
+        setEditError("Este e-mail já está em uso por outro usuário.");
+        return;
+      }
+
+      await updateUsuario(profile.id, {
+        nome: normalizedName,
+        email: normalizedEmail,
+        telefone: normalizedPhone,
+      });
+
+      await updateCliente(profile.id, {
+        end_cep: normalizedCep,
+        end_estado: normalizedState,
+        end_cidade: normalizedCity,
+      });
+
+      const refreshed = await api.get<UserProfile>("/auth/me").then((response) => response.data);
+
+      setProfile(refreshed);
+      localStorage.setItem("user", JSON.stringify(refreshed));
+      setIsEditing(false);
+    } catch {
+      setEditError("Não foi possível salvar as alterações. Tente novamente.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   if (loading) {
@@ -80,6 +207,9 @@ export default function ClienteProfilePage() {
   const clientTypeLabel = cp?.client_type === "pessoa_juridica" ? "Pessoa Jurídica" : "Pessoa Física";
   const docLabel = cp?.client_type === "pessoa_juridica" ? "CNPJ" : "CPF";
   const docValue = cp?.cnpj ?? cp?.cpf;
+  const cepValue = cp?.cep ?? "";
+  const stateValue = cp?.state ?? "";
+  const cityValue = cp?.city ?? "";
 
   return (
     <div className="px-8 py-8">
@@ -110,6 +240,15 @@ export default function ClienteProfilePage() {
               </span>
             </div>
           </div>
+
+          <button
+            type="button"
+            onClick={startEditing}
+            className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
+          >
+            <Pencil size={14} />
+            Editar perfil
+          </button>
         </div>
 
         {/* Dados pessoais */}
@@ -125,13 +264,13 @@ export default function ClienteProfilePage() {
         </div>
 
         {/* Endereço */}
-        {cp && (cp.cep || cp.city || cp.state) && (
+        {cp && (cepValue || cityValue || stateValue) && (
           <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
             <h3 className="mb-1 text-xs font-semibold uppercase tracking-wider text-gray-400">Endereço</h3>
             <div className="divide-y divide-gray-50">
-              {cp.city && <InfoRow icon={<Shield size={14} />} label="Cidade" value={cp.city} />}
-              {cp.state && <InfoRow icon={<Shield size={14} />} label="Estado" value={cp.state} />}
-              {cp.cep && cp.cep !== "00000-000" && <InfoRow icon={<Shield size={14} />} label="CEP" value={cp.cep} />}
+              {cityValue && <InfoRow icon={<Shield size={14} />} label="Cidade" value={cityValue} />}
+              {stateValue && <InfoRow icon={<Shield size={14} />} label="Estado" value={stateValue} />}
+              {cepValue && cepValue !== "00000-000" && <InfoRow icon={<Shield size={14} />} label="CEP" value={cepValue} />}
             </div>
           </div>
         )}
@@ -145,6 +284,104 @@ export default function ClienteProfilePage() {
           Sair da conta
         </button>
       </div>
+
+      <EditModal
+        isOpen={isEditing}
+        title="Editar perfil"
+        onClose={cancelEditing}
+      >
+        <div className="space-y-4">
+          {editError && (
+            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+              {editError}
+            </div>
+          )}
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Nome</label>
+              <input
+                type="text"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#1c46f3] focus:ring-2 focus:ring-[#1c46f3]/15"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">E-mail</label>
+              <input
+                type="email"
+                value={editEmail}
+                onChange={(e) => setEditEmail(e.target.value)}
+                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#1c46f3] focus:ring-2 focus:ring-[#1c46f3]/15"
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="mb-1 block text-sm font-medium text-gray-700">Telefone</label>
+              <input
+                type="text"
+                value={editPhone}
+                onChange={(e) => setEditPhone(e.target.value)}
+                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#1c46f3] focus:ring-2 focus:ring-[#1c46f3]/15"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">CEP</label>
+              <input
+                type="text"
+                value={editCep}
+                onChange={(e) => setEditCep(e.target.value)}
+                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#1c46f3] focus:ring-2 focus:ring-[#1c46f3]/15"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Estado</label>
+              <input
+                type="text"
+                value={editState}
+                onChange={(e) => setEditState(e.target.value.toUpperCase().slice(0, 2))}
+                maxLength={2}
+                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#1c46f3] focus:ring-2 focus:ring-[#1c46f3]/15"
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="mb-1 block text-sm font-medium text-gray-700">Cidade</label>
+              <input
+                type="text"
+                value={editCity}
+                onChange={(e) => setEditCity(e.target.value)}
+                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#1c46f3] focus:ring-2 focus:ring-[#1c46f3]/15"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-3 border-t border-gray-100 pt-4">
+            <button
+              type="button"
+              onClick={saveProfile}
+              disabled={saving}
+              className="flex items-center gap-2 rounded-xl bg-[#1c46f3] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1538c9] disabled:opacity-60"
+            >
+              <Save size={14} />
+              {saving ? "Salvando..." : "Salvar alterações"}
+            </button>
+
+            <button
+              type="button"
+              onClick={cancelEditing}
+              className="flex items-center gap-2 rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-600 transition hover:bg-gray-50"
+            >
+              <X size={14} />
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </EditModal>
     </div>
   );
 }
