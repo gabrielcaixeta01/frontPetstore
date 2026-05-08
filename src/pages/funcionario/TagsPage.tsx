@@ -1,0 +1,171 @@
+import { useEffect, useState } from "react";
+import { Tag, RefreshCw } from "lucide-react";
+import EditModal from "../../components/EditModal";
+import EditTagForm from "../../components/tag/EditTagForm";
+import TagForm from "../../components/tag/TagForm";
+import TagList from "../../components/tag/TagList";
+import { apexTheme } from "../../lib/theme";
+import {
+  createTag,
+  deleteTag,
+  getTags,
+  updateTag,
+} from "../../services/tagService";
+import type { CreateEtiquetaDTO, Etiqueta, UpdateEtiquetaDTO } from "../../types/tag";
+
+function getIsCliente() {
+  try {
+    const stored = localStorage.getItem("user");
+    return stored ? JSON.parse(stored).role === "cliente" : false;
+  } catch {
+    return false;
+  }
+}
+
+export default function TagsPage() {
+  const c = apexTheme.colors;
+  const isCliente = getIsCliente();
+  const [tags, setTags] = useState<Etiqueta[]>([]);
+  const [tagBeingEdited, setTagBeingEdited] = useState<Etiqueta | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [feedback, setFeedback] = useState("");
+  const [error, setError] = useState("");
+
+  async function loadTags() {
+    try {
+      setLoading(true);
+      const data = await getTags();
+      setTags(data);
+      setError("");
+    } catch (err) {
+      console.error(err);
+      setError("Erro ao carregar tags.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadTags();
+  }, []);
+
+  async function handleCreateTag(data: CreateEtiquetaDTO) {
+    try {
+      await createTag(data);
+      setFeedback("Tag cadastrada com sucesso.");
+      setTagBeingEdited(null);
+      await loadTags();
+    } catch (err) {
+      console.error(err);
+      setError("Erro ao cadastrar tag.");
+    }
+  }
+
+  async function handleUpdateTag(id: number, data: UpdateEtiquetaDTO) {
+    try {
+      await updateTag(id, data);
+      setFeedback("Tag atualizada com sucesso.");
+      setTagBeingEdited(null);
+      await loadTags();
+    } catch (err) {
+      console.error(err);
+      setError("Erro ao atualizar tag.");
+    }
+  }
+
+  async function handleDeleteTag(id: number) {
+    if (!window.confirm("Tem certeza que deseja excluir esta tag?")) return;
+
+    try {
+      await deleteTag(id);
+      setFeedback("Tag excluída com sucesso.");
+      if (tagBeingEdited?.id === id) setTagBeingEdited(null);
+      await loadTags();
+    } catch (err) {
+      console.error(err);
+      setError("Erro ao excluir tag.");
+    }
+  }
+
+  return (
+    <div className={`min-h-screen ${c.bg} px-4 py-10 ${c.text}`}>
+      <div className="mx-auto max-w-6xl space-y-8">
+        <header className={`rounded-3xl border ${c.border} ${c.card} p-8`}>
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-pink-100">
+              <Tag size={26} className="text-pink-600" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold">Tags</h1>
+              <p className={`mt-1 text-sm ${c.textSoft}`}>
+                Organize e classifique entidades do sistema com tags reutilizáveis.
+              </p>
+            </div>
+          </div>
+        </header>
+
+        {feedback && (
+          <div className="rounded-2xl border border-emerald-800 bg-emerald-950 px-4 py-3 text-emerald-300">
+            {feedback}
+          </div>
+        )}
+
+        {error && (
+          <div className="rounded-2xl border border-red-800 bg-red-950 px-4 py-3 text-red-300">
+            {error}
+          </div>
+        )}
+
+        {!isCliente && (
+          <TagForm
+            tagBeingEdited={null}
+            onCreate={handleCreateTag}
+            onUpdate={handleUpdateTag}
+            onCancelEdit={() => setTagBeingEdited(null)}
+          />
+        )}
+
+        {!isCliente && (
+          <EditModal
+            isOpen={Boolean(tagBeingEdited)}
+            title="Editar Tag"
+            onClose={() => setTagBeingEdited(null)}
+          >
+            {tagBeingEdited && (
+              <EditTagForm
+                tag={tagBeingEdited}
+                onUpdate={handleUpdateTag}
+                onCancel={() => setTagBeingEdited(null)}
+              />
+            )}
+          </EditModal>
+        )}
+
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold">Lista de tags</h2>
+            <button
+              onClick={loadTags}
+              className={`flex items-center gap-2 rounded-2xl px-4 py-2 font-medium transition ${c.outlineButton}`}
+            >
+              <RefreshCw size={14} />
+              Atualizar
+            </button>
+          </div>
+
+          {loading ? (
+            <div className={`rounded-2xl border ${c.border} ${c.card} p-6 ${c.textSoft}`}>
+              Carregando tags...
+            </div>
+          ) : (
+            <TagList
+              tags={tags}
+              onEdit={isCliente ? undefined : setTagBeingEdited}
+              onDelete={isCliente ? undefined : handleDeleteTag}
+            />
+          )}
+        </section>
+      </div>
+    </div>
+  );
+}

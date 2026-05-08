@@ -1,19 +1,35 @@
 import { useEffect, useState } from "react";
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { apexTheme } from "./lib/theme";
+
+// Shared / public
 import Navbar from "./components/Navbar";
-import Home from "./pages/Home";
+import Home from "./pages/funcionario/Home";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
-import CategoriasPage from "./pages/CategoriasPage";
-import LojasPage from "./pages/LojasPage";
-import LojaPage from "./pages/LojaPage";
-import AtendimentosPage from "./pages/AtendimentosPage";
-import PetsPage from "./pages/PetsPage";
-import ServicosPage from "./pages/ServicosPage";
-import TagsPage from "./pages/TagsPage";
-import UsersPage from "./pages/UsersPage";
-import ProfilePage from "./pages/ProfilePage";
+
+// Employee pages (funcionario)
+import CategoriasPage from "./pages/funcionario/CategoriasPage";
+import LojasPage from "./pages/funcionario/LojasPage";
+import LojaPage from "./pages/funcionario/LojaPage";
+import AtendimentosPage from "./pages/funcionario/AtendimentosPage";
+import PetsPage from "./pages/funcionario/PetsPage";
+import ServicosPage from "./pages/funcionario/ServicosPage";
+import TagsPage from "./pages/funcionario/TagsPage";
+import UsersPage from "./pages/funcionario/UsersPage";
+import ProfilePage from "./pages/funcionario/ProfilePage";
+
+// Cliente layout + pages
+import ClienteLayout from "./components/cliente/ClienteLayout";
+import ClienteHome from "./pages/cliente/Home";
+import ClientePetsPage from "./pages/cliente/PetsPage";
+import ClienteCategoriasPage from "./pages/cliente/CategoriasPage";
+import ClienteServicosPage from "./pages/cliente/ServicosPage";
+import ClienteTagsPage from "./pages/cliente/TagsPage";
+import ClienteLojasPage from "./pages/cliente/LojasPage";
+import ClienteLojaPage from "./pages/cliente/LojaPage";
+import ClienteAtendimentosPage from "./pages/cliente/AtendimentosPage";
+import ClienteProfilePage from "./pages/cliente/ProfilePage";
 
 type UserRole = "cliente" | "funcionario" | string | null;
 
@@ -26,17 +42,27 @@ function getStoredRole(): UserRole {
   }
 }
 
-function AppShell() {
-  const location = useLocation();
-  const [userRole, setUserRole] = useState<UserRole>(() => getStoredRole());
+function ClienteShell() {
+  return (
+    <ClienteLayout>
+      <Routes>
+        <Route path="/" element={<ClienteHome />} />
+        <Route path="/pets" element={<ClientePetsPage />} />
+        <Route path="/categorias" element={<ClienteCategoriasPage />} />
+        <Route path="/servicos" element={<ClienteServicosPage />} />
+        <Route path="/tags" element={<ClienteTagsPage />} />
+        <Route path="/lojas" element={<ClienteLojasPage />} />
+        <Route path="/lojas/:id" element={<ClienteLojaPage />} />
+        <Route path="/atendimentos" element={<ClienteAtendimentosPage />} />
+        <Route path="/perfil" element={<ClienteProfilePage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </ClienteLayout>
+  );
+}
 
-  useEffect(() => {
-    setUserRole(getStoredRole());
-  }, [location.pathname]);
-
-  const isCliente = userRole === "cliente";
+function FuncionarioShell() {
   const c = apexTheme.colors;
-
   return (
     <div className={`min-h-screen ${c.bg}`}>
       <Navbar />
@@ -49,14 +75,8 @@ function AppShell() {
         <Route path="/lojas" element={<LojasPage />} />
         <Route path="/lojas/:id" element={<LojaPage />} />
         <Route path="/categorias" element={<CategoriasPage />} />
-        <Route
-          path="/usuarios"
-          element={isCliente ? <Navigate to="/" replace /> : <UsersPage />}
-        />
-        <Route
-          path="/users"
-          element={isCliente ? <Navigate to="/" replace /> : <UsersPage />}
-        />
+        <Route path="/usuarios" element={<UsersPage />} />
+        <Route path="/users" element={<UsersPage />} />
         <Route path="/tags" element={<TagsPage />} />
         <Route path="/atendimentos" element={<AtendimentosPage />} />
         <Route path="/perfil" element={<ProfilePage />} />
@@ -65,12 +85,25 @@ function AppShell() {
   );
 }
 
-function App() {
+function AppShell() {
+  const location = useLocation();
+  const [userRole, setUserRole] = useState<UserRole>(() => getStoredRole());
+
+  useEffect(() => {
+    setUserRole(getStoredRole());
+  }, [location.pathname]);
+
+  if (userRole === "cliente") {
+    return <ClienteShell />;
+  }
+
+  return <FuncionarioShell />;
+}
+
+export default function App() {
   return (
     <BrowserRouter>
       <AppShell />
     </BrowserRouter>
   );
 }
-
-export default App;
