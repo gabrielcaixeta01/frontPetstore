@@ -1,6 +1,5 @@
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Tag } from "lucide-react";
 import type { Etiqueta } from "../../types/tag";
-import { apexTheme } from "../../lib/theme";
 
 interface TagListProps {
   tags: Etiqueta[];
@@ -8,57 +7,82 @@ interface TagListProps {
   onDelete?: (id: number) => Promise<void>;
 }
 
+const chipColors = [
+  "border-blue-200 bg-blue-50 text-blue-700",
+  "border-emerald-200 bg-emerald-50 text-emerald-700",
+  "border-purple-200 bg-purple-50 text-purple-700",
+  "border-yellow-200 bg-yellow-50 text-yellow-700",
+  "border-pink-200 bg-pink-50 text-pink-700",
+  "border-orange-200 bg-orange-50 text-orange-700",
+  "border-sky-200 bg-sky-50 text-sky-700",
+  "border-rose-200 bg-rose-50 text-rose-700",
+];
+
 export default function TagList({ tags, onEdit, onDelete }: TagListProps) {
-  const c = apexTheme.colors;
+  const canEdit = Boolean(onEdit || onDelete);
 
   if (tags.length === 0) {
     return (
-      <div className={`rounded-2xl border ${c.border} ${c.cardSoft} p-6 ${c.textMuted}`}>
+      <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-10 text-center text-sm text-gray-400">
         Nenhuma tag encontrada.
       </div>
     );
   }
 
+  // Simple view (read-only): just colorful chips
+  if (!canEdit) {
+    return (
+      <div className="flex flex-wrap gap-2">
+        {tags.map((tag, i) => (
+          <span
+            key={tag.id}
+            title={tag.descricao ?? undefined}
+            className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium ${chipColors[i % chipColors.length]}`}
+          >
+            <Tag size={12} />
+            {tag.nome}
+          </span>
+        ))}
+      </div>
+    );
+  }
+
+  // Editable view: compact table
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {tags.map((tag) => (
-        <div
-          key={tag.id}
-          className={`rounded-2xl border ${c.border} ${c.card} p-4 shadow-sm transition hover:shadow-md`}
-        >
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <h3 className={`truncate font-bold ${c.text}`}>{tag.nome}</h3>
+    <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+      <div className="grid grid-cols-[1fr_auto] gap-4 border-b border-gray-100 bg-gray-50 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+        <span>Tag</span>
+        <span className="text-right">Ações</span>
+      </div>
+      <div className="divide-y divide-gray-50">
+        {tags.map((tag, i) => (
+          <div key={tag.id} className="flex items-center gap-4 px-5 py-3 transition hover:bg-gray-50/60">
+            <div className="flex min-w-0 flex-1 items-center gap-3">
+              <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${chipColors[i % chipColors.length]}`}>
+                <Tag size={10} />
+                {tag.nome}
+              </span>
               {tag.descricao && (
-                <p className={`mt-1 text-sm ${c.textSoft} line-clamp-2`}>{tag.descricao}</p>
+                <p className="truncate text-sm text-gray-400">{tag.descricao}</p>
               )}
             </div>
-
-            {(onEdit || onDelete) && (
             <div className="flex shrink-0 gap-1.5">
               {onEdit && (
-              <button
-                onClick={() => onEdit(tag)}
-                title="Editar"
-                className={`rounded-lg border ${c.border} p-2 text-sm transition hover:bg-gray-50`}
-              >
-                <Pencil size={13} className={c.text} />
-              </button>
+                <button onClick={() => onEdit(tag)} title="Editar"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:bg-gray-100">
+                  <Pencil size={13} />
+                </button>
               )}
               {onDelete && (
-              <button
-                onClick={() => onDelete(tag.id)}
-                title="Excluir"
-                className="rounded-lg border border-red-200 bg-white p-2 transition hover:bg-red-50"
-              >
-                <Trash2 size={13} className="text-red-600" />
-              </button>
+                <button onClick={() => onDelete(tag.id)} title="Excluir"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-red-100 text-red-400 transition hover:bg-red-50">
+                  <Trash2 size={13} />
+                </button>
               )}
             </div>
-            )}
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }

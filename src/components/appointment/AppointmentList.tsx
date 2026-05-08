@@ -1,5 +1,5 @@
-import { Pencil, Trash2, Store, User, Users, PawPrint, CreditCard, Wifi, WifiOff } from "lucide-react";
-import { apexTheme } from "../../lib/theme";
+import { useState } from "react";
+import { Pencil, Trash2, Store, User, Users, PawPrint, ChevronDown, ChevronUp, Clock, CheckCircle2, XCircle } from "lucide-react";
 import type { Appointment } from "../../types/atendimento";
 
 type AppointmentListProps = {
@@ -13,166 +13,145 @@ type AppointmentListProps = {
   servicosById: Record<number, string>;
 };
 
-function formatDateTime(dateValue?: string) {
-  if (!dateValue) return "—";
-  const parsed = new Date(dateValue);
-  if (Number.isNaN(parsed.getTime())) return dateValue;
-  return new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(parsed);
-}
-
-const statusColors: Record<string, string> = {
-  pendente: "bg-yellow-100 text-yellow-700",
-  concluido: "bg-emerald-100 text-emerald-700",
-  cancelado: "bg-red-100 text-red-600",
-  em_andamento: "bg-blue-100 text-blue-700",
+const statusCfg: Record<string, { label: string; icon: typeof Clock; cls: string; dot: string }> = {
+  agendado:    { label: "Agendado",  icon: Clock,         cls: "text-yellow-700 bg-yellow-50 border-yellow-200",  dot: "bg-yellow-400" },
+  concluido:   { label: "Concluído", icon: CheckCircle2,  cls: "text-emerald-700 bg-emerald-50 border-emerald-200", dot: "bg-emerald-400" },
+  cancelado:   { label: "Cancelado", icon: XCircle,       cls: "text-red-600 bg-red-50 border-red-200",           dot: "bg-red-400" },
+  pendente:    { label: "Pendente",  icon: Clock,         cls: "text-yellow-700 bg-yellow-50 border-yellow-200",  dot: "bg-yellow-400" },
+  em_andamento:{ label: "Em andamento", icon: Clock,      cls: "text-blue-700 bg-blue-50 border-blue-200",        dot: "bg-blue-400" },
 };
 
+const pgmtLabel: Record<string, string> = {
+  pix: "Pix", cartao_credito: "Crédito", cartao_debito: "Débito", dinheiro: "Dinheiro",
+};
+
+function dateCircle(dateStr?: string) {
+  if (!dateStr) return { day: "—", month: "" };
+  const d = new Date(dateStr);
+  return {
+    day: d.getDate().toString().padStart(2, "0"),
+    month: d.toLocaleDateString("pt-BR", { month: "short" }).replace(".", ""),
+  };
+}
+
 export default function AppointmentList({
-  appointments,
-  onEdit,
-  onDelete,
-  lojasById,
-  clientesById,
-  funcionariosById,
-  petsById,
-  servicosById,
+  appointments, onEdit, onDelete,
+  lojasById, clientesById, funcionariosById, petsById, servicosById,
 }: AppointmentListProps) {
-  const c = apexTheme.colors;
+  const [expandedId, setExpandedId] = useState<number | null>(null);
 
   if (appointments.length === 0) {
     return (
-      <div className={`rounded-2xl border p-6 ${c.border} ${c.card} ${c.textMuted}`}>
+      <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-10 text-center text-sm text-gray-400">
         Nenhum atendimento encontrado.
       </div>
     );
   }
 
   return (
-    <div className="grid gap-4">
-      {appointments.map((appointment) => {
-        const items = appointment.items ?? [];
-        const statusClass = statusColors[appointment.status?.toLowerCase()] ?? "bg-gray-100 text-gray-700";
+    <div className="space-y-2">
+      {appointments.map((apt) => {
+        const cfg = statusCfg[apt.status?.toLowerCase()] ?? statusCfg.agendado;
+        const { day, month } = dateCircle(apt.data_atendimento);
+        const isExpanded = expandedId === apt.id;
+        const items = apt.items ?? [];
 
         return (
-          <div
-            key={appointment.id}
-            className={`rounded-2xl border p-5 shadow-sm transition hover:shadow-md ${c.border} ${c.card}`}
-          >
-            <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-              <div className="flex-1 space-y-3 min-w-0">
-                {/* Cabeçalho */}
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className={`font-bold ${c.text}`}>
-                    Atendimento #{appointment.id}
-                  </h3>
-
-                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${statusClass}`}>
-                    {appointment.status}
-                  </span>
-
-                  {appointment.online ? (
-                    <span className="flex items-center gap-1 rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700">
-                      <Wifi size={11} /> Online
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-600">
-                      <WifiOff size={11} /> Presencial
-                    </span>
-                  )}
-                </div>
-
-                {/* Valor + data + pagamento */}
-                <div className="flex flex-wrap gap-x-5 gap-y-1">
-                  <span className="text-lg font-bold text-[#1c46f3]">
-                    R$ {Number(appointment.valor_final).toFixed(2)}
-                  </span>
-                  <span className={`flex items-center gap-1.5 text-sm ${c.textSoft}`}>
-                    {formatDateTime(appointment.data_atendimento)}
-                  </span>
-                  {appointment.forma_pagamento && (
-                    <span className={`flex items-center gap-1.5 text-sm ${c.textSoft}`}>
-                      <CreditCard size={13} />
-                      {appointment.forma_pagamento}
-                    </span>
-                  )}
-                </div>
-
-                {/* Vínculos */}
-                <div className="grid grid-cols-2 gap-x-6 gap-y-1 sm:grid-cols-4">
-                  <InfoItem icon={<Store size={12} />} label="Loja" value={lojasById[appointment.loja_id] ?? "—"} />
-                  <InfoItem icon={<User size={12} />} label="Cliente" value={clientesById[appointment.cliente_id] ?? "—"} />
-                  <InfoItem icon={<Users size={12} />} label="Funcionário" value={funcionariosById[appointment.funcionario_id] ?? "—"} />
-                  <InfoItem icon={<PawPrint size={12} />} label="Pet" value={petsById[appointment.pet_id] ?? `#${appointment.pet_id}`} />
-                </div>
-
-                {/* Observações */}
-                {appointment.observacoes && (
-                  <p className={`text-xs ${c.textMuted}`}>Obs: {appointment.observacoes}</p>
-                )}
-
-                {/* Serviços vinculados */}
-                {items.length > 0 ? (
-                  <div className="flex gap-2 overflow-x-auto pb-1">
-                    {items.map((item) => (
-                      <div
-                        key={`${appointment.id}-${item.service_id}-${item.order_date}`}
-                        className={`min-w-56 rounded-xl border px-3 py-2 text-sm ${c.border} ${c.cardSoft}`}
-                      >
-                        <div className="flex items-center justify-between gap-2">
-                          <span className={`font-medium ${c.text}`}>
-                            {servicosById[item.service_id] ?? `Serviço #${item.service_id}`}
-                          </span>
-                          <span className="font-semibold text-[#00bb69]">
-                            R$ {Number(item.charged_value).toFixed(2)}
-                          </span>
-                        </div>
-                        <div className={`mt-1 flex flex-wrap gap-3 text-xs ${c.textMuted}`}>
-                          <span>Pedido: {formatDateTime(item.order_date)}</span>
-                          {item.delivery_date && (
-                            <span>Entrega: {formatDateTime(item.delivery_date)}</span>
-                          )}
-                        </div>
-                        {item.observations && (
-                          <p className={`mt-1 text-xs ${c.textSoft}`}>{item.observations}</p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className={`text-xs ${c.textMuted}`}>Nenhum serviço vinculado.</p>
-                )}
+          <div key={apt.id} className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:shadow-md">
+            {/* Main row */}
+            <div className="flex items-center gap-4 px-5 py-4">
+              {/* Date */}
+              <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-xl bg-[#1c46f3]/8 text-[#1c46f3]">
+                <span className="text-base font-bold leading-none">{day}</span>
+                <span className="text-xs font-medium">{month}</span>
               </div>
 
-              {/* Botões */}
-              <div className="flex shrink-0 gap-2 md:flex-col">
-                <button
-                  onClick={() => onEdit(appointment)}
-                  className={`flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium transition ${c.border} ${c.text} hover:bg-gray-50`}
-                >
+              {/* Status + links */}
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className={`flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${cfg.cls}`}>
+                    <cfg.icon size={11} /> {cfg.label}
+                  </span>
+                  {apt.online && (
+                    <span className="rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">Online</span>
+                  )}
+                </div>
+                <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-gray-400">
+                  {lojasById[apt.loja_id] && (
+                    <span className="flex items-center gap-1"><Store size={11} />{lojasById[apt.loja_id]}</span>
+                  )}
+                  {clientesById[apt.cliente_id] && (
+                    <span className="flex items-center gap-1"><User size={11} />{clientesById[apt.cliente_id]}</span>
+                  )}
+                  {funcionariosById[apt.funcionario_id] && (
+                    <span className="flex items-center gap-1"><Users size={11} />{funcionariosById[apt.funcionario_id]}</span>
+                  )}
+                  {petsById[apt.pet_id] && (
+                    <span className="flex items-center gap-1"><PawPrint size={11} />{petsById[apt.pet_id]}</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Value */}
+              <div className="shrink-0 text-right">
+                <p className="text-base font-bold text-gray-900">R$ {Number(apt.valor_final).toFixed(2)}</p>
+                <p className="text-xs text-gray-400">{pgmtLabel[apt.forma_pagamento] ?? apt.forma_pagamento}</p>
+              </div>
+
+              {/* Expand */}
+              <button
+                onClick={() => setExpandedId(isExpanded ? null : apt.id)}
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-gray-200 text-gray-400 transition hover:bg-gray-50"
+              >
+                {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+              </button>
+
+              {/* Actions */}
+              <div className="flex shrink-0 gap-1.5">
+                <button onClick={() => onEdit(apt)} title="Editar"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:bg-gray-100">
                   <Pencil size={13} />
-                  Editar
                 </button>
-                <button
-                  onClick={() => onDelete(appointment.id)}
-                  className="flex items-center gap-1.5 rounded-xl border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
-                >
+                <button onClick={() => onDelete(apt.id)} title="Excluir"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-red-100 text-red-400 transition hover:bg-red-50">
                   <Trash2 size={13} />
-                  Excluir
                 </button>
               </div>
             </div>
+
+            {/* Expanded details */}
+            {isExpanded && (
+              <div className="border-t border-gray-50 bg-gray-50/50 px-5 py-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {apt.observacoes && (
+                    <div className="sm:col-span-2">
+                      <p className="mb-1 text-xs font-medium text-gray-400">Observações</p>
+                      <p className="text-sm text-gray-600">{apt.observacoes}</p>
+                    </div>
+                  )}
+                  {items.length > 0 && (
+                    <div className="sm:col-span-2">
+                      <p className="mb-2 text-xs font-medium text-gray-400">Serviços ({items.length})</p>
+                      <div className="flex flex-wrap gap-2">
+                        {items.map((item, idx) => (
+                          <div key={`${apt.id}-${item.service_id}-${idx}`}
+                            className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm">
+                            <span className="text-gray-700">{servicosById[item.service_id] ?? `Serviço #${item.service_id}`}</span>
+                            <span className="font-semibold text-[#00bb69]">R$ {Number(item.charged_value).toFixed(2)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {items.length === 0 && !apt.observacoes && (
+                    <p className="text-xs text-gray-400">Nenhum detalhe adicional.</p>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         );
       })}
-    </div>
-  );
-}
-
-function InfoItem({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
-  return (
-    <div>
-      <p className="flex items-center gap-1 text-xs text-gray-400">{icon} {label}</p>
-      <p className="truncate text-sm font-medium text-gray-700">{value}</p>
     </div>
   );
 }

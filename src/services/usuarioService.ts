@@ -34,6 +34,7 @@ type ApiUser = {
   email: string;
   phone?: string | null;
   role?: string | null;
+  profile_type?: string | null;  // backend field name
   cpf?: string | null;
   cnpj?: string | null;
   active: boolean;
@@ -49,7 +50,7 @@ function toUsuario(user: ApiUser): Usuario {
     nome: user.name,
     email: user.email,
     telefone: user.phone ?? "",
-    tipo_perfil: user.role === "funcionario" ? "funcionario" : "cliente",
+    tipo_perfil: (user.profile_type ?? user.role) === "funcionario" ? "funcionario" : "cliente",
     cpf: user.cpf ?? null,
     cnpj: user.cnpj ?? null,
     ativo: user.active,
