@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CalendarCheck, RefreshCw } from "lucide-react";
+import { Plus, X, RefreshCw } from "lucide-react";
 import EditModal from "../../components/EditModal";
 import AppointmentForm from "../../components/appointment/AppointmentForm";
 import AppointmentList from "../../components/appointment/AppointmentList";
@@ -24,6 +24,7 @@ export default function AppointmentsPage() {
   const [atendimentos, setAtendimentos] = useState<Appointment[]>([]);
   const [atendimentoBeingEdited, setAtendimentoBeingEdited] = useState<Appointment | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [error, setError] = useState("");
   const [lojasById, setLojasById] = useState<Record<number, string>>({});
@@ -144,6 +145,7 @@ export default function AppointmentsPage() {
       await syncServicosAtendimento(atendimento.id, servicoIdsSelecionados);
       setFeedback("Atendimento cadastrado com sucesso.");
       setAtendimentoBeingEdited(null);
+      setShowForm(false);
       await loadAtendimentos();
     } catch (err) {
       console.error(err);
@@ -189,17 +191,17 @@ export default function AppointmentsPage() {
     <div className="px-8 py-8">
       <div className="mx-auto max-w-6xl space-y-8">
         <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#00bb69]/10">
-              <CalendarCheck size={20} className="text-[#00bb69]" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Atendimentos</h1>
-              <p className="mt-0.5 text-sm text-gray-500">
-                Controle atendimentos, pagamento, status e vínculos com loja, cliente e funcionário.
-              </p>
-            </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Atendimentos</h1>
+            <p className="mt-0.5 text-sm text-gray-500">Gerencie agendamentos, pagamentos e status.</p>
           </div>
+          <button
+            onClick={() => setShowForm((v) => !v)}
+            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-[#1c46f3]/20 transition hover:opacity-90"
+          >
+            {showForm ? <X size={15} /> : <Plus size={15} />}
+            {showForm ? "Cancelar" : "Novo atendimento"}
+          </button>
         </div>
 
         {feedback && (
@@ -214,12 +216,14 @@ export default function AppointmentsPage() {
           </div>
         )}
 
-        <AppointmentForm
-          appointmentBeingEdited={null}
-          onCreate={handleCreateAtendimento}
-          onUpdate={handleUpdateAtendimento}
-          onCancelEdit={() => setAtendimentoBeingEdited(null)}
-        />
+        {showForm && (
+          <AppointmentForm
+            appointmentBeingEdited={null}
+            onCreate={handleCreateAtendimento}
+            onUpdate={handleUpdateAtendimento}
+            onCancelEdit={() => { setAtendimentoBeingEdited(null); setShowForm(false); }}
+          />
+        )}
 
         <EditModal
           isOpen={Boolean(atendimentoBeingEdited)}

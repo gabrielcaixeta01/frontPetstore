@@ -1,5 +1,4 @@
-import { Pencil, Trash2, CheckCircle, XCircle, Mail, Phone, MapPin, Briefcase } from "lucide-react";
-import { apexTheme } from "../../lib/theme";
+import { Pencil, Trash2, CheckCircle, XCircle } from "lucide-react";
 import type { Usuario } from "../../types/usuario";
 
 interface UserListProps {
@@ -8,146 +7,91 @@ interface UserListProps {
   onDelete: (id: number) => Promise<void>;
 }
 
-const perfilColors: Record<string, string> = {
-  cliente: "bg-emerald-100 text-emerald-700",
-  funcionario: "bg-blue-100 text-blue-700",
-  admin: "bg-purple-100 text-purple-700",
+const perfilCfg: Record<string, { label: string; cls: string }> = {
+  cliente:     { label: "Cliente",       cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  funcionario: { label: "Funcionário",   cls: "bg-blue-50 text-blue-700 border-blue-200" },
+  admin:       { label: "Administrador", cls: "bg-purple-50 text-purple-700 border-purple-200" },
 };
-
-const perfilLabels: Record<string, string> = {
-  cliente: "Cliente",
-  funcionario: "Funcionário",
-  admin: "Administrador",
-};
-
-function formatMoney(value: number) {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
-}
-
-function formatDate(dateStr?: string) {
-  if (!dateStr) return "—";
-  const d = new Date(dateStr);
-  if (Number.isNaN(d.getTime())) return dateStr;
-  return d.toLocaleDateString("pt-BR");
-}
 
 function getInitials(name: string) {
   return name.split(" ").slice(0, 2).map((n) => n[0]).join("").toUpperCase();
 }
 
 export default function UserList({ users, onEdit, onDelete }: UserListProps) {
-  const c = apexTheme.colors;
-
   if (users.length === 0) {
     return (
-      <div className={`rounded-2xl border p-6 ${c.border} ${c.card} ${c.textMuted}`}>
+      <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-10 text-center text-sm text-gray-400">
         Nenhum usuário encontrado.
       </div>
     );
   }
 
   return (
-    <div className="grid gap-4">
-      {users.map((user) => (
-        <div
-          key={user.id}
-          className={`rounded-2xl border p-5 shadow-sm transition hover:shadow-md ${c.border} ${c.card}`}
-        >
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            {/* Lado esquerdo */}
-            <div className="flex gap-4">
-              {/* Avatar */}
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#1c46f3]/10 text-sm font-bold text-[#1c46f3]">
-                {getInitials(user.nome)}
+    <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+      {/* Header */}
+      <div className="grid grid-cols-[1fr_160px_90px_88px] gap-4 border-b border-gray-100 bg-gray-50 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+        <span>Usuário</span>
+        <span>Tipo</span>
+        <span>Status</span>
+        <span className="text-right">Ações</span>
+      </div>
+
+      <div className="divide-y divide-gray-50">
+        {users.map((user) => {
+          const cfg = perfilCfg[user.tipo_perfil] ?? { label: user.tipo_perfil, cls: "bg-gray-100 text-gray-700 border-gray-200" };
+          return (
+            <div
+              key={user.id}
+              className="grid grid-cols-[1fr_160px_90px_88px] items-center gap-4 px-5 py-3.5 transition hover:bg-gray-50/60"
+            >
+              {/* Name + email */}
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#1c46f3]/15 to-[#00bb69]/15 text-xs font-bold text-[#1c46f3]">
+                  {getInitials(user.nome)}
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-gray-900">{user.nome}</p>
+                  <p className="truncate text-xs text-gray-400">{user.email}</p>
+                </div>
               </div>
 
-              <div className="space-y-2 min-w-0">
-                {/* Nome + badges */}
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className={`font-bold ${c.text}`}>{user.nome}</h3>
+              {/* Tipo */}
+              <span className={`inline-flex w-fit items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${cfg.cls}`}>
+                {cfg.label}
+              </span>
 
-                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${perfilColors[user.tipo_perfil] ?? "bg-gray-100 text-gray-700"}`}>
-                    {perfilLabels[user.tipo_perfil] ?? user.tipo_perfil}
-                  </span>
+              {/* Status */}
+              {user.ativo ? (
+                <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600">
+                  <CheckCircle size={12} /> Ativo
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 text-xs font-medium text-red-500">
+                  <XCircle size={12} /> Inativo
+                </span>
+              )}
 
-                  {user.ativo ? (
-                    <span className="flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
-                      <CheckCircle size={11} /> Ativo
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-600">
-                      <XCircle size={11} /> Inativo
-                    </span>
-                  )}
-                </div>
-
-                {/* Info básica */}
-                <div className="flex flex-wrap gap-x-4 gap-y-1">
-                  <span className={`flex items-center gap-1.5 text-sm ${c.textSoft}`}>
-                    <Mail size={13} />
-                    {user.email}
-                  </span>
-                  {user.telefone && (
-                    <span className={`flex items-center gap-1.5 text-sm ${c.textSoft}`}>
-                      <Phone size={13} />
-                      {user.telefone}
-                    </span>
-                  )}
-                </div>
-
-                {/* Dados de cliente */}
-                {user.tipo_perfil === "cliente" && user.client_profile && (
-                  <div className={`flex flex-wrap gap-x-4 gap-y-1 rounded-xl border ${c.border} bg-gray-50 px-3 py-2`}>
-                    <span className={`flex items-center gap-1.5 text-xs ${c.textSoft}`}>
-                      <MapPin size={12} />
-                      {user.client_profile.end_cidade} — {user.client_profile.end_estado}
-                    </span>
-                    <span className={`text-xs ${c.textMuted}`}>CEP: {user.client_profile.end_cep}</span>
-                    <span className={`text-xs ${c.textMuted}`}>{user.client_profile.tipo_cliente}</span>
-                  </div>
-                )}
-
-                {/* Dados de funcionário */}
-                {user.tipo_perfil === "funcionario" && user.employee_profile && (
-                  <div className={`flex flex-wrap gap-x-4 gap-y-1 rounded-xl border ${c.border} bg-gray-50 px-3 py-2`}>
-                    <span className={`flex items-center gap-1.5 text-xs ${c.textSoft}`}>
-                      <Briefcase size={12} />
-                      {user.employee_profile.cargo}
-                    </span>
-                    <span className={`text-xs ${c.textMuted}`}>
-                      {formatMoney(user.employee_profile.salario)}
-                    </span>
-                    <span className={`text-xs ${c.textMuted}`}>
-                      Desde {formatDate(user.employee_profile.data_contratacao)}
-                    </span>
-                    <span className={`text-xs ${c.textMuted}`}>
-                      Mat. {user.employee_profile.matricula}
-                    </span>
-                  </div>
-                )}
+              {/* Actions */}
+              <div className="flex justify-end gap-1.5">
+                <button
+                  onClick={() => onEdit(user)}
+                  title="Editar"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:bg-gray-100"
+                >
+                  <Pencil size={13} />
+                </button>
+                <button
+                  onClick={() => onDelete(user.id)}
+                  title="Excluir"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-red-100 text-red-400 transition hover:bg-red-50"
+                >
+                  <Trash2 size={13} />
+                </button>
               </div>
             </div>
-
-            {/* Botões */}
-            <div className="flex shrink-0 gap-2">
-              <button
-                onClick={() => onEdit(user)}
-                className={`flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium transition ${c.border} ${c.text} hover:bg-gray-50`}
-              >
-                <Pencil size={13} />
-                Editar
-              </button>
-              <button
-                onClick={() => onDelete(user.id)}
-                className="flex items-center gap-1.5 rounded-xl border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
-              >
-                <Trash2 size={13} />
-                Excluir
-              </button>
-            </div>
-          </div>
-        </div>
-      ))}
+          );
+        })}
+      </div>
     </div>
   );
 }

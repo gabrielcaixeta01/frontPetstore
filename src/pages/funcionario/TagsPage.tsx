@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Tag, RefreshCw } from "lucide-react";
+import { Tag, Plus, X, RefreshCw } from "lucide-react";
 import EditModal from "../../components/EditModal";
 import EditTagForm from "../../components/tag/EditTagForm";
 import TagForm from "../../components/tag/TagForm";
@@ -16,6 +16,7 @@ export default function TagsPage() {
   const [tags, setTags] = useState<Etiqueta[]>([]);
   const [tagBeingEdited, setTagBeingEdited] = useState<Etiqueta | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [error, setError] = useState("");
 
@@ -42,6 +43,7 @@ export default function TagsPage() {
       await createTag(data);
       setFeedback("Tag cadastrada com sucesso.");
       setTagBeingEdited(null);
+      setShowForm(false);
       await loadTags();
     } catch (err) {
       console.error(err);
@@ -79,17 +81,17 @@ export default function TagsPage() {
     <div className="px-8 py-8">
       <div className="mx-auto max-w-6xl space-y-8">
         <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-pink-100">
-              <Tag size={20} className="text-pink-600" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Tags</h1>
-              <p className="mt-0.5 text-sm text-gray-500">
-                Organize e classifique entidades do sistema com tags reutilizáveis.
-              </p>
-            </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Tags</h1>
+            <p className="mt-0.5 text-sm text-gray-500">Organize e classifique entidades com tags reutilizáveis.</p>
           </div>
+          <button
+            onClick={() => setShowForm((v) => !v)}
+            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-[#1c46f3]/20 transition hover:opacity-90"
+          >
+            {showForm ? <X size={15} /> : <Plus size={15} />}
+            {showForm ? "Cancelar" : "Nova tag"}
+          </button>
         </div>
 
         {feedback && (
@@ -104,12 +106,14 @@ export default function TagsPage() {
           </div>
         )}
 
-        <TagForm
-          tagBeingEdited={null}
-          onCreate={handleCreateTag}
-          onUpdate={handleUpdateTag}
-          onCancelEdit={() => setTagBeingEdited(null)}
-        />
+        {showForm && (
+          <TagForm
+            tagBeingEdited={null}
+            onCreate={handleCreateTag}
+            onUpdate={handleUpdateTag}
+            onCancelEdit={() => { setTagBeingEdited(null); setShowForm(false); }}
+          />
+        )}
 
         <EditModal
           isOpen={Boolean(tagBeingEdited)}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Users, RefreshCw } from "lucide-react";
+import { Plus, X, RefreshCw } from "lucide-react";
 import EditModal from "../../components/EditModal";
 import EditUserForm from "../../components/user/EditUserForm";
 import UserForm from "../../components/user/UserForm";
@@ -16,6 +16,7 @@ export default function UsersPage() {
   const [users, setUsers] = useState<Usuario[]>([]);
   const [userBeingEdited, setUserBeingEdited] = useState<Usuario | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [error, setError] = useState("");
 
@@ -42,6 +43,7 @@ export default function UsersPage() {
       await createUsuario(data);
       setFeedback("Usuário cadastrado com sucesso.");
       setUserBeingEdited(null);
+      setShowForm(false);
       await loadUsers();
     } catch (err) {
       console.error(err);
@@ -79,17 +81,17 @@ export default function UsersPage() {
     <div className="px-8 py-8">
       <div className="mx-auto max-w-6xl space-y-8">
         <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#1c46f3]/10">
-              <Users size={20} className="text-[#1c46f3]" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Usuários</h1>
-              <p className="mt-0.5 text-sm text-gray-500">
-                Gerencie pessoas do sistema com perfil, documentos e status.
-              </p>
-            </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Usuários</h1>
+            <p className="mt-0.5 text-sm text-gray-500">Gerencie clientes e funcionários do sistema.</p>
           </div>
+          <button
+            onClick={() => setShowForm((v) => !v)}
+            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-[#1c46f3]/20 transition hover:opacity-90"
+          >
+            {showForm ? <X size={15} /> : <Plus size={15} />}
+            {showForm ? "Cancelar" : "Novo usuário"}
+          </button>
         </div>
 
         {feedback && (
@@ -104,12 +106,14 @@ export default function UsersPage() {
           </div>
         )}
 
-        <UserForm
-          userBeingEdited={null}
-          onCreate={handleCreateUser}
-          onUpdate={handleUpdateUser}
-          onCancelEdit={() => setUserBeingEdited(null)}
-        />
+        {showForm && (
+          <UserForm
+            userBeingEdited={null}
+            onCreate={handleCreateUser}
+            onUpdate={handleUpdateUser}
+            onCancelEdit={() => { setUserBeingEdited(null); setShowForm(false); }}
+          />
+        )}
 
         <EditModal
           isOpen={Boolean(userBeingEdited)}

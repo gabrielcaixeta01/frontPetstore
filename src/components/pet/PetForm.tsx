@@ -1,34 +1,29 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Search, Plus } from "lucide-react";
 import { getCategories } from "../../services/categoriaService";
-import { apexTheme } from "../../lib/theme";
+import { getUsuarios } from "../../services/usuarioService";
 import type { Categoria } from "../../types/categoria";
 import type { CreatePetDTO, Pet, UpdatePetDTO } from "../../types/pet";
+import type { Usuario } from "../../types/usuario";
 
 function getStoredUserId(): number | null {
   try {
     const stored = localStorage.getItem("user");
     if (!stored) return null;
-
     const user = JSON.parse(stored);
     const rawId = user.id ?? user.user_id ?? user.usuario_id;
     const parsedId = Number(rawId);
-
     return Number.isFinite(parsedId) ? parsedId : null;
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 
 function getStoredRole(): string | null {
   try {
     const stored = localStorage.getItem("user");
     if (!stored) return null;
-
     const user = JSON.parse(stored);
     return user.role ?? user.profile_type ?? user.tipo_perfil ?? null;
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 
 interface PetFormProps {
@@ -38,42 +33,42 @@ interface PetFormProps {
   onCancelEdit: () => void;
 }
 
-export default function PetForm({
-  petBeingEdited,
-  onCreate,
-  onUpdate,
-  onCancelEdit,
-}: PetFormProps) {
-  const c = apexTheme.colors;
-  const [categories, setCategories] = useState<Categoria[]>([]);
-  const [loadingCategories, setLoadingCategories] = useState(true);
+const inputCls = "w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white focus:ring-2 focus:ring-[#1c46f3]/15";
+const selectCls = inputCls + " appearance-none";
+
+export default function PetForm({ petBeingEdited, onCreate, onUpdate, onCancelEdit }: PetFormProps) {
+  const isCliente = getStoredRole() === "cliente";
+  const currentUserId = getStoredUserId();
+
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [clientes, setClientes] = useState<Usuario[]>([]);
 
   const [nome, setNome] = useState("");
   const [raca, setRaca] = useState("");
   const [sexo, setSexo] = useState<CreatePetDTO["sexo"] | "">("");
   const [porte, setPorte] = useState<CreatePetDTO["porte"] | "">("");
   const [peso, setPeso] = useState("");
-  const [observacoesSaude, setObservacoesSaude] = useState("");
-  const [categoryId, setCategoryId] = useState("");
-  const [ownerId, setOwnerId] = useState("");
-  const isCliente = getStoredRole() === "cliente";
-  const currentUserId = getStoredUserId();
+  const [observacoes, setObservacoes] = useState("");
+  const [categoriaId, setCategoriaId] = useState("");
+
+  // Owner search (funcionario only)
+  const [ownerSearch, setOwnerSearch] = useState("");
+  const [ownerId, setOwnerId] = useState<number | null>(null);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const filteredClientes = clientes.filter((u) =>
+    u.nome.toLowerCase().includes(ownerSearch.toLowerCase())
+  ).slice(0, 8);
 
   useEffect(() => {
-    async function loadCategories() {
-      try {
-        setLoadingCategories(true);
-        const data = await getCategories();
-        setCategories(data);
-      } catch (error) {
-        console.error("Erro ao buscar categorias:", error);
-      } finally {
-        setLoadingCategories(false);
-      }
+    getCategories().then(setCategorias).catch(console.error);
+    if (!isCliente) {
+      getUsuarios()
+        .then((all) => setClientes(all.filter((u) => u.tipo_perfil === "cliente")))
+        .catch(console.error);
     }
-
-    loadCategories();
-  }, []);
+  }, [isCliente]);
 
   useEffect(() => {
     if (petBeingEdited) {
@@ -82,287 +77,178 @@ export default function PetForm({
       setSexo(petBeingEdited.sexo ?? "");
       setPorte(petBeingEdited.porte ?? "");
       setPeso(petBeingEdited.peso !== undefined ? String(petBeingEdited.peso) : "");
-      setObservacoesSaude(petBeingEdited.observacoes_saude ?? "");
-      setCategoryId(String(petBeingEdited.categoria_id ?? ""));
-      setOwnerId(String(petBeingEdited.dono_id ?? ""));
-      return;
-    }
-
-    setNome("");
-    setRaca("");
-    setSexo("");
-    setPorte("");
-    setPeso("");
-    setObservacoesSaude("");
-
-    if (isCliente && currentUserId !== null) {
-      setOwnerId(String(currentUserId));
+      setObservacoes(petBeingEdited.observacoes_saude ?? "");
+      setCategoriaId(String(petBeingEdited.categoria_id ?? ""));
+      if (!isCliente) {
+        setOwnerId(petBeingEdited.dono_id);
+        const dono = clientes.find((c) => c.id === petBeingEdited.dono_id);
+        setOwnerSearch(dono?.nome ?? `ID ${petBeingEdited.dono_id}`);
+      }
     } else {
-      setOwnerId("");
+      setNome(""); setRaca(""); setSexo(""); setPorte(""); setPeso(""); setObservacoes("");
+      setCategoriaId(categorias[0] ? String(categorias[0].id) : "");
+      if (!isCliente) { setOwnerId(null); setOwnerSearch(""); }
     }
+  }, [petBeingEdited, categorias, clientes, isCliente]);
 
-    if (categories.length > 0) {
-      setCategoryId(String(categories[0].id));
-    } else {
-      setCategoryId("");
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
     }
-  }, [petBeingEdited, categories]);
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!nome.trim()) {
-      alert("Informe o nome do pet.");
-      return;
-    }
+    const ownerValue = isCliente ? currentUserId! : ownerId;
+    if (!ownerValue) { alert(isCliente ? "Não foi possível identificar o cliente." : "Selecione o dono do pet."); return; }
 
-    if (!categoryId) {
-      alert("Selecione uma categoria.");
-      return;
-    }
+    const payload = {
+      nome: nome.trim(),
+      raca: raca.trim() || undefined,
+      sexo: (sexo || undefined) as CreatePetDTO["sexo"],
+      porte: (porte || undefined) as CreatePetDTO["porte"],
+      peso: peso.trim() ? Number(peso) : undefined,
+      observacoes_saude: observacoes.trim() || undefined,
+      categoria_id: Number(categoriaId),
+      dono_id: ownerValue,
+    };
 
-    if (isCliente && currentUserId === null) {
-      alert("Nao foi possivel identificar o cliente logado.");
-      return;
-    }
-
-    if (!isCliente && !ownerId.trim()) {
-      alert("Informe o dono do pet.");
-      return;
-    }
-
-    const sexoValue = sexo || undefined;
-    const porteValue = porte || undefined;
-    const pesoValue = peso.trim() ? Number(peso) : undefined;
-
-    let ownerValue: number;
-
-    if (isCliente) {
-      if (currentUserId === null) {
-        alert("Nao foi possivel identificar o cliente logado.");
-        return;
-      }
-
-      ownerValue = currentUserId;
+    if (petBeingEdited) {
+      await onUpdate(petBeingEdited.id, payload);
     } else {
-      ownerValue = Number(ownerId);
-    }
-
-    try {
-      if (petBeingEdited) {
-        const payload: UpdatePetDTO = {
-          nome: nome.trim(),
-          raca: raca.trim() || undefined,
-          sexo: sexoValue,
-          porte: porteValue,
-          peso: pesoValue,
-          observacoes_saude: observacoesSaude.trim(),
-          categoria_id: Number(categoryId),
-          dono_id: ownerValue,
-        };
-
-        await onUpdate(petBeingEdited.id, payload);
-      } else {
-        const payload: CreatePetDTO = {
-          nome: nome.trim(),
-          raca: raca.trim() || undefined,
-          sexo: sexoValue,
-          porte: porteValue,
-          peso: pesoValue,
-          observacoes_saude: observacoesSaude.trim() || undefined,
-          categoria_id: Number(categoryId),
-          dono_id: ownerValue,
-        };
-
-        await onCreate(payload);
-      }
-
-      if (!petBeingEdited) {
-        setNome("");
-        setRaca("");
-        setSexo("");
-        setPorte("");
-        setPeso("");
-        setObservacoesSaude("");
-        if (isCliente && currentUserId !== null) {
-          setOwnerId(String(currentUserId));
-        } else {
-          setOwnerId("");
-        }
-        if (categories.length > 0) {
-          setCategoryId(String(categories[0].id));
-        }
-      }
-    } catch (error) {
-      console.error("Erro ao salvar pet:", error);
+      await onCreate(payload);
+      setNome(""); setRaca(""); setSexo(""); setPorte(""); setPeso(""); setObservacoes("");
+      setCategoriaId(categorias[0] ? String(categorias[0].id) : "");
+      if (!isCliente) { setOwnerId(null); setOwnerSearch(""); }
     }
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className={`space-y-4 rounded-2xl border ${c.border} ${c.card} p-6 shadow-lg`}
-    >
-      <div>
-        <h2 className={`text-2xl font-bold ${c.text}`}>
-          {petBeingEdited ? "Editar Pet" : "Cadastrar Pet"}
-        </h2>
-        <p className={`mt-1 text-sm ${c.textMuted}`}>
-          Preencha os dados do pet para salvar no sistema.
-        </p>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <div>
-          <label htmlFor="nome" className={`mb-1 block text-sm ${c.textSoft}`}>
-            Nome
-          </label>
-          <input
-            id="nome"
-            type="text"
-            value={nome}
-            onChange={(e) => setNome(e.target.value)}
-            required
-            className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
-          />
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Nome */}
+        <div className="space-y-1.5">
+          <label className="block text-xs font-medium text-gray-500">Nome *</label>
+          <input className={inputCls} placeholder="Nome do pet" value={nome} onChange={(e) => setNome(e.target.value)} required />
         </div>
 
-        <div>
-          <label htmlFor="raca" className={`mb-1 block text-sm ${c.textSoft}`}>
-            Raça
-          </label>
-          <input
-            id="raca"
-            type="text"
-            value={raca}
-            onChange={(e) => setRaca(e.target.value)}
-            className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
-          />
+        {/* Raça */}
+        <div className="space-y-1.5">
+          <label className="block text-xs font-medium text-gray-500">Raça *</label>
+          <input className={inputCls} placeholder="Ex: Golden Retriever" value={raca} onChange={(e) => setRaca(e.target.value)} required />
         </div>
 
-        <div>
-          <label htmlFor="sexo" className={`mb-1 block text-sm ${c.textSoft}`}>
-            Sexo
-          </label>
-          <select
-            id="sexo"
-            value={sexo}
-            onChange={(e) =>
-              setSexo(e.target.value as CreatePetDTO["sexo"] | "")
-            }
-            className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
-          >
-            <option value="">Selecione</option>
-            <option value="macho">macho</option>
-            <option value="femea">femea</option>
+        {/* Categoria */}
+        <div className="space-y-1.5">
+          <label className="block text-xs font-medium text-gray-500">Categoria *</label>
+          <select className={selectCls} value={categoriaId} onChange={(e) => setCategoriaId(e.target.value)} required>
+            <option value="">Selecionar...</option>
+            {categorias.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
         </div>
 
-        <div>
-          <label htmlFor="porte" className={`mb-1 block text-sm ${c.textSoft}`}>
-            Porte
-          </label>
-          <select
-            id="porte"
-            value={porte}
-            onChange={(e) =>
-              setPorte(e.target.value as CreatePetDTO["porte"] | "")
-            }
-            className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
-          >
-            <option value="">Selecione</option>
-            <option value="pequeno">pequeno</option>
-            <option value="medio">medio</option>
-            <option value="grande">grande</option>
-          </select>
-        </div>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <div>
-          <label htmlFor="peso" className={`mb-1 block text-sm ${c.textSoft}`}>
-            Peso
-          </label>
-          <input
-            id="peso"
-            type="number"
-            step="0.01"
-            value={peso}
-            onChange={(e) => setPeso(e.target.value)}
-            className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="category" className={`mb-1 block text-sm ${c.textSoft}`}>
-            Categoria
-          </label>
-          <select
-            id="category"
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-            disabled={loadingCategories || categories.length === 0}
-            className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3] disabled:opacity-60`}
-          >
-            {loadingCategories ? (
-              <option value="">Carregando categorias...</option>
-            ) : categories.length === 0 ? (
-              <option value="">Nenhuma categoria encontrada</option>
-            ) : (
-              categories.map((category) => (
-                <option key={category.id} value={String(category.id)}>
-                  {category.name}
-                </option>
-              ))
-            )}
+        {/* Sexo */}
+        <div className="space-y-1.5">
+          <label className="block text-xs font-medium text-gray-500">Sexo</label>
+          <select className={selectCls} value={sexo} onChange={(e) => setSexo(e.target.value as CreatePetDTO["sexo"] | "")}>
+            <option value="">Selecionar...</option>
+            <option value="macho">Macho</option>
+            <option value="femea">Fêmea</option>
           </select>
         </div>
 
+        {/* Porte */}
+        <div className="space-y-1.5">
+          <label className="block text-xs font-medium text-gray-500">Porte</label>
+          <select className={selectCls} value={porte} onChange={(e) => setPorte(e.target.value as CreatePetDTO["porte"] | "")}>
+            <option value="">Selecionar...</option>
+            <option value="pequeno">Pequeno</option>
+            <option value="medio">Médio</option>
+            <option value="grande">Grande</option>
+          </select>
+        </div>
+
+        {/* Peso */}
+        <div className="space-y-1.5">
+          <label className="block text-xs font-medium text-gray-500">Peso (kg)</label>
+          <input type="number" step="0.1" min="0" className={inputCls} placeholder="Ex: 8.5" value={peso} onChange={(e) => setPeso(e.target.value)} />
+        </div>
+
+        {/* Dono — busca por nome (somente funcionário) */}
         {!isCliente && (
-          <div>
-            <label htmlFor="ownerId" className={`mb-1 block text-sm ${c.textSoft}`}>
-              Dono ID
+          <div className="relative space-y-1.5 sm:col-span-2 lg:col-span-2" ref={dropdownRef}>
+            <label className="block text-xs font-medium text-gray-500">
+              Dono (cliente) *
+              {ownerId && <span className="ml-2 text-[#1c46f3]">✓ selecionado</span>}
             </label>
-            <input
-              id="ownerId"
-              type="number"
-              value={ownerId}
-              onChange={(e) => setOwnerId(e.target.value)}
-              className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
-            />
+            <div className="relative">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                className={inputCls + " pl-9"}
+                placeholder="Buscar cliente pelo nome..."
+                value={ownerSearch}
+                onChange={(e) => { setOwnerSearch(e.target.value); setOwnerId(null); setShowDropdown(true); }}
+                onFocus={() => setShowDropdown(true)}
+                autoComplete="off"
+              />
+            </div>
+            {showDropdown && ownerSearch.length > 0 && (
+              <div className="absolute z-20 mt-1 w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
+                {filteredClientes.length === 0 ? (
+                  <p className="px-4 py-3 text-xs text-gray-400">Nenhum cliente encontrado.</p>
+                ) : (
+                  filteredClientes.map((c) => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        setOwnerId(c.id);
+                        setOwnerSearch(c.nome);
+                        setShowDropdown(false);
+                      }}
+                      className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition hover:bg-gray-50"
+                    >
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#1c46f3]/10 text-xs font-bold text-[#1c46f3]">
+                        {c.nome[0]?.toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-800">{c.nome}</p>
+                        <p className="text-xs text-gray-400">{c.email}</p>
+                      </div>
+                    </button>
+                  ))
+                )}
+              </div>
+            )}
           </div>
         )}
 
-        <div>
-          <label htmlFor="observacoes" className={`mb-1 block text-sm ${c.textSoft}`}>
-            Observações de saúde
-          </label>
-          <textarea
-            id="observacoes"
-            value={observacoesSaude}
-            onChange={(e) => setObservacoesSaude(e.target.value)}
-            rows={3}
-            className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
-          />
+        {/* Observações */}
+        <div className="space-y-1.5 sm:col-span-2 lg:col-span-1">
+          <label className="block text-xs font-medium text-gray-500">Observações de saúde</label>
+          <input className={inputCls} placeholder="Alergias, medicamentos..." value={observacoes} onChange={(e) => setObservacoes(e.target.value)} />
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-3">
+      <div className="flex gap-2 pt-1">
         <button
           type="submit"
-          disabled={loadingCategories || categories.length === 0}
-          className={`rounded-xl ${c.primary} ${c.primaryText} px-5 py-3 font-semibold transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60`}
+          disabled={categorias.length === 0}
+          className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-[#1c46f3]/20 transition hover:opacity-90 disabled:opacity-50"
         >
+          <Plus size={14} />
           {petBeingEdited ? "Salvar alterações" : "Cadastrar"}
         </button>
-
         {petBeingEdited && (
-          <button
-            type="button"
-            onClick={onCancelEdit}
-            className={`rounded-xl border ${c.border} px-5 py-3 font-semibold ${c.text} transition hover:${c.bgSoft}`}
-          >
-            Cancelar edição
+          <button type="button" onClick={onCancelEdit} className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm text-gray-500 transition hover:bg-gray-50">
+            Cancelar
           </button>
         )}
       </div>

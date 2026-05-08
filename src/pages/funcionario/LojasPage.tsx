@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Store, Plus, RefreshCw, Pencil, Trash2, ChevronRight } from "lucide-react";
+import { Store, Plus, X, RefreshCw, Pencil, Trash2, ChevronRight } from "lucide-react";
 import EditModal from "../../components/EditModal";
 import {
   createLoja,
@@ -15,6 +15,7 @@ export default function LojasPage() {
   const [lojas, setLojas] = useState<Loja[]>([]);
   const [lojaBeingEdited, setLojaBeingEdited] = useState<Loja | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [error, setError] = useState("");
 
@@ -111,6 +112,7 @@ export default function LojasPage() {
     try {
       await createLoja(form);
       setFeedback("Loja cadastrada com sucesso.");
+      setShowForm(false);
       setForm({
         nome: "",
         cnpj: "",
@@ -182,17 +184,17 @@ export default function LojasPage() {
     <div className="px-8 py-8">
       <div className="mx-auto max-w-6xl space-y-8">
         <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-100">
-              <Store size={20} className="text-purple-600" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Lojas</h1>
-              <p className="mt-0.5 text-sm text-gray-500">
-                Gerencie unidades da empresa com dados de contato e endereço.
-              </p>
-            </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Lojas</h1>
+            <p className="mt-0.5 text-sm text-gray-500">Gerencie unidades com contato e endereço.</p>
           </div>
+          <button
+            onClick={() => setShowForm((v) => !v)}
+            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-[#1c46f3]/20 transition hover:opacity-90"
+          >
+            {showForm ? <X size={15} /> : <Plus size={15} />}
+            {showForm ? "Cancelar" : "Nova loja"}
+          </button>
         </div>
 
         {feedback && (
@@ -207,11 +209,11 @@ export default function LojasPage() {
           </div>
         )}
 
-        <form
+        {showForm && <form
           onSubmit={handleCreateSubmit}
           className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm"
         >
-          <h2 className="text-base font-semibold text-gray-800 mb-4">Cadastrar Loja</h2>
+          <h2 className="text-base font-semibold text-gray-800 mb-4">Nova Loja</h2>
 
           <div className="grid gap-4 md:grid-cols-2">
             <input
@@ -296,7 +298,7 @@ export default function LojasPage() {
               Cadastrar
             </button>
           </div>
-        </form>
+        </form>}
 
         <EditModal
           isOpen={Boolean(lojaBeingEdited)}
