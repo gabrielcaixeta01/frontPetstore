@@ -10,8 +10,18 @@ import {
 } from "../services/servicoService";
 import type { CreateServicoDTO, Servico, UpdateServicoDTO } from "../types/servico";
 
+function getIsCliente() {
+  try {
+    const stored = localStorage.getItem("user");
+    return stored ? JSON.parse(stored).role === "cliente" : false;
+  } catch {
+    return false;
+  }
+}
+
 export default function ServicosPage() {
   const c = apexTheme.colors;
+  const isCliente = getIsCliente();
   const [servicos, setServicos] = useState<Servico[]>([]);
   const [servicoBeingEdited, setServicoBeingEdited] = useState<Servico | null>(null);
   const [loading, setLoading] = useState(true);
@@ -163,7 +173,7 @@ export default function ServicosPage() {
           </div>
         )}
 
-        <form
+        {!isCliente && <form
           onSubmit={handleCreateSubmit}
           className={`space-y-4 rounded-2xl border ${c.border} ${c.card} p-6 shadow-lg`}
         >
@@ -221,9 +231,9 @@ export default function ServicosPage() {
               Cadastrar
             </button>
           </div>
-        </form>
+        </form>}
 
-        <EditModal
+        {!isCliente && <EditModal
           isOpen={Boolean(servicoBeingEdited)}
           title="Editar Serviço"
           onClose={() => setServicoBeingEdited(null)}
@@ -285,7 +295,7 @@ export default function ServicosPage() {
               </button>
             </div>
           </form>
-        </EditModal>
+        </EditModal>}
 
         <section className="space-y-4">
           <div className="flex items-center justify-between">
@@ -325,6 +335,7 @@ export default function ServicosPage() {
                       </p>
                     </div>
 
+                    {!isCliente && (
                     <div className="flex gap-2">
                       <button
                         onClick={() => setServicoBeingEdited(servico)}
@@ -341,6 +352,7 @@ export default function ServicosPage() {
                         Excluir
                       </button>
                     </div>
+                    )}
                   </div>
                 </div>
               ))}

@@ -13,8 +13,18 @@ import {
 } from "../services/tagService";
 import type { CreateEtiquetaDTO, Etiqueta, UpdateEtiquetaDTO } from "../types/tag";
 
+function getIsCliente() {
+  try {
+    const stored = localStorage.getItem("user");
+    return stored ? JSON.parse(stored).role === "cliente" : false;
+  } catch {
+    return false;
+  }
+}
+
 export default function TagsPage() {
   const c = apexTheme.colors;
+  const isCliente = getIsCliente();
   const [tags, setTags] = useState<Etiqueta[]>([]);
   const [tagBeingEdited, setTagBeingEdited] = useState<Etiqueta | null>(null);
   const [loading, setLoading] = useState(true);
@@ -106,26 +116,30 @@ export default function TagsPage() {
           </div>
         )}
 
-        <TagForm
-          tagBeingEdited={null}
-          onCreate={handleCreateTag}
-          onUpdate={handleUpdateTag}
-          onCancelEdit={() => setTagBeingEdited(null)}
-        />
+        {!isCliente && (
+          <TagForm
+            tagBeingEdited={null}
+            onCreate={handleCreateTag}
+            onUpdate={handleUpdateTag}
+            onCancelEdit={() => setTagBeingEdited(null)}
+          />
+        )}
 
-        <EditModal
-          isOpen={Boolean(tagBeingEdited)}
-          title="Editar Tag"
-          onClose={() => setTagBeingEdited(null)}
-        >
-          {tagBeingEdited && (
-            <EditTagForm
-              tag={tagBeingEdited}
-              onUpdate={handleUpdateTag}
-              onCancel={() => setTagBeingEdited(null)}
-            />
-          )}
-        </EditModal>
+        {!isCliente && (
+          <EditModal
+            isOpen={Boolean(tagBeingEdited)}
+            title="Editar Tag"
+            onClose={() => setTagBeingEdited(null)}
+          >
+            {tagBeingEdited && (
+              <EditTagForm
+                tag={tagBeingEdited}
+                onUpdate={handleUpdateTag}
+                onCancel={() => setTagBeingEdited(null)}
+              />
+            )}
+          </EditModal>
+        )}
 
         <section className="space-y-4">
           <div className="flex items-center justify-between">
@@ -146,8 +160,8 @@ export default function TagsPage() {
           ) : (
             <TagList
               tags={tags}
-              onEdit={setTagBeingEdited}
-              onDelete={handleDeleteTag}
+              onEdit={isCliente ? undefined : setTagBeingEdited}
+              onDelete={isCliente ? undefined : handleDeleteTag}
             />
           )}
         </section>

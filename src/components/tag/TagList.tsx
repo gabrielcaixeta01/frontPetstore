@@ -4,8 +4,8 @@ import { apexTheme } from "../../lib/theme";
 
 interface TagListProps {
   tags: Etiqueta[];
-  onEdit: (tag: Etiqueta) => void;
-  onDelete: (id: number) => Promise<void>;
+  onEdit?: (tag: Etiqueta) => void;
+  onDelete?: (id: number) => Promise<void>;
 }
 
 export default function TagList({ tags, onEdit, onDelete }: TagListProps) {
@@ -34,7 +34,9 @@ export default function TagList({ tags, onEdit, onDelete }: TagListProps) {
               )}
             </div>
 
+            {(onEdit || onDelete) && (
             <div className="flex shrink-0 gap-1.5">
+              {onEdit && (
               <button
                 onClick={() => onEdit(tag)}
                 title="Editar"
@@ -42,6 +44,8 @@ export default function TagList({ tags, onEdit, onDelete }: TagListProps) {
               >
                 <Pencil size={13} className={c.text} />
               </button>
+              )}
+              {onDelete && (
               <button
                 onClick={() => onDelete(tag.id)}
                 title="Excluir"
@@ -49,7 +53,9 @@ export default function TagList({ tags, onEdit, onDelete }: TagListProps) {
               >
                 <Trash2 size={13} className="text-red-600" />
               </button>
+              )}
             </div>
+            )}
           </div>
         </div>
       ))}

@@ -12,8 +12,18 @@ import {
 } from "../services/categoriaService";
 import type { Categoria } from "../types/categoria";
 
+function getIsCliente() {
+  try {
+    const stored = localStorage.getItem("user");
+    return stored ? JSON.parse(stored).role === "cliente" : false;
+  } catch {
+    return false;
+  }
+}
+
 export default function CategoriasPage() {
   const c = apexTheme.colors;
+  const isCliente = getIsCliente();
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [categoriaBeingEdited, setCategoriaBeingEdited] = useState<Categoria | null>(null);
   const [loading, setLoading] = useState(true);
@@ -146,7 +156,7 @@ export default function CategoriasPage() {
           </div>
         )}
 
-        <form
+        {!isCliente && <form
           onSubmit={handleCreateSubmit}
           className={`space-y-4 rounded-2xl border ${c.border} ${c.card} p-6 shadow-lg`}
         >
@@ -188,9 +198,9 @@ export default function CategoriasPage() {
               Cadastrar
             </button>
           </div>
-        </form>
+        </form>}
 
-        <EditModal
+        {!isCliente && <EditModal
           isOpen={Boolean(categoriaBeingEdited)}
           title="Editar Categoria"
           onClose={() => setCategoriaBeingEdited(null)}
@@ -237,7 +247,7 @@ export default function CategoriasPage() {
               </button>
             </div>
           </form>
-        </EditModal>
+        </EditModal>}
 
         <section className="space-y-4">
           <div className="flex items-center justify-between">
@@ -274,6 +284,7 @@ export default function CategoriasPage() {
                       )}
                     </div>
 
+                    {!isCliente && (
                     <div className="flex gap-2">
                       <button
                         onClick={() => setCategoriaBeingEdited(categoria)}
@@ -290,6 +301,7 @@ export default function CategoriasPage() {
                         Excluir
                       </button>
                     </div>
+                    )}
                   </div>
                 </div>
               ))}

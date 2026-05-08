@@ -11,8 +11,18 @@ import {
 } from "../services/lojaService";
 import type { CreateLojaDTO, Loja, UpdateLojaDTO } from "../types/loja";
 
+function getIsCliente() {
+  try {
+    const stored = localStorage.getItem("user");
+    return stored ? JSON.parse(stored).role === "cliente" : false;
+  } catch {
+    return false;
+  }
+}
+
 export default function LojasPage() {
   const c = apexTheme.colors;
+  const isCliente = getIsCliente();
   const navigate = useNavigate();
   const [lojas, setLojas] = useState<Loja[]>([]);
   const [lojaBeingEdited, setLojaBeingEdited] = useState<Loja | null>(null);
@@ -207,7 +217,7 @@ export default function LojasPage() {
           </div>
         )}
 
-        <form
+        {!isCliente && <form
           onSubmit={handleCreateSubmit}
           className={`space-y-4 rounded-2xl border ${c.border} ${c.card} p-6 shadow-lg`}
         >
@@ -296,9 +306,9 @@ export default function LojasPage() {
               Cadastrar
             </button>
           </div>
-        </form>
+        </form>}
 
-        <EditModal
+        {!isCliente && <EditModal
           isOpen={Boolean(lojaBeingEdited)}
           title="Editar Loja"
           onClose={() => setLojaBeingEdited(null)}
@@ -325,7 +335,7 @@ export default function LojasPage() {
               </button>
             </div>
           </form>
-        </EditModal>
+        </EditModal>}
 
         <section className="space-y-4">
           <div className="flex items-center justify-between">
@@ -371,6 +381,7 @@ export default function LojasPage() {
                       </div>
                     </div>
 
+                    {!isCliente && (
                     <div className="flex shrink-0 gap-2">
                       <button
                         onClick={(e) => {
@@ -393,6 +404,7 @@ export default function LojasPage() {
                         Excluir
                       </button>
                     </div>
+                    )}
                   </div>
                 </div>
               ))}

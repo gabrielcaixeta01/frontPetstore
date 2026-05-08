@@ -43,6 +43,15 @@ export default function Navbar() {
     return !!localStorage.getItem("token");
   });
 
+  const [userRole, setUserRole] = useState<string | null>(() => {
+    try {
+      const stored = localStorage.getItem("user");
+      return stored ? JSON.parse(stored).role : null;
+    } catch {
+      return null;
+    }
+  });
+
   const [hoveredPath, setHoveredPath] = useState<string | null>(null);
 
   const [pill, setPill] = useState<Pill>({
@@ -53,14 +62,15 @@ export default function Navbar() {
 
   const visibleLinks = useMemo((): NavItem[] => {
     if (isLogged) {
-      return [...links, { to: "/perfil", label: "Perfil", icon: User }];
+      const all: NavItem[] = [...links, { to: "/perfil", label: "Perfil", icon: User }];
+      return userRole === "cliente" ? all.filter((l) => l.to !== "/usuarios") : all;
     }
 
     return [
       { to: "/login", label: "Login", icon: LogIn },
       { to: "/register", label: "Cadastro", icon: UserPlus },
     ];
-  }, [isLogged]);
+  }, [isLogged, userRole]);
 
   function movePillTo(path: string) {
     const nav = navRef.current;
@@ -94,6 +104,12 @@ export default function Navbar() {
 
   useEffect(() => {
     setIsLogged(!!localStorage.getItem("token"));
+    try {
+      const stored = localStorage.getItem("user");
+      setUserRole(stored ? JSON.parse(stored).role : null);
+    } catch {
+      setUserRole(null);
+    }
   }, [location.pathname]);
 
   useEffect(() => {
