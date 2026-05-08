@@ -156,7 +156,7 @@ export default function PetForm({
           sexo: sexoValue,
           porte: porteValue,
           peso: pesoValue,
-          observacoes_saude: observacoesSaude.trim() || undefined,
+          observacoes_saude: observacoesSaude.trim(),
           categoria_id: Number(categoryId),
           dono_id: ownerValue,
         };

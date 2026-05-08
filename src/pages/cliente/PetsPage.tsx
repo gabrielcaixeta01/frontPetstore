@@ -139,7 +139,7 @@ export default function ClientePetsPage() {
         sexo: (editForm.sexo as Pet["sexo"]) || undefined,
         porte: (editForm.porte as Pet["porte"]) || undefined,
         peso: editForm.peso ? Number(editForm.peso) : undefined,
-        observacoes_saude: editForm.observacoes_saude.trim() || undefined,
+        observacoes_saude: editForm.observacoes_saude.trim(),
         categoria_id: Number(editForm.categoria_id),
         dono_id: resolvedUserId,
       };
