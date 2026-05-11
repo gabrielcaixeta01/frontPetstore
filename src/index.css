@@ -6,6 +6,15 @@ body,
   min-height: 100%;
 }
 
+/* Hide browser-native password reveal button (Edge/Chrome) */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+input[type="password"]::-webkit-credentials-auto-fill-button {
+  visibility: hidden;
+}
+
 body {
   margin: 0;
   background: white;

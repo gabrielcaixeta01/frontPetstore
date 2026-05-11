@@ -50,11 +50,11 @@ export default function PetList({ pets, onEdit, onDelete, categoriasById, donosB
         {pets.map((pet) => (
           <div
             key={pet.id}
-            className="grid grid-cols-[1fr_130px_120px_88px] items-center gap-4 px-5 py-3.5 transition hover:bg-gray-50/60"
+            className="grid grid-cols-[1fr_130px_120px_88px] items-start gap-4 px-5 py-3.5 transition hover:bg-gray-50/60"
           >
-            {/* Name + breed */}
-            <div className="flex min-w-0 items-center gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#1c46f3]/10 text-xs font-bold text-[#1c46f3]">
+            {/* Name + breed + tags + obs */}
+            <div className="flex min-w-0 items-start gap-3">
+              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#1c46f3]/10 text-xs font-bold text-[#1c46f3]">
                 {getInitials(pet.nome)}
               </div>
               <div className="min-w-0">
@@ -64,11 +64,25 @@ export default function PetList({ pets, onEdit, onDelete, categoriasById, donosB
                     .filter(Boolean)
                     .join(" · ") || "Sem detalhes"}
                 </p>
+                {pet.observacoes_saude && (
+                  <p className="mt-1 truncate text-xs text-amber-600" title={pet.observacoes_saude}>
+                    {pet.observacoes_saude}
+                  </p>
+                )}
+                {pet.tags && pet.tags.length > 0 && (
+                  <div className="mt-1.5 flex flex-wrap gap-1">
+                    {pet.tags.map((tag) => (
+                      <span key={tag.id} className="rounded-full border border-[#1c46f3]/20 bg-[#1c46f3]/8 px-2 py-0.5 text-xs font-medium text-[#1c46f3]">
+                        {tag.nome}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Categoria + Porte */}
-            <div className="flex min-w-0 flex-col gap-1">
+            <div className="flex min-w-0 flex-col gap-1 pt-0.5">
               {pet.categoria_id && (
                 <span className="truncate text-xs font-medium text-gray-700">
                   {categoriasById[pet.categoria_id] ?? "—"}
@@ -82,12 +96,12 @@ export default function PetList({ pets, onEdit, onDelete, categoriasById, donosB
             </div>
 
             {/* Dono */}
-            <p className="truncate text-xs text-gray-500">
+            <p className="truncate pt-0.5 text-xs text-gray-500">
               {donosById[pet.dono_id] ?? <span className="text-gray-300">—</span>}
             </p>
 
             {/* Actions */}
-            <div className="flex justify-end gap-1.5">
+            <div className="flex justify-end gap-1.5 pt-0.5">
               <button
                 onClick={() => onEdit(pet)}
                 title="Editar"
