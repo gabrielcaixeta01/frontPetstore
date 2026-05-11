@@ -1,6 +1,12 @@
 import { api } from "./api";
 import type { CreatePetDTO, Pet, UpdatePetDTO } from "../types/pet";
 
+type ApiPetTag = {
+  id: number;
+  name?: string;
+  description?: string | null;
+};
+
 type ApiPet = {
   id: number;
   name: string;
@@ -11,6 +17,7 @@ type ApiPet = {
   health_notes?: string | null;
   category_id: number;
   owner_id: number;
+  tags?: ApiPetTag[];
 };
 
 function fromApiSex(value?: string | null): Pet["sexo"] | undefined {
@@ -39,6 +46,7 @@ function toPet(pet: ApiPet): Pet {
     observacoes_saude: pet.health_notes ?? undefined,
     categoria_id: pet.category_id,
     dono_id: pet.owner_id,
+    tags: pet.tags?.map((t) => ({ id: t.id, nome: t.name ?? "", descricao: t.description ?? undefined })),
   };
 }
 
@@ -63,6 +71,7 @@ export async function createPet(data: CreatePetDTO): Promise<Pet> {
       health_notes: data.observacoes_saude,
       category_id: data.categoria_id,
       owner_id: data.dono_id,
+      tag_ids: data.tag_ids?.length ? data.tag_ids : undefined,
     },
   });
   return toPet(response.data);
@@ -79,6 +88,7 @@ export async function updatePet(id: number, data: UpdatePetDTO): Promise<Pet> {
       health_notes: data.observacoes_saude,
       category_id: data.categoria_id,
       owner_id: data.dono_id,
+      tag_ids: data.tag_ids?.length ? data.tag_ids : undefined,
     },
   });
   return toPet(response.data);

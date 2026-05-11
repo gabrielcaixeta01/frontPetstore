@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { PawPrint, Plus, Pencil, Trash2, X, Check } from "lucide-react";
 import { getCategories } from "../../services/categoriaService";
 import { createPet, deletePet, getPets, updatePet } from "../../services/petService";
+import { getTags } from "../../services/tagService";
 import type { Categoria } from "../../types/categoria";
 import type { CreatePetDTO, Pet, UpdatePetDTO } from "../../types/pet";
+import type { Etiqueta } from "../../types/tag";
 
 function getStoredUser() {
   try { return JSON.parse(localStorage.getItem("user") || "{}"); } catch { return {}; }
@@ -49,11 +51,14 @@ export default function ClientePetsPage() {
 
   const [pets, setPets] = useState<Pet[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [tagsDisponiveis, setTagsDisponiveis] = useState<Etiqueta[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingPet, setEditingPet] = useState<Pet | null>(null);
   const [form, setForm] = useState<PetForm>(emptyForm);
   const [editForm, setEditForm] = useState<PetForm>(emptyForm);
+  const [tagIdsCriacao, setTagIdsCriacao] = useState<number[]>([]);
+  const [tagIdsEdicao, setTagIdsEdicao] = useState<number[]>([]);
   const [feedback, setFeedback] = useState("");
   const [error, setError] = useState("");
 
@@ -75,6 +80,7 @@ export default function ClientePetsPage() {
   useEffect(() => {
     loadPets();
     getCategories().then(setCategorias).catch(console.error);
+    getTags().then(setTagsDisponiveis).catch(console.error);
   }, []);
 
   useEffect(() => {
@@ -88,6 +94,7 @@ export default function ClientePetsPage() {
         observacoes_saude: editingPet.observacoes_saude ?? "",
         categoria_id: String(editingPet.categoria_id),
       });
+      setTagIdsEdicao(editingPet.tags?.map((t) => t.id) ?? []);
     }
   }, [editingPet]);
 
@@ -126,12 +133,16 @@ export default function ClientePetsPage() {
     }
     try {
       const payload = f({ ...form, observacoes_saude: normalizedObservacoes });
-      await createPet(payload);
+      await createPet({ ...payload, tag_ids: tagIdsCriacao.length > 0 ? tagIdsCriacao : undefined });
       setFeedback("Pet cadastrado com sucesso!");
       setForm(emptyForm);
+      setTagIdsCriacao([]);
       setShowForm(false);
       await loadPets();
-    } catch { setError("Erro ao cadastrar pet."); }
+    } catch (err: unknown) {
+      const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
+      setError(detail ?? "Erro ao cadastrar pet.");
+    }
   }
 
   async function handleUpdate(e: React.FormEvent) {
@@ -168,12 +179,16 @@ export default function ClientePetsPage() {
         observacoes_saude: normalizedObservacoes,
         categoria_id: Number(editForm.categoria_id),
         dono_id: resolvedUserId,
+        tag_ids: tagIdsEdicao,
       };
       await updatePet(editingPet.id, payload);
       setFeedback("Pet atualizado!");
       setEditingPet(null);
       await loadPets();
-    } catch { setError("Erro ao atualizar pet."); }
+    } catch (err: unknown) {
+      const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
+      setError(detail ?? "Erro ao atualizar pet.");
+    }
   }
 
   async function handleDelete(id: number) {
@@ -191,7 +206,7 @@ export default function ClientePetsPage() {
     if (!text) return null;
     const max = 50;
     return (
-      <p title={text} className="mt-2 rounded-lg bg-yellow-50 px-2 py-1.5 text-yellow-700">
+      <p title={text} className="mt-2 break-words rounded-lg bg-yellow-50 px-2 py-1.5 text-yellow-700">
         {text.length > max ? `${text.slice(0, max)}…` : text}
       </p>
     );
@@ -265,6 +280,22 @@ export default function ClientePetsPage() {
               <label className="mb-1 block text-xs font-medium text-gray-500">Observações de saúde</label>
               <input maxLength={MAX_OBSERVACOES_SAUDE} className={inputCls} placeholder="Alergias, medicamentos, etc." value={form.observacoes_saude} onChange={(e) => setForm({ ...form, observacoes_saude: e.target.value })} />
             </div>
+            {tagsDisponiveis.length > 0 && (
+              <div className="sm:col-span-2 lg:col-span-3">
+                <label className="mb-1 block text-xs font-medium text-gray-500">Tags</label>
+                <div className="flex flex-wrap gap-2">
+                  {tagsDisponiveis.map((tag) => {
+                    const sel = tagIdsCriacao.includes(tag.id);
+                    return (
+                      <button key={tag.id} type="button"
+                        onClick={() => setTagIdsCriacao((ids) => sel ? ids.filter((id) => id !== tag.id) : [...ids, tag.id])}
+                        className={`rounded-full border px-3 py-1 text-xs font-medium transition ${sel ? "border-[#1c46f3] bg-[#1c46f3] text-white" : "border-gray-200 bg-gray-50 text-gray-600 hover:border-[#1c46f3]/50 hover:text-[#1c46f3]"}`}
+                      >{tag.nome}</button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
           <div className="mt-4 flex gap-2">
             <button type="submit" className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90">
@@ -302,7 +333,7 @@ export default function ClientePetsPage() {
                     <option value="">Categoria...</option>
                     {categorias.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                   </select>
-                  <input className={inputCls} placeholder="Raça *" value={editForm.raca} onChange={(e) => setEditForm({ ...editForm, raca: e.target.value })} required />
+                  <input maxLength={80} className={inputCls} placeholder="Raça *" value={editForm.raca} onChange={(e) => setEditForm({ ...editForm, raca: e.target.value })} required />
                   <div className="grid grid-cols-2 gap-2">
                     <select className={selectCls} value={editForm.sexo} onChange={(e) => setEditForm({ ...editForm, sexo: e.target.value })}>
                       {sexoOpts.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
@@ -313,6 +344,22 @@ export default function ClientePetsPage() {
                   </div>
                   <input type="number" step="0.1" min="0" className={inputCls} placeholder="Peso (kg)" value={editForm.peso} onChange={(e) => setEditForm({ ...editForm, peso: e.target.value })} />
                   <input maxLength={MAX_OBSERVACOES_SAUDE} className={inputCls} placeholder="Observações de saúde" value={editForm.observacoes_saude} onChange={(e) => setEditForm({ ...editForm, observacoes_saude: e.target.value })} />
+                  {tagsDisponiveis.length > 0 && (
+                    <div>
+                      <p className="mb-1.5 text-xs font-medium text-gray-500">Tags</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {tagsDisponiveis.map((tag) => {
+                          const sel = tagIdsEdicao.includes(tag.id);
+                          return (
+                            <button key={tag.id} type="button"
+                              onClick={() => setTagIdsEdicao((ids) => sel ? ids.filter((id) => id !== tag.id) : [...ids, tag.id])}
+                              className={`rounded-full border px-2.5 py-0.5 text-xs font-medium transition ${sel ? "border-[#1c46f3] bg-[#1c46f3] text-white" : "border-gray-200 bg-gray-50 text-gray-600 hover:border-[#1c46f3]/50 hover:text-[#1c46f3]"}`}
+                            >{tag.nome}</button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                   <div className="flex gap-2 pt-1">
                     <button type="submit" className="flex-1 rounded-xl bg-[#1c46f3] py-2 text-sm font-semibold text-white transition hover:opacity-90">Salvar</button>
                     <button type="button" onClick={() => setEditingPet(null)} className="rounded-xl border border-gray-200 px-4 py-2 text-sm text-gray-600 transition hover:bg-gray-50">✕</button>
@@ -336,6 +383,15 @@ export default function ClientePetsPage() {
                     {pet.peso != null && <p><span className="font-medium text-gray-700">Peso:</span> {pet.peso} kg</p>}
                     {renderObservacoes(pet.observacoes_saude)}
                   </div>
+                  {pet.tags && pet.tags.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {pet.tags.map((tag) => (
+                        <span key={tag.id} className="rounded-full border border-[#1c46f3]/20 bg-[#1c46f3]/8 px-2 py-0.5 text-xs font-medium text-[#1c46f3]">
+                          {tag.nome}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   <div className="mt-4 flex gap-2">
                     <button onClick={() => setEditingPet(pet)} className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-gray-200 py-2 text-xs font-medium text-gray-600 transition hover:bg-gray-50">
                       <Pencil size={12} /> Editar

@@ -1,3 +1,9 @@
+export interface PetTag {
+  id: number;
+  nome: string;
+  descricao?: string;
+}
+
 export interface Pet {
   id: number;
   nome: string;
@@ -8,6 +14,7 @@ export interface Pet {
   observacoes_saude?: string;
   categoria_id: number;
   dono_id: number;
+  tags?: PetTag[];
 }
 
 export interface CreatePetDTO {
@@ -19,6 +26,7 @@ export interface CreatePetDTO {
   observacoes_saude?: string;
   categoria_id: number;
   dono_id: number;
+  tag_ids?: number[];
 }
 
 export interface UpdatePetDTO {
@@ -30,4 +38,5 @@ export interface UpdatePetDTO {
   observacoes_saude?: string;
   categoria_id?: number;
   dono_id?: number;
+  tag_ids?: number[];
 }

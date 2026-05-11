@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { Search, Plus } from "lucide-react";
 import { getCategories } from "../../services/categoriaService";
 import { getUsuarios } from "../../services/usuarioService";
+import { getTags } from "../../services/tagService";
 import type { Categoria } from "../../types/categoria";
 import type { CreatePetDTO, Pet, UpdatePetDTO } from "../../types/pet";
+import type { Etiqueta } from "../../types/tag";
 import type { Usuario } from "../../types/usuario";
 
 function getStoredUserId(): number | null {
@@ -43,6 +45,7 @@ export default function PetForm({ petBeingEdited, onCreate, onUpdate, onCancelEd
 
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [clientes, setClientes] = useState<Usuario[]>([]);
+  const [tagsDisponiveis, setTagsDisponiveis] = useState<Etiqueta[]>([]);
 
   const [nome, setNome] = useState("");
   const [raca, setRaca] = useState("");
@@ -51,6 +54,7 @@ export default function PetForm({ petBeingEdited, onCreate, onUpdate, onCancelEd
   const [peso, setPeso] = useState("");
   const [observacoes, setObservacoes] = useState("");
   const [categoriaId, setCategoriaId] = useState("");
+  const [tagIdsSelecionados, setTagIdsSelecionados] = useState<number[]>([]);
 
   // Owner search (funcionario only)
   const [ownerSearch, setOwnerSearch] = useState("");
@@ -64,6 +68,7 @@ export default function PetForm({ petBeingEdited, onCreate, onUpdate, onCancelEd
 
   useEffect(() => {
     getCategories().then(setCategorias).catch(console.error);
+    getTags().then(setTagsDisponiveis).catch(console.error);
     if (!isCliente) {
       getUsuarios()
         .then((all) => setClientes(all.filter((u) => u.tipo_perfil === "cliente")))
@@ -80,6 +85,7 @@ export default function PetForm({ petBeingEdited, onCreate, onUpdate, onCancelEd
       setPeso(petBeingEdited.peso !== undefined ? String(petBeingEdited.peso) : "");
       setObservacoes(petBeingEdited.observacoes_saude ?? "");
       setCategoriaId(String(petBeingEdited.categoria_id ?? ""));
+      setTagIdsSelecionados(petBeingEdited.tags?.map((t) => t.id) ?? []);
       if (!isCliente) {
         setOwnerId(petBeingEdited.dono_id);
         const dono = clientes.find((c) => c.id === petBeingEdited.dono_id);
@@ -88,6 +94,7 @@ export default function PetForm({ petBeingEdited, onCreate, onUpdate, onCancelEd
     } else {
       setNome(""); setRaca(""); setSexo(""); setPorte(""); setPeso(""); setObservacoes("");
       setCategoriaId(categorias[0] ? String(categorias[0].id) : "");
+      setTagIdsSelecionados([]);
       if (!isCliente) { setOwnerId(null); setOwnerSearch(""); }
     }
   }, [petBeingEdited, categorias, clientes, isCliente]);
@@ -144,14 +151,16 @@ export default function PetForm({ petBeingEdited, onCreate, onUpdate, onCancelEd
       observacoes_saude: normalizedObservacoes,
       categoria_id: Number(categoriaId),
       dono_id: ownerValue,
+      tag_ids: tagIdsSelecionados.length > 0 ? tagIdsSelecionados : undefined,
     };
 
     if (petBeingEdited) {
-      await onUpdate(petBeingEdited.id, payload);
+      await onUpdate(petBeingEdited.id, { ...payload, tag_ids: tagIdsSelecionados });
     } else {
       await onCreate(payload);
       setNome(""); setRaca(""); setSexo(""); setPorte(""); setPeso(""); setObservacoes("");
       setCategoriaId(categorias[0] ? String(categorias[0].id) : "");
+      setTagIdsSelecionados([]);
       if (!isCliente) { setOwnerId(null); setOwnerSearch(""); }
     }
   }
@@ -168,7 +177,7 @@ export default function PetForm({ petBeingEdited, onCreate, onUpdate, onCancelEd
         {/* Raça */}
         <div className="space-y-1.5">
           <label className="block text-xs font-medium text-gray-500">Raça *</label>
-          <input className={inputCls} placeholder="Ex: Golden Retriever" value={raca} onChange={(e) => setRaca(e.target.value)} required />
+          <input maxLength={80} className={inputCls} placeholder="Ex: Golden Retriever" value={raca} onChange={(e) => setRaca(e.target.value)} required />
         </div>
 
         {/* Categoria */}
@@ -262,6 +271,34 @@ export default function PetForm({ petBeingEdited, onCreate, onUpdate, onCancelEd
           <label className="block text-xs font-medium text-gray-500">Observações de saúde</label>
           <input maxLength={MAX_OBSERVACOES_SAUDE} className={inputCls} placeholder="Alergias, medicamentos..." value={observacoes} onChange={(e) => setObservacoes(e.target.value)} />
         </div>
+
+        {/* Tags */}
+        {tagsDisponiveis.length > 0 && (
+          <div className="space-y-1.5 sm:col-span-2 lg:col-span-3">
+            <label className="block text-xs font-medium text-gray-500">Tags</label>
+            <div className="flex flex-wrap gap-2">
+              {tagsDisponiveis.map((tag) => {
+                const selecionada = tagIdsSelecionados.includes(tag.id);
+                return (
+                  <button
+                    key={tag.id}
+                    type="button"
+                    onClick={() => setTagIdsSelecionados((ids) =>
+                      ids.includes(tag.id) ? ids.filter((id) => id !== tag.id) : [...ids, tag.id]
+                    )}
+                    className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                      selecionada
+                        ? "border-[#1c46f3] bg-[#1c46f3] text-white"
+                        : "border-gray-200 bg-gray-50 text-gray-600 hover:border-[#1c46f3]/50 hover:text-[#1c46f3]"
+                    }`}
+                  >
+                    {tag.nome}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="flex gap-2 pt-1">
