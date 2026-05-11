@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { User, Mail, Phone, Shield, LogOut, CalendarDays, Pencil, X, Save } from "lucide-react";
 import EditModal from "../../components/EditModal";
 import { getUsuarios, updateUsuario } from "../../services/usuarioService";
-import { updateCliente } from "../../services/clienteService";
 import { api } from "../../services/api";
 
 type UserProfile = {
@@ -169,12 +168,9 @@ export default function ClienteProfilePage() {
         nome: normalizedName,
         email: normalizedEmail,
         telefone: normalizedPhone,
-      });
-
-      await updateCliente(profile.id, {
-        end_cep: normalizedCep,
-        end_estado: normalizedState,
-        end_cidade: normalizedCity,
+        cep: normalizedCep,
+        state: normalizedState,
+        city: normalizedCity,
       });
 
       const refreshed = await api.get<UserProfile>("/auth/me").then((response) => response.data);

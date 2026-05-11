@@ -16,12 +16,12 @@ export interface Loja {
   email: string;
   ativo: boolean;
   data_cadastro: string;
-  end_cep: string;
-  end_cidade: string;
-  end_estado: string;
-  end_rua: string;
-  end_bairro: string;
-  end_numero: string;
+  cep: string;
+  city: string;
+  state: string;
+  street: string;
+  neighborhood: string;
+  number: string;
   funcionarios: FuncionarioLoja[];
 }
 
@@ -30,12 +30,12 @@ export interface CreateLojaDTO {
   cnpj: string;
   telefone: string;
   email: string;
-  end_cep: string;
-  end_cidade: string;
-  end_estado: string;
-  end_rua: string;
-  end_bairro: string;
-  end_numero: string;
+  cep: string;
+  city: string;
+  state: string;
+  street: string;
+  neighborhood: string;
+  number: string;
 }
 
 export interface UpdateLojaDTO {
@@ -43,10 +43,10 @@ export interface UpdateLojaDTO {
   telefone?: string;
   email?: string;
   ativo?: boolean;
-  end_cep?: string;
-  end_cidade?: string;
-  end_estado?: string;
-  end_rua?: string;
-  end_bairro?: string;
-  end_numero?: string;
+  cep?: string;
+  city?: string;
+  state?: string;
+  street?: string;
+  neighborhood?: string;
+  number?: string;
 }

@@ -25,8 +25,8 @@ export default function ClienteLojasPage() {
       setLoading(true);
       const data = await getLojas();
       if (userCity) {
-        const nearby = data.filter((l) => l.end_cidade.toLowerCase().trim() === userCity);
-        const others = data.filter((l) => l.end_cidade.toLowerCase().trim() !== userCity);
+        const nearby = data.filter((l) => l.city.toLowerCase().trim() === userCity);
+        const others = data.filter((l) => l.city.toLowerCase().trim() !== userCity);
         setLojas([...nearby, ...others]);
       } else {
         setLojas(data);
@@ -84,7 +84,7 @@ export default function ClienteLojasPage() {
           <section className="space-y-4">
             <div className="grid gap-4 lg:grid-cols-2">
               {lojas.map((loja) => {
-                const isNearby = userCity && loja.end_cidade.toLowerCase().trim() === userCity;
+                const isNearby = userCity && loja.city.toLowerCase().trim() === userCity;
                 return (
                   <div
                     key={loja.id}
@@ -114,7 +114,7 @@ export default function ClienteLojasPage() {
                           </div>
                           <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-400">
                             <MapPin size={11} className="shrink-0" />
-                            {loja.end_rua}, {loja.end_numero} — {loja.end_bairro}, {loja.end_cidade}/{loja.end_estado}
+                            {loja.street}, {loja.number} — {loja.neighborhood}, {loja.city}/{loja.state}
                           </p>
                           <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1">
                             <span className="flex items-center gap-1 text-xs text-gray-400">

@@ -20,7 +20,7 @@ type ApiStore = {
   cep: string;
   city: string;
   state: string;
-  address: string;
+  street: string;
   neighborhood: string;
   number: string;
   active: boolean;
@@ -37,12 +37,12 @@ function toLoja(store: ApiStore): Loja {
     email: store.email,
     ativo: store.active,
     data_cadastro: store.created_at,
-    end_cep: store.cep,
-    end_cidade: store.city,
-    end_estado: store.state,
-    end_rua: store.address,
-    end_bairro: store.neighborhood,
-    end_numero: store.number,
+    cep: store.cep,
+    city: store.city,
+    state: store.state,
+    street: store.street,
+    neighborhood: store.neighborhood,
+    number: store.number,
     funcionarios: (store.employees ?? []).map((employee) => ({
       usuario_id: employee.user_id,
       nome: employee.employee_name ?? `Usuário #${employee.user_id}`,
@@ -72,12 +72,12 @@ export async function createLoja(data: CreateLojaDTO): Promise<Loja> {
       cnpj: data.cnpj,
       phone: data.telefone,
       email: data.email,
-      cep: data.end_cep,
-      city: data.end_cidade,
-      state: data.end_estado,
-      address: data.end_rua,
-      neighborhood: data.end_bairro,
-      number: data.end_numero,
+      cep: data.cep,
+      city: data.city,
+      state: data.state,
+      street: data.street,
+      neighborhood: data.neighborhood,
+      number: data.number,
     },
   });
   return toLoja(response.data);
@@ -90,12 +90,12 @@ export async function updateLoja(id: number, data: UpdateLojaDTO): Promise<Loja>
       phone: data.telefone,
       email: data.email,
       active: data.ativo,
-      cep: data.end_cep,
-      city: data.end_cidade,
-      state: data.end_estado,
-      address: data.end_rua,
-      neighborhood: data.end_bairro,
-      number: data.end_numero,
+      cep: data.cep,
+      city: data.city,
+      state: data.state,
+      street: data.street,
+      neighborhood: data.neighborhood,
+      number: data.number,
     },
   });
   return toLoja(response.data);

@@ -49,4 +49,7 @@ export interface UpdateUsuarioDTO {
   cnpj?: string;
   ativo?: boolean;
   is_superuser?: boolean;
+  cep?: string;
+  state?: string;
+  city?: string;
 }

@@ -24,24 +24,24 @@ export default function LojasPage() {
     cnpj: "",
     telefone: "",
     email: "",
-    end_cep: "",
-    end_cidade: "",
-    end_estado: "",
-    end_rua: "",
-    end_bairro: "",
-    end_numero: "",
+    cep: "",
+    city: "",
+    state: "",
+    street: "",
+    neighborhood: "",
+    number: "",
   });
   const [editForm, setEditForm] = useState<CreateLojaDTO>({
     nome: "",
     cnpj: "",
     telefone: "",
     email: "",
-    end_cep: "",
-    end_cidade: "",
-    end_estado: "",
-    end_rua: "",
-    end_bairro: "",
-    end_numero: "",
+    cep: "",
+    city: "",
+    state: "",
+    street: "",
+    neighborhood: "",
+    number: "",
   });
 
   async function loadLojas() {
@@ -69,12 +69,12 @@ export default function LojasPage() {
         cnpj: "",
         telefone: "",
         email: "",
-        end_cep: "",
-        end_cidade: "",
-        end_estado: "",
-        end_rua: "",
-        end_bairro: "",
-        end_numero: "",
+        cep: "",
+        city: "",
+        state: "",
+        street: "",
+        neighborhood: "",
+        number: "",
       });
       return;
     }
@@ -84,12 +84,12 @@ export default function LojasPage() {
       cnpj: lojaBeingEdited.cnpj,
       telefone: lojaBeingEdited.telefone,
       email: lojaBeingEdited.email,
-      end_cep: lojaBeingEdited.end_cep,
-      end_cidade: lojaBeingEdited.end_cidade,
-      end_estado: lojaBeingEdited.end_estado,
-      end_rua: lojaBeingEdited.end_rua,
-      end_bairro: lojaBeingEdited.end_bairro,
-      end_numero: lojaBeingEdited.end_numero,
+      cep: lojaBeingEdited.cep,
+      city: lojaBeingEdited.city,
+      state: lojaBeingEdited.state,
+      street: lojaBeingEdited.street,
+      neighborhood: lojaBeingEdited.neighborhood,
+      number: lojaBeingEdited.number,
     });
   }, [lojaBeingEdited]);
 
@@ -118,12 +118,12 @@ export default function LojasPage() {
         cnpj: "",
         telefone: "",
         email: "",
-        end_cep: "",
-        end_cidade: "",
-        end_estado: "",
-        end_rua: "",
-        end_bairro: "",
-        end_numero: "",
+        cep: "",
+        city: "",
+        state: "",
+        street: "",
+        neighborhood: "",
+        number: "",
       });
       await loadLojas();
     } catch (err) {
@@ -147,12 +147,12 @@ export default function LojasPage() {
         nome: editForm.nome,
         telefone: editForm.telefone,
         email: editForm.email,
-        end_cep: editForm.end_cep,
-        end_cidade: editForm.end_cidade,
-        end_estado: editForm.end_estado,
-        end_rua: editForm.end_rua,
-        end_bairro: editForm.end_bairro,
-        end_numero: editForm.end_numero,
+        cep: editForm.cep,
+        city: editForm.city,
+        state: editForm.state,
+        street: editForm.street,
+        neighborhood: editForm.neighborhood,
+        number: editForm.number,
       };
       await updateLoja(lojaBeingEdited.id, payload);
       setFeedback("Loja atualizada com sucesso.");
@@ -247,43 +247,43 @@ export default function LojasPage() {
             />
             <input
               placeholder="CEP"
-              value={form.end_cep}
-              onChange={(e) => updateField("end_cep", e.target.value)}
+              value={form.cep}
+              onChange={(e) => updateField("cep", e.target.value)}
               required
               className={inputClass}
             />
             <input
               placeholder="Cidade"
-              value={form.end_cidade}
-              onChange={(e) => updateField("end_cidade", e.target.value)}
+              value={form.city}
+              onChange={(e) => updateField("city", e.target.value)}
               required
               className={inputClass}
             />
             <input
               placeholder="Estado"
-              value={form.end_estado}
-              onChange={(e) => updateField("end_estado", e.target.value)}
+              value={form.state}
+              onChange={(e) => updateField("state", e.target.value)}
               required
               className={inputClass}
             />
             <input
               placeholder="Rua"
-              value={form.end_rua}
-              onChange={(e) => updateField("end_rua", e.target.value)}
+              value={form.street}
+              onChange={(e) => updateField("street", e.target.value)}
               required
               className={inputClass}
             />
             <input
               placeholder="Bairro"
-              value={form.end_bairro}
-              onChange={(e) => updateField("end_bairro", e.target.value)}
+              value={form.neighborhood}
+              onChange={(e) => updateField("neighborhood", e.target.value)}
               required
               className={inputClass}
             />
             <input
               placeholder="Número"
-              value={form.end_numero}
-              onChange={(e) => updateField("end_numero", e.target.value)}
+              value={form.number}
+              onChange={(e) => updateField("number", e.target.value)}
               required
               className={inputClass}
             />
@@ -311,12 +311,12 @@ export default function LojasPage() {
               <input placeholder="CNPJ" value={editForm.cnpj} onChange={(e) => updateEditField("cnpj", e.target.value)} required className={inputClass} />
               <input placeholder="Telefone" value={editForm.telefone} onChange={(e) => updateEditField("telefone", e.target.value)} required className={inputClass} />
               <input type="email" placeholder="Email" value={editForm.email} onChange={(e) => updateEditField("email", e.target.value)} required className={inputClass} />
-              <input placeholder="CEP" value={editForm.end_cep} onChange={(e) => updateEditField("end_cep", e.target.value)} required className={inputClass} />
-              <input placeholder="Cidade" value={editForm.end_cidade} onChange={(e) => updateEditField("end_cidade", e.target.value)} required className={inputClass} />
-              <input placeholder="Estado" value={editForm.end_estado} onChange={(e) => updateEditField("end_estado", e.target.value)} required className={inputClass} />
-              <input placeholder="Rua" value={editForm.end_rua} onChange={(e) => updateEditField("end_rua", e.target.value)} required className={inputClass} />
-              <input placeholder="Bairro" value={editForm.end_bairro} onChange={(e) => updateEditField("end_bairro", e.target.value)} required className={inputClass} />
-              <input placeholder="Número" value={editForm.end_numero} onChange={(e) => updateEditField("end_numero", e.target.value)} required className={inputClass} />
+              <input placeholder="CEP" value={editForm.cep} onChange={(e) => updateEditField("cep", e.target.value)} required className={inputClass} />
+              <input placeholder="Cidade" value={editForm.city} onChange={(e) => updateEditField("city", e.target.value)} required className={inputClass} />
+              <input placeholder="Estado" value={editForm.state} onChange={(e) => updateEditField("state", e.target.value)} required className={inputClass} />
+              <input placeholder="Rua" value={editForm.street} onChange={(e) => updateEditField("street", e.target.value)} required className={inputClass} />
+              <input placeholder="Bairro" value={editForm.neighborhood} onChange={(e) => updateEditField("neighborhood", e.target.value)} required className={inputClass} />
+              <input placeholder="Número" value={editForm.number} onChange={(e) => updateEditField("number", e.target.value)} required className={inputClass} />
             </div>
             <div className="flex gap-3">
               <button type="submit" className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-[#1c46f3]/20 transition hover:opacity-90">
@@ -378,7 +378,7 @@ export default function LojasPage() {
                         </div>
                         <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-400">
                           <MapPin size={11} className="shrink-0" />
-                          {loja.end_rua}, {loja.end_numero} — {loja.end_bairro}, {loja.end_cidade}/{loja.end_estado}
+                            {loja.street}, {loja.number} — {loja.neighborhood}, {loja.city}/{loja.state}
                         </p>
                         <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1">
                           <span className="flex items-center gap-1 text-xs text-gray-400">

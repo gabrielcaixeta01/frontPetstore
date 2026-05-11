@@ -76,7 +76,7 @@ export default function LojaPage() {
               <h1 className="text-xl font-bold text-gray-900">{loja.nome}</h1>
               <p className="mt-0.5 flex items-center gap-1.5 text-sm text-gray-400">
                 <MapPin size={13} className="shrink-0" />
-                {loja.end_rua}, {loja.end_numero} — {loja.end_bairro}, {loja.end_cidade}/{loja.end_estado}
+                {loja.street}, {loja.number} — {loja.neighborhood}, {loja.city}/{loja.state}
               </p>
             </div>
           </div>
@@ -96,11 +96,11 @@ export default function LojaPage() {
             <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
               <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-400">Endereço</h2>
               <div className="grid gap-4 sm:grid-cols-2">
-                <InfoField icon={<MapPin size={13} />} label="Rua" value={loja.end_rua} />
-                <InfoField icon={<MapPin size={13} />} label="Número" value={loja.end_numero} />
-                <InfoField icon={<MapPin size={13} />} label="Bairro" value={loja.end_bairro} />
-                <InfoField icon={<MapPin size={13} />} label="Cidade / UF" value={`${loja.end_cidade} / ${loja.end_estado}`} />
-                <InfoField icon={<MapPin size={13} />} label="CEP" value={loja.end_cep} />
+                <InfoField icon={<MapPin size={13} />} label="Rua" value={loja.street} />
+                <InfoField icon={<MapPin size={13} />} label="Número" value={loja.number} />
+                <InfoField icon={<MapPin size={13} />} label="Bairro" value={loja.neighborhood} />
+                <InfoField icon={<MapPin size={13} />} label="Cidade / UF" value={`${loja.city} / ${loja.state}`} />
+                <InfoField icon={<MapPin size={13} />} label="CEP" value={loja.cep} />
               </div>
             </div>
           </div>
