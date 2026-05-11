@@ -17,16 +17,19 @@ type ApiAppointment = {
   service_at?: string;
   atendimento_em?: string;
   created_at?: string;
-  payment_type?: 'pix' | 'cartao_credito' | 'cartao_debito' | 'dinheiro';
-  forma_pagamento?: 'pix' | 'cartao_credito' | 'cartao_debito' | 'dinheiro';
+  payment_method?: string;
+  payment_type?: string;
+  forma_pagamento?: string;
   status: 'agendado' | 'concluido' | 'cancelado';
   online: boolean;
+  notes?: string | null;
   observations?: string | null;
   observacoes?: string | null;
   store_id?: number;
   loja_id?: number;
   client_id?: number;
   cliente_id?: number;
+  employee_id?: number;
   worker_id?: number;
   funcionario_id?: number;
   pet_id?: number;
@@ -41,10 +44,13 @@ type ApiAppointmentItem = {
   servico_id?: number;
   charged_value?: number;
   valor_cobrado?: number;
+  ordered_at?: string;
   order_date?: string;
   data_pedido?: string;
+  delivered_at?: string | null;
   delivery_date?: string | null;
   data_entrega?: string | null;
+  notes?: string | null;
   observations?: string | null;
   observacoes?: string | null;
 };
@@ -87,9 +93,9 @@ function toAppointmentItem(item: ApiAppointmentItem): AppointmentItem {
     appointment_id: item.appointment_id ?? item.atendimento_id ?? 0,
     service_id: item.service_id ?? item.servico_id ?? 0,
     charged_value: item.charged_value ?? item.valor_cobrado ?? 0,
-    order_date: item.order_date ?? item.data_pedido ?? "",
-    delivery_date: item.delivery_date ?? item.data_entrega ?? null,
-    observations: item.observations ?? item.observacoes ?? null,
+    order_date: item.ordered_at ?? item.order_date ?? item.data_pedido ?? "",
+    delivery_date: item.delivered_at ?? item.delivery_date ?? item.data_entrega ?? null,
+    observations: item.notes ?? item.observations ?? item.observacoes ?? null,
   };
 }
 
@@ -109,13 +115,13 @@ function toAtendimento(appointment: ApiAppointment): Atendimento {
       appointment.created_at ??
       "",
     forma_pagamento:
-      appointment.payment_type ?? appointment.forma_pagamento ?? "pix",
+      (appointment.payment_method ?? appointment.payment_type ?? appointment.forma_pagamento ?? "pix") as Atendimento["forma_pagamento"],
     status: normalizeAppointmentStatus(appointment.status),
     online: appointment.online,
-    observacoes: appointment.observations ?? appointment.observacoes ?? undefined,
+    observacoes: appointment.notes ?? appointment.observations ?? appointment.observacoes ?? undefined,
     loja_id: appointment.store_id ?? appointment.loja_id ?? 0,
     cliente_id: appointment.client_id ?? appointment.cliente_id ?? 0,
-    funcionario_id: appointment.worker_id ?? appointment.funcionario_id ?? 0,
+    funcionario_id: appointment.employee_id ?? appointment.worker_id ?? appointment.funcionario_id ?? 0,
     pet_id: appointment.pet_id ?? 0,
     items: rawItems.map(toAppointmentItem),
   };
@@ -172,17 +178,18 @@ export async function getAppointmentById(id: number): Promise<Atendimento> {
   return toAtendimento(response.data);
 }
 
-export async function createAppointment(data: CreateAtendimentoDTO): Promise<Atendimento> {
+export async function createAppointment(data: CreateAtendimentoDTO, serviceIds: number[]): Promise<Atendimento> {
   const response = await api.post<ApiAppointment>("/appointment", null, {
     params: {
-      payment_type: data.forma_pagamento,
+      payment_method: data.forma_pagamento,
       status: data.status,
       online: data.online,
-      observations: data.observacoes,
+      notes: data.observacoes,
       store_id: data.loja_id,
       client_id: data.cliente_id,
-      worker_id: data.funcionario_id,
+      employee_id: data.funcionario_id,
       pet_id: data.pet_id,
+      service_ids: serviceIds,
     },
   });
   return toAtendimento(response.data);
@@ -191,13 +198,13 @@ export async function createAppointment(data: CreateAtendimentoDTO): Promise<Ate
 export async function updateAppointment(id: number, data: UpdateAtendimentoDTO): Promise<Atendimento> {
   const response = await api.put<ApiAppointment>(`/appointment/${id}`, null, {
     params: {
-      payment_type: data.forma_pagamento,
+      payment_method: data.forma_pagamento,
       status: data.status,
       online: data.online,
-      observations: data.observacoes,
+      notes: data.observacoes,
       store_id: data.loja_id,
       client_id: data.cliente_id,
-      worker_id: data.funcionario_id,
+      employee_id: data.funcionario_id,
       pet_id: data.pet_id,
       service_ids: data.service_ids,
     },
@@ -218,8 +225,8 @@ export async function getAtendimentoById(id: number): Promise<Atendimento> {
   return getAppointmentById(id);
 }
 
-export async function createAtendimento(data: CreateAtendimentoDTO): Promise<Atendimento> {
-  return createAppointment(data);
+export async function createAtendimento(data: CreateAtendimentoDTO, serviceIds: number[]): Promise<Atendimento> {
+  return createAppointment(data, serviceIds);
 }
 
 export async function updateAtendimento(id: number, data: UpdateAtendimentoDTO): Promise<Atendimento> {

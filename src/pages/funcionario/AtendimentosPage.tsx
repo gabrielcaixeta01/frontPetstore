@@ -8,13 +8,9 @@ import { getLojas } from "../../services/lojaService";
 import { getPets } from "../../services/petService";
 import { getServicos } from "../../services/servicoService";
 import {
-  createAtendimentoServico,
   createAppointment,
-  deleteAtendimentoServico,
   deleteAppointment,
-  getAtendimentoServicos,
   getAppointments,
-  updateAtendimentoServico,
   updateAppointment,
 } from "../../services/atendimentoService";
 import { getUsuarios } from "../../services/usuarioService";
@@ -31,7 +27,6 @@ export default function AppointmentsPage() {
   const [clientesById, setClientesById] = useState<Record<number, string>>({});
   const [funcionariosById, setFuncionariosById] = useState<Record<number, string>>({});
   const [petsById, setPetsById] = useState<Record<number, string>>({});
-  const [precoServicoById, setPrecoServicoById] = useState<Record<number, number>>({});
   const [servicosById, setServicosById] = useState<Record<number, string>>({});
 
   async function loadAtendimentos() {
@@ -88,14 +83,10 @@ export default function AppointmentsPage() {
         });
         setPetsById(petsMap);
 
-        const precoServicoMap: Record<number, number> = {};
         const servicosMap: Record<number, string> = {};
         servicos.forEach((servico) => {
-          const preco = Number(servico.preco);
-          precoServicoMap[servico.id] = Number.isFinite(preco) ? preco : 0;
           servicosMap[servico.id] = servico.nome;
         });
-        setPrecoServicoById(precoServicoMap);
         setServicosById(servicosMap);
       } catch (err) {
         console.error("Erro ao carregar relacionamentos de atendimento:", err);
@@ -105,44 +96,9 @@ export default function AppointmentsPage() {
     loadRelacionamentos();
   }, []);
 
-  async function syncServicosAtendimento(atendimentoId: number, servicoIdsSelecionados: number[]) {
-    const itensAtuais = await getAtendimentoServicos(atendimentoId);
-    const servicosAtuais = new Set(itensAtuais.map((item) => item.servico_id));
-    const servicosSelecionados = new Set(servicoIdsSelecionados);
-
-    const idsParaRemover = itensAtuais
-      .filter((item) => !servicosSelecionados.has(item.servico_id))
-      .map((item) => item.servico_id);
-
-    const idsParaCriar = servicoIdsSelecionados.filter((id) => !servicosAtuais.has(id));
-    const idsParaAtualizar = servicoIdsSelecionados.filter((id) => servicosAtuais.has(id));
-
-    await Promise.all(
-      idsParaRemover.map((servicoId) => deleteAtendimentoServico(atendimentoId, servicoId))
-    );
-
-    await Promise.all(
-      idsParaCriar.map((servicoId) =>
-        createAtendimentoServico(atendimentoId, {
-          servico_id: servicoId,
-          valor_cobrado: precoServicoById[servicoId] ?? 0,
-        })
-      )
-    );
-
-    await Promise.all(
-      idsParaAtualizar.map((servicoId) =>
-        updateAtendimentoServico(atendimentoId, servicoId, {
-          valor_cobrado: precoServicoById[servicoId] ?? 0,
-        })
-      )
-    );
-  }
-
   async function handleCreateAtendimento(data: CreateAppointmentDTO, servicoIdsSelecionados: number[]) {
     try {
-      const atendimento = await createAppointment(data);
-      await syncServicosAtendimento(atendimento.id, servicoIdsSelecionados);
+      await createAppointment(data, servicoIdsSelecionados);
       setFeedback("Atendimento cadastrado com sucesso.");
       setAtendimentoBeingEdited(null);
       setShowForm(false);

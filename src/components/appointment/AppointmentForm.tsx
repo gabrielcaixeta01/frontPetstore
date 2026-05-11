@@ -210,7 +210,7 @@ export default function AppointmentForm({
         forma_pagamento: formaPagamento,
         status,
         online,
-        observacoes: observacoes.trim() || undefined,
+        observacoes: observacoes.trim(),
         loja_id: Number(lojaId),
         cliente_id: Number(clienteId),
         funcionario_id: Number(funcionarioId),
