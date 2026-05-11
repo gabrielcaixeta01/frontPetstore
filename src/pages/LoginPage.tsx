@@ -28,7 +28,8 @@ export default function LoginPage() {
       localStorage.setItem("user", JSON.stringify(data.user));
       navigate("/");
     } catch (err: any) {
-      setError(err?.response?.data?.detail || err?.message || "Credenciais inválidas.");
+      const detail: string = err?.response?.data?.detail || err?.message || "Credenciais inválidas.";
+      setError(detail);
     } finally {
       setLoading(false);
     }
@@ -148,7 +149,7 @@ export default function LoginPage() {
 
             {/* Erro */}
             {error && (
-              <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+              <div className={`rounded-xl border px-4 py-3 text-sm ${error.toLowerCase().includes("desativada") ? "border-amber-200 bg-amber-50 text-amber-700" : "border-red-200 bg-red-50 text-red-600"}`}>
                 {error}
               </div>
             )}
