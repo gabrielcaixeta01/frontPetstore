@@ -12,6 +12,25 @@ import {
 } from "../../services/tagService";
 import type { CreateEtiquetaDTO, Etiqueta, UpdateEtiquetaDTO } from "../../types/tag";
 
+function getApiErrorMessage(error: unknown, fallback: string) {
+  if (typeof error !== "object" || error === null) return fallback;
+
+  const axiosError = error as { response?: { status?: number; data?: unknown } };
+  if (axiosError.response?.status === 422) {
+    return "Nome da tag inválido. Use pelo menos 2 caracteres.";
+  }
+
+  const data = axiosError.response?.data as { detail?: unknown } | undefined;
+  if (typeof data?.detail === "string") return data.detail;
+
+  if (Array.isArray(data?.detail) && data.detail.length > 0) {
+    const first = data.detail[0] as { msg?: string };
+    if (first?.msg) return first.msg;
+  }
+
+  return fallback;
+}
+
 export default function TagsPage() {
   const [tags, setTags] = useState<Etiqueta[]>([]);
   const [tagBeingEdited, setTagBeingEdited] = useState<Etiqueta | null>(null);
@@ -47,7 +66,7 @@ export default function TagsPage() {
       await loadTags();
     } catch (err) {
       console.error(err);
-      setError("Erro ao cadastrar tag.");
+      setError(getApiErrorMessage(err, "Erro ao cadastrar tag."));
     }
   }
 
@@ -59,7 +78,7 @@ export default function TagsPage() {
       await loadTags();
     } catch (err) {
       console.error(err);
-      setError("Erro ao atualizar tag.");
+      setError(getApiErrorMessage(err, "Erro ao atualizar tag."));
     }
   }
 

@@ -122,7 +122,7 @@ export async function updateUsuario(id: number, data: UpdateUsuarioDTO): Promise
       role: data.tipo_perfil,
       cpf: data.cpf,
       cnpj: data.cnpj,
-      user_active: data.ativo,
+      active: data.ativo,
       cep: data.cep,
       state: data.state,
       city: data.city,

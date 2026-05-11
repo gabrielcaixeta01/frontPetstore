@@ -22,14 +22,15 @@ export default function TagForm({
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    if (!nome.trim()) {
-      alert("Informe o nome da tag.");
+    const normalizedNome = nome.trim();
+    if (normalizedNome.length < 2) {
+      alert("O nome da tag deve ter no mínimo 2 caracteres.");
       return;
     }
 
     const payload = {
-      nome: nome.trim(),
-      descricao: descricao.trim() || undefined,
+      nome: normalizedNome,
+      descricao: descricao.trim(),
     };
 
     if (tagBeingEdited) {
@@ -60,6 +61,7 @@ export default function TagForm({
           type="text"
           value={nome}
           onChange={(e) => setNome(e.target.value)}
+          minLength={2}
           required
           className={`w-full rounded-xl border ${c.border} ${c.cardSoft} px-4 py-3 ${c.text} outline-none focus:ring-2 focus:ring-[#1c46f3]`}
         />
