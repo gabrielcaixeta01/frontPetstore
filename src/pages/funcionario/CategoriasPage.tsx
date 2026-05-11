@@ -13,6 +13,25 @@ import type { Categoria } from "../../types/categoria";
 
 const inputCls = "w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white focus:ring-2 focus:ring-[#1c46f3]/15";
 
+function getApiErrorMessage(error: unknown, fallback: string) {
+  if (typeof error !== "object" || error === null) return fallback;
+
+  const axiosError = error as { response?: { status?: number; data?: unknown } };
+  if (axiosError.response?.status === 422) {
+    return "Nome da categoria inválido. Use pelo menos 2 caracteres.";
+  }
+
+  const data = axiosError.response?.data as { detail?: unknown } | undefined;
+  if (typeof data?.detail === "string") return data.detail;
+
+  if (Array.isArray(data?.detail) && data.detail.length > 0) {
+    const first = data.detail[0] as { msg?: string };
+    if (first?.msg) return first.msg;
+  }
+
+  return fallback;
+}
+
 export default function CategoriasPage() {
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [categoriaBeingEdited, setCategoriaBeingEdited] = useState<Categoria | null>(null);
@@ -44,25 +63,35 @@ export default function CategoriasPage() {
 
   async function handleCreateSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const normalizedNome = nome.trim();
+    if (normalizedNome.length < 2) {
+      setError("O nome da categoria deve ter no mínimo 2 caracteres.");
+      return;
+    }
     try {
-      const payload: CreateCategoriaDTO = { name: nome.trim(), description: descricao.trim() || undefined };
+      const payload: CreateCategoriaDTO = { name: normalizedNome, description: descricao.trim() || undefined };
       await createCategory(payload);
       setFeedback("Categoria cadastrada com sucesso.");
       setNome(""); setDescricao(""); setShowForm(false);
       await loadCategorias();
-    } catch { setError("Erro ao cadastrar categoria."); }
+    } catch (error) { setError(getApiErrorMessage(error, "Erro ao cadastrar categoria.")); }
   }
 
   async function handleUpdateSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!categoriaBeingEdited) return;
+    const normalizedNome = editNome.trim();
+    if (normalizedNome.length < 2) {
+      setError("O nome da categoria deve ter no mínimo 2 caracteres.");
+      return;
+    }
     try {
-      const payload: UpdateCategoriaDTO = { name: editNome.trim(), description: editDescricao.trim() || undefined };
+      const payload: UpdateCategoriaDTO = { name: normalizedNome, description: editDescricao.trim() };
       await updateCategory(categoriaBeingEdited.id, payload);
       setFeedback("Categoria atualizada.");
       setCategoriaBeingEdited(null);
       await loadCategorias();
-    } catch { setError("Erro ao atualizar categoria."); }
+    } catch (error) { setError(getApiErrorMessage(error, "Erro ao atualizar categoria.")); }
   }
 
   async function handleDelete(id: number) {
@@ -102,7 +131,7 @@ export default function CategoriasPage() {
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-xs font-medium text-gray-500">Nome *</label>
-              <input className={inputCls} placeholder="Ex: Cão" value={nome} onChange={(e) => setNome(e.target.value)} required />
+              <input minLength={2} className={inputCls} placeholder="Ex: Cão" value={nome} onChange={(e) => setNome(e.target.value)} required />
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-gray-500">Descrição</label>
@@ -126,7 +155,7 @@ export default function CategoriasPage() {
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-xs font-medium text-gray-500">Nome *</label>
-              <input className={inputCls} value={editNome} onChange={(e) => setEditNome(e.target.value)} required />
+              <input minLength={2} className={inputCls} value={editNome} onChange={(e) => setEditNome(e.target.value)} required />
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-gray-500">Descrição</label>

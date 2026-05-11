@@ -6,6 +6,25 @@ import type { CreateServicoDTO, Servico, UpdateServicoDTO } from "../../types/se
 
 const inputCls = "w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white focus:ring-2 focus:ring-[#1c46f3]/15";
 
+function getApiErrorMessage(error: unknown, fallback: string) {
+  if (typeof error !== "object" || error === null) return fallback;
+
+  const axiosError = error as { response?: { status?: number; data?: unknown } };
+  if (axiosError.response?.status === 422) {
+    return "Nome do serviço inválido. Use pelo menos 2 caracteres.";
+  }
+
+  const data = axiosError.response?.data as { detail?: unknown } | undefined;
+  if (typeof data?.detail === "string") return data.detail;
+
+  if (Array.isArray(data?.detail) && data.detail.length > 0) {
+    const first = data.detail[0] as { msg?: string };
+    if (first?.msg) return first.msg;
+  }
+
+  return fallback;
+}
+
 export default function ServicosPage() {
   const [servicos, setServicos] = useState<Servico[]>([]);
   const [servicoBeingEdited, setServicoBeingEdited] = useState<Servico | null>(null);
@@ -38,27 +57,31 @@ export default function ServicosPage() {
 
   async function handleCreateSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const normalizedNome = nome.trim();
+    if (normalizedNome.length < 2) { setError("O nome do serviço deve ter no mínimo 2 caracteres."); return; }
     if (!preco.trim() || Number.isNaN(Number(preco))) { setError("Informe um preço válido."); return; }
     try {
-      const payload: CreateServicoDTO = { nome: nome.trim(), descricao: descricao.trim() || undefined, preco: Number(preco) };
+      const payload: CreateServicoDTO = { nome: normalizedNome, descricao: descricao.trim() || undefined, preco: Number(preco) };
       await createServico(payload);
       setFeedback("Serviço cadastrado com sucesso.");
       setNome(""); setDescricao(""); setPreco(""); setShowForm(false);
       await loadServicos();
-    } catch { setError("Erro ao cadastrar serviço."); }
+    } catch (error) { setError(getApiErrorMessage(error, "Erro ao cadastrar serviço.")); }
   }
 
   async function handleUpdateSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!servicoBeingEdited) return;
+    const normalizedNome = editNome.trim();
+    if (normalizedNome.length < 2) { setError("O nome do serviço deve ter no mínimo 2 caracteres."); return; }
     if (!editPreco.trim() || Number.isNaN(Number(editPreco))) { setError("Informe um preço válido."); return; }
     try {
-      const payload: UpdateServicoDTO = { nome: editNome.trim(), descricao: editDescricao.trim() || undefined, preco: Number(editPreco) };
+      const payload: UpdateServicoDTO = { nome: normalizedNome, descricao: editDescricao.trim(), preco: Number(editPreco) };
       await updateServico(servicoBeingEdited.id, payload);
       setFeedback("Serviço atualizado.");
       setServicoBeingEdited(null);
       await loadServicos();
-    } catch { setError("Erro ao atualizar serviço."); }
+    } catch (error) { setError(getApiErrorMessage(error, "Erro ao atualizar serviço.")); }
   }
 
   async function handleDelete(id: number) {
@@ -97,7 +120,7 @@ export default function ServicosPage() {
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="sm:col-span-1">
               <label className="mb-1 block text-xs font-medium text-gray-500">Nome *</label>
-              <input className={inputCls} placeholder="Ex: Banho e Tosa" value={nome} onChange={(e) => setNome(e.target.value)} required />
+              <input minLength={2} className={inputCls} placeholder="Ex: Banho e Tosa" value={nome} onChange={(e) => setNome(e.target.value)} required />
             </div>
             <div className="sm:col-span-1">
               <label className="mb-1 block text-xs font-medium text-gray-500">Descrição</label>
@@ -122,7 +145,7 @@ export default function ServicosPage() {
           <div className="grid gap-4 sm:grid-cols-3">
             <div>
               <label className="mb-1 block text-xs font-medium text-gray-500">Nome *</label>
-              <input className={inputCls} value={editNome} onChange={(e) => setEditNome(e.target.value)} required />
+              <input minLength={2} className={inputCls} value={editNome} onChange={(e) => setEditNome(e.target.value)} required />
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-gray-500">Descrição</label>
