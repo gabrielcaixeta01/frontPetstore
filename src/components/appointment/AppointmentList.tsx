@@ -40,6 +40,16 @@ export default function AppointmentList({
 }: AppointmentListProps) {
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
+  function renderObservacoes(text?: string) {
+    if (!text) return null;
+    const max = 50;
+    return (
+      <p title={text} className="text-sm text-gray-600">
+        {text.length > max ? `${text.slice(0, max)}…` : text}
+      </p>
+    );
+  }
+
   if (appointments.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-10 text-center text-sm text-gray-400">
@@ -126,7 +136,7 @@ export default function AppointmentList({
                   {apt.observacoes && (
                     <div className="sm:col-span-2">
                       <p className="mb-1 text-xs font-medium text-gray-400">Observações</p>
-                      <p className="text-sm text-gray-600">{apt.observacoes}</p>
+                      {renderObservacoes(apt.observacoes)}
                     </div>
                   )}
                   {items.length > 0 && (

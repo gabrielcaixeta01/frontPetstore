@@ -193,7 +193,7 @@ export default function ClienteAtendimentosPage() {
                       {at.observacoes && (
                         <div className="sm:col-span-2">
                           <p className="text-xs font-medium text-gray-400">Observações</p>
-                          <p className="mt-0.5 text-sm text-gray-600">{at.observacoes}</p>
+                          <p title={at.observacoes} className="mt-0.5 text-sm text-gray-600">{at.observacoes.length > 50 ? `${at.observacoes.slice(0,50)}…` : at.observacoes}</p>
                         </div>
                       )}
                       {at.items?.length > 0 && (

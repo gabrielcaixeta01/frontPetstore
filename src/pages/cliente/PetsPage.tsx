@@ -30,6 +30,7 @@ const sexoOpts = [
   { value: "macho", label: "Macho" },
   { value: "femea", label: "Fêmea" },
 ];
+const MAX_OBSERVACOES_SAUDE = 50;
 
 type PetForm = {
   nome: string;
@@ -111,9 +112,21 @@ export default function ClientePetsPage() {
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.nome.trim() || !form.raca.trim() || !form.categoria_id) { setError("Nome, raça e categoria são obrigatórios."); return; }
+    const normalizedNome = form.nome.trim();
+    const normalizedRaca = form.raca.trim();
+    const normalizedPeso = form.peso ? Number(form.peso) : undefined;
+    let normalizedObservacoes = form.observacoes_saude.trim();
+
+    if (normalizedNome.length < 2) { setError("O nome do pet deve ter no mínimo 2 caracteres."); return; }
+    if (!normalizedRaca || !form.categoria_id) { setError("Raça e categoria são obrigatórias."); return; }
+    if (normalizedPeso !== undefined && (!Number.isFinite(normalizedPeso) || normalizedPeso <= 0)) { setError("O peso do pet deve ser maior que 0."); return; }
+    if (normalizedObservacoes.length > MAX_OBSERVACOES_SAUDE) {
+      normalizedObservacoes = normalizedObservacoes.slice(0, MAX_OBSERVACOES_SAUDE);
+      alert(`Observações muito longas — truncadas para ${MAX_OBSERVACOES_SAUDE} caracteres.`);
+    }
     try {
-      await createPet(f(form));
+      const payload = f({ ...form, observacoes_saude: normalizedObservacoes });
+      await createPet(payload);
       setFeedback("Pet cadastrado com sucesso!");
       setForm(emptyForm);
       setShowForm(false);
@@ -132,14 +145,27 @@ export default function ClientePetsPage() {
       return;
     }
 
+    const normalizedNome = editForm.nome.trim();
+    const normalizedRaca = editForm.raca.trim();
+    const normalizedPeso = editForm.peso ? Number(editForm.peso) : undefined;
+    let normalizedObservacoes = editForm.observacoes_saude.trim();
+
+    if (normalizedNome.length < 2) { setError("O nome do pet deve ter no mínimo 2 caracteres."); return; }
+    if (!normalizedRaca || !editForm.categoria_id) { setError("Raça e categoria são obrigatórias."); return; }
+    if (normalizedPeso !== undefined && (!Number.isFinite(normalizedPeso) || normalizedPeso <= 0)) { setError("O peso do pet deve ser maior que 0."); return; }
+    if (normalizedObservacoes.length > MAX_OBSERVACOES_SAUDE) {
+      normalizedObservacoes = normalizedObservacoes.slice(0, MAX_OBSERVACOES_SAUDE);
+      alert(`Observações muito longas — truncadas para ${MAX_OBSERVACOES_SAUDE} caracteres.`);
+    }
+
     try {
       const payload: UpdatePetDTO = {
-        nome: editForm.nome.trim(),
-        raca: editForm.raca.trim() || undefined,
+        nome: normalizedNome,
+        raca: normalizedRaca || undefined,
         sexo: (editForm.sexo as Pet["sexo"]) || undefined,
         porte: (editForm.porte as Pet["porte"]) || undefined,
-        peso: editForm.peso ? Number(editForm.peso) : undefined,
-        observacoes_saude: editForm.observacoes_saude.trim(),
+        peso: normalizedPeso,
+        observacoes_saude: normalizedObservacoes,
         categoria_id: Number(editForm.categoria_id),
         dono_id: resolvedUserId,
       };
@@ -160,6 +186,16 @@ export default function ClientePetsPage() {
   }
 
   const catById = Object.fromEntries(categorias.map((c) => [c.id, c.name]));
+
+  function renderObservacoes(text?: string) {
+    if (!text) return null;
+    const max = 50;
+    return (
+      <p title={text} className="mt-2 rounded-lg bg-yellow-50 px-2 py-1.5 text-yellow-700">
+        {text.length > max ? `${text.slice(0, max)}…` : text}
+      </p>
+    );
+  }
 
   return (
     <div className="px-8 py-8">
@@ -196,7 +232,7 @@ export default function ClientePetsPage() {
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <div className="lg:col-span-2">
               <label className="mb-1 block text-xs font-medium text-gray-500">Nome *</label>
-              <input className={inputCls} placeholder="Nome do pet" value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} required />
+              <input minLength={2} className={inputCls} placeholder="Nome do pet" value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} required />
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-gray-500">Categoria *</label>
@@ -227,7 +263,7 @@ export default function ClientePetsPage() {
             </div>
             <div className="sm:col-span-2 lg:col-span-2">
               <label className="mb-1 block text-xs font-medium text-gray-500">Observações de saúde</label>
-              <input className={inputCls} placeholder="Alergias, medicamentos, etc." value={form.observacoes_saude} onChange={(e) => setForm({ ...form, observacoes_saude: e.target.value })} />
+              <input maxLength={MAX_OBSERVACOES_SAUDE} className={inputCls} placeholder="Alergias, medicamentos, etc." value={form.observacoes_saude} onChange={(e) => setForm({ ...form, observacoes_saude: e.target.value })} />
             </div>
           </div>
           <div className="mt-4 flex gap-2">
@@ -261,7 +297,7 @@ export default function ClientePetsPage() {
               {editingPet?.id === pet.id ? (
                 <form onSubmit={handleUpdate} className="space-y-3">
                   <h3 className="mb-2 font-semibold text-gray-800">Editar Pet</h3>
-                  <input className={inputCls} placeholder="Nome" value={editForm.nome} onChange={(e) => setEditForm({ ...editForm, nome: e.target.value })} required />
+                  <input minLength={2} className={inputCls} placeholder="Nome" value={editForm.nome} onChange={(e) => setEditForm({ ...editForm, nome: e.target.value })} required />
                   <select className={selectCls} value={editForm.categoria_id} onChange={(e) => setEditForm({ ...editForm, categoria_id: e.target.value })}>
                     <option value="">Categoria...</option>
                     {categorias.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -276,7 +312,7 @@ export default function ClientePetsPage() {
                     </select>
                   </div>
                   <input type="number" step="0.1" min="0" className={inputCls} placeholder="Peso (kg)" value={editForm.peso} onChange={(e) => setEditForm({ ...editForm, peso: e.target.value })} />
-                  <input className={inputCls} placeholder="Observações de saúde" value={editForm.observacoes_saude} onChange={(e) => setEditForm({ ...editForm, observacoes_saude: e.target.value })} />
+                  <input maxLength={MAX_OBSERVACOES_SAUDE} className={inputCls} placeholder="Observações de saúde" value={editForm.observacoes_saude} onChange={(e) => setEditForm({ ...editForm, observacoes_saude: e.target.value })} />
                   <div className="flex gap-2 pt-1">
                     <button type="submit" className="flex-1 rounded-xl bg-[#1c46f3] py-2 text-sm font-semibold text-white transition hover:opacity-90">Salvar</button>
                     <button type="button" onClick={() => setEditingPet(null)} className="rounded-xl border border-gray-200 px-4 py-2 text-sm text-gray-600 transition hover:bg-gray-50">✕</button>
@@ -298,7 +334,7 @@ export default function ClientePetsPage() {
                     {pet.sexo && <p><span className="font-medium text-gray-700">Sexo:</span> <span className="capitalize">{pet.sexo}</span></p>}
                     {pet.porte && <p><span className="font-medium text-gray-700">Porte:</span> <span className="capitalize">{pet.porte}</span></p>}
                     {pet.peso != null && <p><span className="font-medium text-gray-700">Peso:</span> {pet.peso} kg</p>}
-                    {pet.observacoes_saude && <p className="mt-2 rounded-lg bg-yellow-50 px-2 py-1.5 text-yellow-700">{pet.observacoes_saude}</p>}
+                    {renderObservacoes(pet.observacoes_saude)}
                   </div>
                   <div className="mt-4 flex gap-2">
                     <button onClick={() => setEditingPet(pet)} className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-gray-200 py-2 text-xs font-medium text-gray-600 transition hover:bg-gray-50">

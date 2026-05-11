@@ -35,6 +35,7 @@ interface PetFormProps {
 
 const inputCls = "w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white focus:ring-2 focus:ring-[#1c46f3]/15";
 const selectCls = inputCls + " appearance-none";
+const MAX_OBSERVACOES_SAUDE = 50;
 
 export default function PetForm({ petBeingEdited, onCreate, onUpdate, onCancelEdit }: PetFormProps) {
   const isCliente = getStoredRole() === "cliente";
@@ -108,13 +109,39 @@ export default function PetForm({ petBeingEdited, onCreate, onUpdate, onCancelEd
     const ownerValue = isCliente ? currentUserId! : ownerId;
     if (!ownerValue) { alert(isCliente ? "Não foi possível identificar o cliente." : "Selecione o dono do pet."); return; }
 
+    const normalizedNome = nome.trim();
+    const normalizedRaca = raca.trim();
+    let normalizedObservacoes = observacoes.trim();
+    const normalizedPeso = peso.trim() ? Number(peso) : undefined;
+
+    if (normalizedNome.length < 2) {
+      alert("O nome do pet deve ter no mínimo 2 caracteres.");
+      return;
+    }
+
+    if (!normalizedRaca) {
+      alert("A raça do pet é obrigatória.");
+      return;
+    }
+
+    if (normalizedPeso !== undefined && (!Number.isFinite(normalizedPeso) || normalizedPeso <= 0)) {
+      alert("O peso do pet deve ser maior que 0.");
+      return;
+    }
+
+    if (normalizedObservacoes.length > MAX_OBSERVACOES_SAUDE) {
+      normalizedObservacoes = normalizedObservacoes.slice(0, MAX_OBSERVACOES_SAUDE);
+      setObservacoes(normalizedObservacoes);
+      alert(`Observações muito longas — truncadas para ${MAX_OBSERVACOES_SAUDE} caracteres.`);
+    }
+
     const payload = {
-      nome: nome.trim(),
-      raca: raca.trim() || undefined,
+      nome: normalizedNome,
+      raca: normalizedRaca || undefined,
       sexo: (sexo || undefined) as CreatePetDTO["sexo"],
       porte: (porte || undefined) as CreatePetDTO["porte"],
-      peso: peso.trim() ? Number(peso) : undefined,
-      observacoes_saude: observacoes.trim() || undefined,
+      peso: normalizedPeso,
+      observacoes_saude: normalizedObservacoes,
       categoria_id: Number(categoriaId),
       dono_id: ownerValue,
     };
@@ -233,7 +260,7 @@ export default function PetForm({ petBeingEdited, onCreate, onUpdate, onCancelEd
         {/* Observações */}
         <div className="space-y-1.5 sm:col-span-2 lg:col-span-1">
           <label className="block text-xs font-medium text-gray-500">Observações de saúde</label>
-          <input className={inputCls} placeholder="Alergias, medicamentos..." value={observacoes} onChange={(e) => setObservacoes(e.target.value)} />
+          <input maxLength={MAX_OBSERVACOES_SAUDE} className={inputCls} placeholder="Alergias, medicamentos..." value={observacoes} onChange={(e) => setObservacoes(e.target.value)} />
         </div>
       </div>
 
