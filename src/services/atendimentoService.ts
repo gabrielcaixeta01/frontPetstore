@@ -68,6 +68,20 @@ type ApiAppointmentService = {
   observations?: string | null;
 };
 
+function normalizeAppointmentStatus(status?: string): 'agendado' | 'concluido' | 'cancelado' {
+  const normalized = (status ?? '').toLowerCase();
+
+  if (normalized === 'concluído' || normalized === 'concluido' || normalized === 'completed') {
+    return 'concluido';
+  }
+
+  if (normalized === 'cancelado' || normalized === 'canceled' || normalized === 'cancelled') {
+    return 'cancelado';
+  }
+
+  return 'agendado';
+}
+
 function toAppointmentItem(item: ApiAppointmentItem): AppointmentItem {
   return {
     appointment_id: item.appointment_id ?? item.atendimento_id ?? 0,
@@ -96,7 +110,7 @@ function toAtendimento(appointment: ApiAppointment): Atendimento {
       "",
     forma_pagamento:
       appointment.payment_type ?? appointment.forma_pagamento ?? "pix",
-    status: appointment.status,
+    status: normalizeAppointmentStatus(appointment.status),
     online: appointment.online,
     observacoes: appointment.observations ?? appointment.observacoes ?? undefined,
     loja_id: appointment.store_id ?? appointment.loja_id ?? 0,

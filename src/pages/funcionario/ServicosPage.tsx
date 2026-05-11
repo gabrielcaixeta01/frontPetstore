@@ -6,6 +6,18 @@ import type { CreateServicoDTO, Servico, UpdateServicoDTO } from "../../types/se
 
 const inputCls = "w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white focus:ring-2 focus:ring-[#1c46f3]/15";
 
+function sanitizePriceInput(value: string) {
+  const cleaned = value.replace(/[^\d.,]/g, "").replace(/,/g, ".");
+  const [integerPart = "", decimalPart = ""] = cleaned.split(".");
+  const limitedInteger = integerPart.slice(0, 5);
+
+  if (decimalPart.length === 0) {
+    return limitedInteger;
+  }
+
+  return `${limitedInteger}.${decimalPart.slice(0, 2)}`;
+}
+
 function getApiErrorMessage(error: unknown, fallback: string) {
   if (typeof error !== "object" || error === null) return fallback;
 
@@ -128,7 +140,16 @@ export default function ServicosPage() {
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-gray-500">Preço (R$) *</label>
-              <input type="number" step="0.01" min="0" className={inputCls} placeholder="0,00" value={preco} onChange={(e) => setPreco(e.target.value)} required />
+              <input
+                type="text"
+                inputMode="decimal"
+                maxLength={10}
+                className={inputCls}
+                placeholder="0,00"
+                value={preco}
+                onChange={(e) => setPreco(sanitizePriceInput(e.target.value))}
+                required
+              />
             </div>
           </div>
           <div className="mt-4 flex gap-2">
@@ -153,7 +174,15 @@ export default function ServicosPage() {
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-gray-500">Preço (R$) *</label>
-              <input type="number" step="0.01" min="0" className={inputCls} value={editPreco} onChange={(e) => setEditPreco(e.target.value)} required />
+              <input
+                type="text"
+                inputMode="decimal"
+                maxLength={10}
+                className={inputCls}
+                value={editPreco}
+                onChange={(e) => setEditPreco(sanitizePriceInput(e.target.value))}
+                required
+              />
             </div>
           </div>
           <div className="flex gap-2">
