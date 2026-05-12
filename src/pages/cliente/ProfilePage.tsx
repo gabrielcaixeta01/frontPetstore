@@ -187,7 +187,7 @@ export default function ClienteProfilePage() {
 
   if (loading) {
     return (
-      <div className="px-8 py-8">
+      <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
         <p className="text-sm text-gray-400">Carregando perfil...</p>
       </div>
     );
@@ -195,7 +195,7 @@ export default function ClienteProfilePage() {
 
   if (!profile) {
     return (
-      <div className="px-8 py-8">
+      <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
         <p className="text-sm text-red-500">Não foi possível carregar o perfil.</p>
       </div>
     );
@@ -211,13 +211,13 @@ export default function ClienteProfilePage() {
   const cityValue = cp?.city ?? "";
 
   return (
-    <div className="px-8 py-8">
+    <div className="mx-auto w-full max-w-2xl px-4 py-6 sm:px-6 sm:py-8">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Meu Perfil</h1>
         <p className="mt-0.5 text-sm text-gray-500">Suas informações cadastradas no Apex Petstore.</p>
       </div>
 
-      <div className="mx-auto max-w-2xl space-y-5">
+      <div className="space-y-5">
         {/* Avatar card */}
         <div className="flex items-center gap-5 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
           <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#1c46f3] to-[#00bb69] text-xl font-bold text-white shadow-md shadow-[#1c46f3]/20">
@@ -243,10 +243,10 @@ export default function ClienteProfilePage() {
           <button
             type="button"
             onClick={startEditing}
-            className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
+            className="flex shrink-0 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 sm:px-4"
           >
             <Pencil size={14} />
-            Editar perfil
+            <span className="hidden sm:inline">Editar perfil</span>
           </button>
         </div>
 

@@ -76,7 +76,7 @@ export default function ClienteAtendimentosPage() {
   };
 
   return (
-    <div className="px-8 py-8">
+    <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Meus Atendimentos</h1>
         <p className="mt-0.5 text-sm text-gray-500">Histórico de todos os seus atendimentos no Apex Petstore.</p>
@@ -123,12 +123,12 @@ export default function ClienteAtendimentosPage() {
             return (
               <div key={at.id} className="rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:shadow-md">
                 <div
-                  className="flex cursor-pointer items-center gap-4 px-5 py-4"
+                  className="flex cursor-pointer items-center gap-2 px-4 py-3.5 sm:gap-4 sm:px-5 sm:py-4"
                   onClick={() => setExpandedId(isExpanded ? null : at.id)}
                 >
                   {/* Date circle */}
-                  <div className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-xl bg-[#1c46f3]/8 text-[#1c46f3]">
-                    <span className="text-lg font-bold leading-none">
+                  <div className="flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-xl bg-[#1c46f3]/8 text-[#1c46f3] sm:h-12 sm:w-12">
+                    <span className="text-sm font-bold leading-none sm:text-lg">
                       {new Date(at.data_atendimento).getDate().toString().padStart(2, "0")}
                     </span>
                     <span className="text-xs font-medium">
@@ -136,43 +136,49 @@ export default function ClienteAtendimentosPage() {
                     </span>
                   </div>
 
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className={`flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${cfg.cls}`}>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold sm:px-2.5 ${cfg.cls}`}>
                         <cfg.icon size={11} />
                         {cfg.label}
                       </span>
                       {at.online && (
-                        <span className="rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700">
+                        <span className="rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700">
                           Online
                         </span>
                       )}
                     </div>
-                    <div className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-sm text-gray-500">
+                    <div className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-gray-400 sm:gap-x-4 sm:text-sm sm:text-gray-500">
                       {lojasById[at.loja_id] && (
-                        <span className="flex items-center gap-1.5">
-                          <Store size={12} className="text-gray-400" />
+                        <span className="flex items-center gap-1">
+                          <Store size={11} className="text-gray-400" />
                           {lojasById[at.loja_id]}
                         </span>
                       )}
                       {petsById[at.pet_id] && (
-                        <span className="flex items-center gap-1.5">
-                          <PawPrint size={12} className="text-gray-400" />
+                        <span className="flex items-center gap-1">
+                          <PawPrint size={11} className="text-gray-400" />
                           {petsById[at.pet_id]}
                         </span>
                       )}
                     </div>
+                    {/* Value inline on mobile */}
+                    <p className="mt-0.5 text-sm font-bold text-gray-900 sm:hidden">
+                      R$ {Number(at.valor_final).toFixed(2)}
+                      <span className="ml-1 text-xs font-normal text-gray-400">{pgmtLabel[at.forma_pagamento] ?? at.forma_pagamento}</span>
+                    </p>
                   </div>
 
-                  <div className="shrink-0 text-right">
+                  {/* Value — desktop only */}
+                  <div className="hidden shrink-0 text-right sm:block">
                     <p className="text-lg font-bold text-gray-900">R$ {Number(at.valor_final).toFixed(2)}</p>
                     <p className="text-xs text-gray-400">{pgmtLabel[at.forma_pagamento] ?? at.forma_pagamento}</p>
                   </div>
 
                   {isExpanded ? (
-                    <ChevronUp size={16} className="shrink-0 text-gray-400" />
+                    <ChevronUp size={15} className="shrink-0 text-gray-400" />
                   ) : (
-                    <ChevronDown size={16} className="shrink-0 text-gray-400" />
+                    <ChevronDown size={15} className="shrink-0 text-gray-400" />
                   )}
                 </div>
 

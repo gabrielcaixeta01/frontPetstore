@@ -213,7 +213,7 @@ export default function ClientePetsPage() {
   }
 
   return (
-    <div className="px-8 py-8">
+    <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>

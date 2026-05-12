@@ -15,7 +15,7 @@ export default function ClienteServicosPage() {
   }, []);
 
   return (
-    <div className="px-8 py-8">
+    <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Serviços</h1>
         <p className="mt-0.5 text-sm text-gray-500">Conheça todos os serviços que oferecemos para o seu pet.</p>

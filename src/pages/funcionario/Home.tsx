@@ -94,7 +94,7 @@ export default function FuncionarioHome() {
   ];
 
   return (
-    <div className="px-8 py-8">
+    <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
       {/* Greeting */}
       <div className="mb-8">
         <p className="text-sm text-gray-400">

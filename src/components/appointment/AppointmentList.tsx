@@ -14,11 +14,11 @@ type AppointmentListProps = {
 };
 
 const statusCfg: Record<string, { label: string; icon: typeof Clock; cls: string; dot: string }> = {
-  agendado:    { label: "Agendado",  icon: Clock,         cls: "text-yellow-700 bg-yellow-50 border-yellow-200",  dot: "bg-yellow-400" },
-  concluido:   { label: "Concluído", icon: CheckCircle2,  cls: "text-emerald-700 bg-emerald-50 border-emerald-200", dot: "bg-emerald-400" },
-  cancelado:   { label: "Cancelado", icon: XCircle,       cls: "text-red-600 bg-red-50 border-red-200",           dot: "bg-red-400" },
-  pendente:    { label: "Pendente",  icon: Clock,         cls: "text-yellow-700 bg-yellow-50 border-yellow-200",  dot: "bg-yellow-400" },
-  em_andamento:{ label: "Em andamento", icon: Clock,      cls: "text-blue-700 bg-blue-50 border-blue-200",        dot: "bg-blue-400" },
+  agendado:     { label: "Agendado",     icon: Clock,        cls: "text-yellow-700 bg-yellow-50 border-yellow-200",   dot: "bg-yellow-400" },
+  concluido:    { label: "Concluído",    icon: CheckCircle2, cls: "text-emerald-700 bg-emerald-50 border-emerald-200", dot: "bg-emerald-400" },
+  cancelado:    { label: "Cancelado",    icon: XCircle,      cls: "text-red-600 bg-red-50 border-red-200",            dot: "bg-red-400" },
+  pendente:     { label: "Pendente",     icon: Clock,        cls: "text-yellow-700 bg-yellow-50 border-yellow-200",   dot: "bg-yellow-400" },
+  em_andamento: { label: "Em andamento", icon: Clock,        cls: "text-blue-700 bg-blue-50 border-blue-200",         dot: "bg-blue-400" },
 };
 
 const pgmtLabel: Record<string, string> = {
@@ -40,16 +40,6 @@ export default function AppointmentList({
 }: AppointmentListProps) {
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
-  function renderObservacoes(text?: string) {
-    if (!text) return null;
-    const max = 50;
-    return (
-      <p title={text} className="text-sm text-gray-600">
-        {text.length > max ? `${text.slice(0, max)}…` : text}
-      </p>
-    );
-  }
-
   if (appointments.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-10 text-center text-sm text-gray-400">
@@ -69,24 +59,24 @@ export default function AppointmentList({
         return (
           <div key={apt.id} className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:shadow-md">
             {/* Main row */}
-            <div className="flex items-center gap-4 px-5 py-4">
-              {/* Date */}
-              <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-xl bg-[#1c46f3]/8 text-[#1c46f3]">
-                <span className="text-base font-bold leading-none">{day}</span>
+            <div className="flex items-center gap-2 px-4 py-3.5 sm:gap-4 sm:px-5 sm:py-4">
+              {/* Date circle */}
+              <div className="flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-xl bg-[#1c46f3]/8 text-[#1c46f3] sm:h-11 sm:w-11">
+                <span className="text-sm font-bold leading-none sm:text-base">{day}</span>
                 <span className="text-xs font-medium">{month}</span>
               </div>
 
-              {/* Status + links */}
+              {/* Status + meta info */}
               <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className={`flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${cfg.cls}`}>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold sm:px-2.5 ${cfg.cls}`}>
                     <cfg.icon size={11} /> {cfg.label}
                   </span>
                   {apt.online && (
                     <span className="rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">Online</span>
                   )}
                 </div>
-                <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-gray-400">
+                <div className="mt-0.5 flex flex-wrap gap-x-2 gap-y-0.5 text-xs text-gray-400 sm:gap-x-3">
                   {lojasById[apt.loja_id] && (
                     <span className="flex items-center gap-1"><Store size={11} />{lojasById[apt.loja_id]}</span>
                   )}
@@ -100,15 +90,20 @@ export default function AppointmentList({
                     <span className="flex items-center gap-1"><PawPrint size={11} />{petsById[apt.pet_id]}</span>
                   )}
                 </div>
+                {/* Value shown inline on mobile */}
+                <p className="mt-0.5 text-sm font-bold text-gray-900 sm:hidden">
+                  R$ {Number(apt.valor_final).toFixed(2)}
+                  <span className="ml-1 text-xs font-normal text-gray-400">{pgmtLabel[apt.forma_pagamento] ?? apt.forma_pagamento}</span>
+                </p>
               </div>
 
-              {/* Value */}
-              <div className="shrink-0 text-right">
+              {/* Value — desktop only */}
+              <div className="hidden shrink-0 text-right sm:block">
                 <p className="text-base font-bold text-gray-900">R$ {Number(apt.valor_final).toFixed(2)}</p>
                 <p className="text-xs text-gray-400">{pgmtLabel[apt.forma_pagamento] ?? apt.forma_pagamento}</p>
               </div>
 
-              {/* Expand */}
+              {/* Expand button */}
               <button
                 onClick={() => setExpandedId(isExpanded ? null : apt.id)}
                 className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-gray-200 text-gray-400 transition hover:bg-gray-50"
@@ -116,8 +111,8 @@ export default function AppointmentList({
                 {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
               </button>
 
-              {/* Actions */}
-              <div className="flex shrink-0 gap-1.5">
+              {/* Edit + Delete — desktop only */}
+              <div className="hidden shrink-0 gap-1.5 sm:flex">
                 <button onClick={() => onEdit(apt)} title="Editar"
                   className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:bg-gray-100">
                   <Pencil size={13} />
@@ -131,12 +126,14 @@ export default function AppointmentList({
 
             {/* Expanded details */}
             {isExpanded && (
-              <div className="border-t border-gray-50 bg-gray-50/50 px-5 py-4">
+              <div className="border-t border-gray-50 bg-gray-50/50 px-4 py-4 sm:px-5">
                 <div className="grid gap-4 sm:grid-cols-2">
                   {apt.observacoes && (
                     <div className="sm:col-span-2">
                       <p className="mb-1 text-xs font-medium text-gray-400">Observações</p>
-                      {renderObservacoes(apt.observacoes)}
+                      <p className="text-sm text-gray-600">
+                        {apt.observacoes.length > 50 ? `${apt.observacoes.slice(0, 50)}…` : apt.observacoes}
+                      </p>
                     </div>
                   )}
                   {items.length > 0 && (
@@ -156,6 +153,22 @@ export default function AppointmentList({
                   {items.length === 0 && !apt.observacoes && (
                     <p className="text-xs text-gray-400">Nenhum detalhe adicional.</p>
                   )}
+                </div>
+
+                {/* Mobile actions — shown only in expanded view */}
+                <div className="mt-4 flex gap-2 border-t border-gray-100 pt-3 sm:hidden">
+                  <button
+                    onClick={() => onEdit(apt)}
+                    className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-gray-200 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100"
+                  >
+                    <Pencil size={13} /> Editar
+                  </button>
+                  <button
+                    onClick={() => onDelete(apt.id)}
+                    className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-red-100 py-2 text-sm font-medium text-red-500 transition hover:bg-red-50"
+                  >
+                    <Trash2 size={13} /> Excluir
+                  </button>
                 </div>
               </div>
             )}

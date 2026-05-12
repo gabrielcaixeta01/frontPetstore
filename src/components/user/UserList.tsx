@@ -28,8 +28,8 @@ export default function UserList({ users, onEdit, onDelete }: UserListProps) {
 
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
-      {/* Header */}
-      <div className="grid grid-cols-[1fr_160px_90px_88px] gap-4 border-b border-gray-100 bg-gray-50 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+      {/* Desktop header — hidden on mobile */}
+      <div className="hidden border-b border-gray-100 bg-gray-50 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400 sm:grid sm:grid-cols-[1fr_160px_90px_88px] sm:gap-4">
         <span>Usuário</span>
         <span>Tipo</span>
         <span>Status</span>
@@ -39,40 +39,60 @@ export default function UserList({ users, onEdit, onDelete }: UserListProps) {
       <div className="divide-y divide-gray-50">
         {users.map((user) => {
           const cfg = perfilCfg[user.tipo_perfil] ?? { label: user.tipo_perfil, cls: "bg-gray-100 text-gray-700 border-gray-200" };
+
           return (
             <div
               key={user.id}
-              className="grid grid-cols-[1fr_160px_90px_88px] items-center gap-4 px-5 py-3.5 transition hover:bg-gray-50/60"
+              className="flex items-center gap-3 px-4 py-3.5 transition hover:bg-gray-50/60 sm:grid sm:grid-cols-[1fr_160px_90px_88px] sm:gap-4 sm:px-5"
             >
-              {/* Name + email */}
-              <div className="flex min-w-0 items-center gap-3">
+              {/* Col 1 — Avatar + name + email (+ mobile badges) */}
+              <div className="flex min-w-0 flex-1 items-center gap-3 sm:flex-none">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#1c46f3]/15 to-[#00bb69]/15 text-xs font-bold text-[#1c46f3]">
                   {getInitials(user.nome)}
                 </div>
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold text-gray-900">{user.nome}</p>
                   <p className="truncate text-xs text-gray-400">{user.email}</p>
+                  {/* Mobile-only badges */}
+                  <div className="mt-1.5 flex flex-wrap items-center gap-1.5 sm:hidden">
+                    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${cfg.cls}`}>
+                      {cfg.label}
+                    </span>
+                    {user.ativo ? (
+                      <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600">
+                        <CheckCircle size={11} /> Ativo
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-xs font-medium text-red-500">
+                        <XCircle size={11} /> Inativo
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {/* Tipo */}
-              <span className={`inline-flex w-fit items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${cfg.cls}`}>
-                {cfg.label}
-              </span>
-
-              {/* Status */}
-              {user.ativo ? (
-                <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600">
-                  <CheckCircle size={12} /> Ativo
+              {/* Col 2 — Tipo (desktop only) */}
+              <div className="hidden sm:block">
+                <span className={`inline-flex w-fit items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${cfg.cls}`}>
+                  {cfg.label}
                 </span>
-              ) : (
-                <span className="inline-flex items-center gap-1 text-xs font-medium text-red-500">
-                  <XCircle size={12} /> Inativo
-                </span>
-              )}
+              </div>
 
-              {/* Actions */}
-              <div className="flex justify-end gap-1.5">
+              {/* Col 3 — Status (desktop only) */}
+              <div className="hidden sm:flex sm:items-center">
+                {user.ativo ? (
+                  <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600">
+                    <CheckCircle size={12} /> Ativo
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-xs font-medium text-red-500">
+                    <XCircle size={12} /> Inativo
+                  </span>
+                )}
+              </div>
+
+              {/* Col 4 — Actions (always visible) */}
+              <div className="flex shrink-0 gap-1.5 sm:justify-end">
                 <button
                   onClick={() => onEdit(user)}
                   title="Editar"

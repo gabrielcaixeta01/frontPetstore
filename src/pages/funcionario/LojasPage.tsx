@@ -181,7 +181,7 @@ export default function LojasPage() {
   const inputClass = "w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white focus:ring-2 focus:ring-[#1c46f3]/15";
 
   return (
-    <div className="px-8 py-8">
+    <div className="px-4 py-6 sm:px-6 sm:py-8">
       <div className="mx-auto max-w-6xl space-y-8">
         <div className="mb-6 flex items-center justify-between">
           <div>
