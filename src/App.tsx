@@ -2,7 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-route
 
 // Public shell (unauthenticated)
 import Navbar from "./components/Navbar";
-import PublicHome from "./pages/funcionario/Home";
+import PublicHome from "./pages/Home";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 
