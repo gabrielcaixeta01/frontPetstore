@@ -1,11 +1,21 @@
-import { useEffect, useState } from "react";
-import { PawPrint, Plus, Pencil, Trash2, X, Check } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { PawPrint, Plus, Pencil, Trash2, X, Check, AlertCircle } from "lucide-react";
 import { getCategories } from "../../services/categoriaService";
 import { createPet, deletePet, getPets, updatePet } from "../../services/petService";
+import { getAppointments } from "../../services/atendimentoService";
 import { getTags } from "../../services/tagService";
 import type { Categoria } from "../../types/categoria";
 import type { CreatePetDTO, Pet, UpdatePetDTO } from "../../types/pet";
 import type { Etiqueta } from "../../types/tag";
+import type { Appointment } from "../../types/atendimento";
+
+function tagColor(nome: string): string {
+  const n = nome.toLowerCase();
+  if (/alergi|alérgic|intoler/.test(n))          return "border-red-200 bg-red-50 text-red-700";
+  if (/alert|atenção|atencao|cuid|medo|ansio/.test(n)) return "border-amber-200 bg-amber-50 text-amber-700";
+  if (/vacin|castrad|microchip|vermífu|vermifug/.test(n)) return "border-emerald-200 bg-emerald-50 text-emerald-700";
+  return "border-[#1c46f3]/20 bg-[#1c46f3]/8 text-[#1c46f3]";
+}
 
 function getStoredUser() {
   try { return JSON.parse(localStorage.getItem("user") || "{}"); } catch { return {}; }
@@ -57,6 +67,7 @@ export default function ClientePetsPage() {
   const [editingPet, setEditingPet] = useState<Pet | null>(null);
   const [form, setForm] = useState<PetForm>(emptyForm);
   const [editForm, setEditForm] = useState<PetForm>(emptyForm);
+  const [atendimentos, setAtendimentos] = useState<Appointment[]>([]);
   const [tagIdsCriacao, setTagIdsCriacao] = useState<number[]>([]);
   const [tagIdsEdicao, setTagIdsEdicao] = useState<number[]>([]);
   const [feedback, setFeedback] = useState("");
@@ -81,6 +92,15 @@ export default function ClientePetsPage() {
     loadPets();
     getCategories().then(setCategorias).catch(console.error);
     getTags().then(setTagsDisponiveis).catch(console.error);
+    if (userId !== null) {
+      getAppointments()
+        .then((all) => setAtendimentos(
+          all
+            .filter((a) => a.cliente_id === userId)
+            .sort((a, b) => new Date(b.data_atendimento).getTime() - new Date(a.data_atendimento).getTime())
+        ))
+        .catch(console.error);
+    }
   }, []);
 
   useEffect(() => {
@@ -206,15 +226,14 @@ export default function ClientePetsPage() {
 
   const catById = Object.fromEntries(categorias.map((c) => [c.id, c.name]));
 
-  function renderObservacoes(text?: string) {
-    if (!text) return null;
-    const max = 50;
-    return (
-      <p title={text} className="mt-2 break-words rounded-lg bg-yellow-50 px-2 py-1.5 text-yellow-700">
-        {text.length > max ? `${text.slice(0, max)}…` : text}
-      </p>
-    );
-  }
+  const atendimentosByPetId = useMemo(() =>
+    atendimentos.reduce<Record<number, Appointment[]>>((acc, a) => {
+      if (!acc[a.pet_id]) acc[a.pet_id] = [];
+      acc[a.pet_id].push(a);
+      return acc;
+    }, {}),
+    [atendimentos]
+  );
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
@@ -312,6 +331,19 @@ export default function ClientePetsPage() {
         </form>
       )}
 
+      {/* Banner de alerta: pets com observações */}
+      {!loading && pets.some((p) => p.observacoes_saude) && (
+        <div className="mb-4 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+          <AlertCircle size={16} className="mt-0.5 shrink-0 text-amber-500" />
+          <p className="text-sm text-amber-700">
+            <span className="font-semibold">
+              {pets.filter((p) => p.observacoes_saude).length === 1 ? "1 pet tem" : `${pets.filter((p) => p.observacoes_saude).length} pets têm`}
+            </span>{" "}
+            observações de saúde — verifique os detalhes abaixo.
+          </p>
+        </div>
+      )}
+
       {/* Pets list */}
       {loading ? (
         <div className="rounded-2xl border border-gray-100 bg-white p-8 text-center text-sm text-gray-400">
@@ -371,31 +403,69 @@ export default function ClientePetsPage() {
                 </form>
               ) : (
                 <>
+                  {/* Header */}
                   <div className="mb-3 flex items-center gap-3">
                     <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#1c46f3]/15 to-[#00bb69]/15 text-lg font-bold text-[#1c46f3]">
                       {pet.nome[0]?.toUpperCase()}
                     </div>
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <h3 className="font-bold text-gray-900">{pet.nome}</h3>
                       <p className="text-xs text-gray-400">{catById[pet.categoria_id] ?? "—"}</p>
                     </div>
                   </div>
-                  <div className="space-y-1 text-xs text-gray-500">
-                    {pet.raca && <p><span className="font-medium text-gray-700">Raça:</span> {pet.raca}</p>}
-                    {pet.sexo && <p><span className="font-medium text-gray-700">Sexo:</span> <span className="capitalize">{pet.sexo}</span></p>}
-                    {pet.porte && <p><span className="font-medium text-gray-700">Porte:</span> <span className="capitalize">{pet.porte}</span></p>}
-                    {pet.peso != null && <p><span className="font-medium text-gray-700">Peso:</span> {pet.peso} kg</p>}
-                    {renderObservacoes(pet.observacoes_saude)}
-                  </div>
+
+                  {/* Info compacta */}
+                  <p className="truncate text-xs text-gray-500">
+                    {[
+                      pet.raca,
+                      pet.sexo && pet.sexo.charAt(0).toUpperCase() + pet.sexo.slice(1),
+                      pet.porte && pet.porte.charAt(0).toUpperCase() + pet.porte.slice(1),
+                      pet.peso != null && `${pet.peso} kg`,
+                    ].filter(Boolean).join(" · ") || "Sem detalhes"}
+                  </p>
+
+                  {/* Observações de saúde */}
+                  {pet.observacoes_saude && (
+                    <div className="mt-2 flex items-start gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-2.5 py-2">
+                      <AlertCircle size={12} className="mt-0.5 shrink-0 text-amber-500" />
+                      <p className="text-xs leading-relaxed text-amber-700 line-clamp-2">
+                        {pet.observacoes_saude}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Tags com cores semânticas */}
                   {pet.tags && pet.tags.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-1">
+                    <div className="mt-2.5 flex flex-wrap gap-1">
                       {pet.tags.map((tag) => (
-                        <span key={tag.id} className="rounded-full border border-[#1c46f3]/20 bg-[#1c46f3]/8 px-2 py-0.5 text-xs font-medium text-[#1c46f3]">
+                        <span key={tag.id} className={`rounded-full border px-2 py-0.5 text-xs font-medium ${tagColor(tag.nome)}`}>
                           {tag.nome}
                         </span>
                       ))}
                     </div>
                   )}
+
+                  {/* Mini histórico de atendimentos */}
+                  {(atendimentosByPetId[pet.id]?.length ?? 0) > 0 && (() => {
+                    const ats = atendimentosByPetId[pet.id];
+                    const gasto = ats.filter(a => a.status === "concluido").reduce((s, a) => s + Number(a.valor_final), 0);
+                    const ultimo = ats[0];
+                    return (
+                      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl bg-gray-50 px-3 py-2 text-xs text-gray-500">
+                        <span className="font-medium text-gray-700">{ats.length} {ats.length === 1 ? "visita" : "visitas"}</span>
+                        <span className="text-gray-300">·</span>
+                        <span>R$ {gasto.toFixed(2)} gasto</span>
+                        {ultimo && (
+                          <>
+                            <span className="text-gray-300">·</span>
+                            <span>último {new Date(ultimo.data_atendimento).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}</span>
+                          </>
+                        )}
+                      </div>
+                    );
+                  })()}
+
+                  {/* Ações */}
                   <div className="mt-4 flex gap-2">
                     <button onClick={() => setEditingPet(pet)} className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-gray-200 py-2 text-xs font-medium text-gray-600 transition hover:bg-gray-50">
                       <Pencil size={12} /> Editar
