@@ -107,7 +107,13 @@ export async function createUsuario(data: CreateUsuarioDTO): Promise<Usuario> {
       email: data.email,
       password: data.senha_hash,
       phone: data.telefone || undefined,
-      role: data.tipo_perfil,
+      profile_type: data.tipo_perfil,
+      cpf: data.cpf || undefined,
+      cnpj: data.cnpj || undefined,
+      client_type: data.client_type || undefined,
+      cep: data.cep || undefined,
+      state: data.state || undefined,
+      city: data.city || undefined,
     },
   });
   return toUsuario(response.data);

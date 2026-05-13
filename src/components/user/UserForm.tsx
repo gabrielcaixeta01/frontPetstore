@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { User, Mail, Phone, Lock, Building2, CreditCard, Eye, EyeOff, Plus } from "lucide-react";
+import { User, Mail, Phone, Lock, Building2, CreditCard, Eye, EyeOff, Plus, MapPin } from "lucide-react";
 import type { CreateUsuarioDTO, UpdateUsuarioDTO, Usuario } from "../../types/usuario";
 
 interface UserFormProps {
@@ -26,6 +26,10 @@ function maskCNPJ(v: string) {
     .replace(/(\d{4})(\d{1,2})$/, "$1-$2");
 }
 
+function maskCEP(v: string) {
+  return v.replace(/\D/g, "").slice(0, 8).replace(/(\d{5})(\d)/, "$1-$2");
+}
+
 export default function UserForm({ userBeingEdited, onCreate, onUpdate, onCancelEdit }: UserFormProps) {
   const [tipoPerfil, setTipoPerfil] = useState<"cliente" | "funcionario">(
     userBeingEdited?.tipo_perfil ?? "cliente"
@@ -39,10 +43,27 @@ export default function UserForm({ userBeingEdited, onCreate, onUpdate, onCancel
   const [cnpj, setCnpj] = useState(userBeingEdited?.cnpj ?? "");
   const [ativo, setAtivo] = useState(userBeingEdited?.ativo ?? true);
 
+  // Client-specific fields (create only)
+  const [clientType, setClientType] = useState<"pessoa_fisica" | "pessoa_juridica">("pessoa_fisica");
+  const [cep, setCep] = useState("");
+  const [estado, setEstado] = useState("");
+  const [cidade, setCidade] = useState("");
+
+  const [localError, setLocalError] = useState("");
+
   const isEditing = Boolean(userBeingEdited);
+  const isCliente = tipoPerfil === "cliente";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setLocalError("");
+
+    // Client-specific validation (create only)
+    if (!isEditing && isCliente) {
+      if (!cep.trim()) { setLocalError("CEP é obrigatório para clientes."); return; }
+      if (!estado.trim()) { setLocalError("Estado é obrigatório para clientes."); return; }
+      if (!cidade.trim()) { setLocalError("Cidade é obrigatória para clientes."); return; }
+    }
 
     if (isEditing && userBeingEdited) {
       const payload: UpdateUsuarioDTO = {
@@ -64,10 +85,17 @@ export default function UserForm({ userBeingEdited, onCreate, onUpdate, onCancel
         tipo_perfil: tipoPerfil,
         cpf: cpf || undefined,
         cnpj: cnpj || undefined,
+        ...(isCliente && {
+          client_type: clientType,
+          cep: cep.trim(),
+          state: estado.trim().toUpperCase(),
+          city: cidade.trim(),
+        }),
       };
       await onCreate(payload);
       setNome(""); setEmail(""); setSenha(""); setTelefone("");
       setTipoPerfil("cliente"); setCpf(""); setCnpj(""); setAtivo(true);
+      setClientType("pessoa_fisica"); setCep(""); setEstado(""); setCidade("");
     }
   }
 
@@ -82,20 +110,16 @@ export default function UserForm({ userBeingEdited, onCreate, onUpdate, onCancel
               type="button"
               onClick={() => { setTipoPerfil("cliente"); setCnpj(""); }}
               className={`flex items-center justify-center gap-2 rounded-xl border py-2.5 text-sm font-medium transition ${
-                tipoPerfil === "cliente"
-                  ? "border-[#1c46f3] bg-[#1c46f3]/8 text-[#1c46f3]"
-                  : "border-gray-200 text-gray-500 hover:border-gray-300"
+                isCliente ? "border-[#1c46f3] bg-[#1c46f3]/8 text-[#1c46f3]" : "border-gray-200 text-gray-500 hover:border-gray-300"
               }`}
             >
-              <User size={14} /> Pessoa Física
+              <User size={14} /> Cliente
             </button>
             <button
               type="button"
               onClick={() => { setTipoPerfil("funcionario"); setCpf(""); }}
               className={`flex items-center justify-center gap-2 rounded-xl border py-2.5 text-sm font-medium transition ${
-                tipoPerfil === "funcionario"
-                  ? "border-[#1c46f3] bg-[#1c46f3]/8 text-[#1c46f3]"
-                  : "border-gray-200 text-gray-500 hover:border-gray-300"
+                tipoPerfil === "funcionario" ? "border-[#1c46f3] bg-[#1c46f3]/8 text-[#1c46f3]" : "border-gray-200 text-gray-500 hover:border-gray-300"
               }`}
             >
               <Building2 size={14} /> Funcionário
@@ -108,7 +132,7 @@ export default function UserForm({ userBeingEdited, onCreate, onUpdate, onCancel
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-1.5">
           <label className="block text-xs font-medium text-gray-500">
-            {tipoPerfil === "funcionario" ? "Nome completo" : "Nome / Razão social"} *
+            {isCliente ? "Nome / Razão social" : "Nome completo"} *
           </label>
           <div className="relative">
             <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -154,6 +178,76 @@ export default function UserForm({ userBeingEdited, onCreate, onUpdate, onCancel
         </div>
       </div>
 
+      {/* Campos de endereço — somente clientes novos */}
+      {!isEditing && isCliente && (
+        <div className="space-y-4 rounded-2xl border border-gray-100 bg-gray-50/60 p-4">
+          <div className="flex items-center gap-2">
+            <MapPin size={14} className="text-[#1c46f3]" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">Endereço do cliente</span>
+          </div>
+
+          {/* Tipo de cliente */}
+          <div className="space-y-1.5">
+            <label className="block text-xs font-medium text-gray-500">Tipo de cliente *</label>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setClientType("pessoa_fisica")}
+                className={`rounded-xl border py-2 text-sm font-medium transition ${
+                  clientType === "pessoa_fisica" ? "border-[#1c46f3] bg-[#1c46f3]/8 text-[#1c46f3]" : "border-gray-200 bg-white text-gray-500 hover:border-gray-300"
+                }`}
+              >
+                Pessoa Física
+              </button>
+              <button
+                type="button"
+                onClick={() => setClientType("pessoa_juridica")}
+                className={`rounded-xl border py-2 text-sm font-medium transition ${
+                  clientType === "pessoa_juridica" ? "border-[#1c46f3] bg-[#1c46f3]/8 text-[#1c46f3]" : "border-gray-200 bg-white text-gray-500 hover:border-gray-300"
+                }`}
+              >
+                Pessoa Jurídica
+              </button>
+            </div>
+          </div>
+
+          {/* CEP + Estado + Cidade */}
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div className="space-y-1.5">
+              <label className="block text-xs font-medium text-gray-500">CEP *</label>
+              <input
+                type="text"
+                className={inputCls}
+                placeholder="00000-000"
+                value={cep}
+                onChange={(e) => setCep(maskCEP(e.target.value))}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-medium text-gray-500">Estado *</label>
+              <input
+                type="text"
+                className={inputCls}
+                placeholder="SP"
+                maxLength={2}
+                value={estado}
+                onChange={(e) => setEstado(e.target.value.toUpperCase())}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-medium text-gray-500">Cidade *</label>
+              <input
+                type="text"
+                className={inputCls}
+                placeholder="São Paulo"
+                value={cidade}
+                onChange={(e) => setCidade(e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Senha (só criação) */}
       {!isEditing && (
         <div className="space-y-1.5">
@@ -188,6 +282,13 @@ export default function UserForm({ userBeingEdited, onCreate, onUpdate, onCancel
           </div>
           <span className="text-sm text-gray-600">{ativo ? "Usuário ativo" : "Usuário inativo"}</span>
         </label>
+      )}
+
+      {/* Local error */}
+      {localError && (
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+          {localError}
+        </div>
       )}
 
       {/* Actions */}

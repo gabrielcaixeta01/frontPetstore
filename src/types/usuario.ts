@@ -38,6 +38,10 @@ export interface CreateUsuarioDTO {
   tipo_perfil: 'cliente' | 'funcionario';
   cpf?: string | null;
   cnpj?: string | null;
+  client_type?: 'pessoa_fisica' | 'pessoa_juridica';
+  cep?: string;
+  state?: string;
+  city?: string;
 }
 
 export interface UpdateUsuarioDTO {

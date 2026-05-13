@@ -38,6 +38,13 @@ export default function UsersPage() {
     loadUsers();
   }, []);
 
+  function extractApiError(err: unknown, fallback: string): string {
+    const detail = (err as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail;
+    if (typeof detail === "string") return detail;
+    if (Array.isArray(detail)) return detail.map((d: { msg?: string }) => d.msg ?? String(d)).join(" · ");
+    return fallback;
+  }
+
   async function handleCreateUser(data: CreateUsuarioDTO) {
     try {
       await createUsuario(data);
@@ -46,8 +53,7 @@ export default function UsersPage() {
       setShowForm(false);
       await loadUsers();
     } catch (err) {
-      console.error(err);
-      setError("Erro ao cadastrar usuário.");
+      setError(extractApiError(err, "Erro ao cadastrar usuário. Verifique os dados e tente novamente."));
     }
   }
 
@@ -58,8 +64,7 @@ export default function UsersPage() {
       setUserBeingEdited(null);
       await loadUsers();
     } catch (err) {
-      console.error(err);
-      setError("Erro ao atualizar usuário.");
+      setError(extractApiError(err, "Erro ao atualizar usuário."));
     }
   }
 
@@ -72,8 +77,7 @@ export default function UsersPage() {
       if (userBeingEdited?.id === id) setUserBeingEdited(null);
       await loadUsers();
     } catch (err) {
-      console.error(err);
-      setError("Erro ao excluir usuário.");
+      setError(extractApiError(err, "Erro ao excluir usuário."));
     }
   }
 
