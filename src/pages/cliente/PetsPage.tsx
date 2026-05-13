@@ -22,13 +22,13 @@ const inputCls = "w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.
 const selectCls = inputCls + " appearance-none";
 
 const porteOpts = [
-  { value: "", label: "Porte (opcional)" },
+  { value: "", label: "Selecionar..." },
   { value: "pequeno", label: "Pequeno" },
   { value: "medio", label: "Médio" },
   { value: "grande", label: "Grande" },
 ];
 const sexoOpts = [
-  { value: "", label: "Sexo (opcional)" },
+  { value: "", label: "Selecionar..." },
   { value: "macho", label: "Macho" },
   { value: "femea", label: "Fêmea" },
 ];
@@ -126,6 +126,8 @@ export default function ClientePetsPage() {
 
     if (normalizedNome.length < 2) { setError("O nome do pet deve ter no mínimo 2 caracteres."); return; }
     if (!normalizedRaca || !form.categoria_id) { setError("Raça e categoria são obrigatórias."); return; }
+    if (!form.sexo) { setError("O sexo do pet é obrigatório."); return; }
+    if (!form.porte) { setError("O porte do pet é obrigatório."); return; }
     if (normalizedPeso !== undefined && (!Number.isFinite(normalizedPeso) || normalizedPeso <= 0)) { setError("O peso do pet deve ser maior que 0."); return; }
     if (normalizedObservacoes.length > MAX_OBSERVACOES_SAUDE) {
       normalizedObservacoes = normalizedObservacoes.slice(0, MAX_OBSERVACOES_SAUDE);
@@ -163,6 +165,8 @@ export default function ClientePetsPage() {
 
     if (normalizedNome.length < 2) { setError("O nome do pet deve ter no mínimo 2 caracteres."); return; }
     if (!normalizedRaca || !editForm.categoria_id) { setError("Raça e categoria são obrigatórias."); return; }
+    if (!editForm.sexo) { setError("O sexo do pet é obrigatório."); return; }
+    if (!editForm.porte) { setError("O porte do pet é obrigatório."); return; }
     if (normalizedPeso !== undefined && (!Number.isFinite(normalizedPeso) || normalizedPeso <= 0)) { setError("O peso do pet deve ser maior que 0."); return; }
     if (normalizedObservacoes.length > MAX_OBSERVACOES_SAUDE) {
       normalizedObservacoes = normalizedObservacoes.slice(0, MAX_OBSERVACOES_SAUDE);
@@ -261,14 +265,14 @@ export default function ClientePetsPage() {
               <input className={inputCls} placeholder="Ex: Golden Retriever" value={form.raca} onChange={(e) => setForm({ ...form, raca: e.target.value })} required />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-gray-500">Sexo</label>
-              <select className={selectCls} value={form.sexo} onChange={(e) => setForm({ ...form, sexo: e.target.value })}>
+              <label className="mb-1 block text-xs font-medium text-gray-500">Sexo *</label>
+              <select className={selectCls} value={form.sexo} onChange={(e) => setForm({ ...form, sexo: e.target.value })} required>
                 {sexoOpts.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-gray-500">Porte</label>
-              <select className={selectCls} value={form.porte} onChange={(e) => setForm({ ...form, porte: e.target.value })}>
+              <label className="mb-1 block text-xs font-medium text-gray-500">Porte *</label>
+              <select className={selectCls} value={form.porte} onChange={(e) => setForm({ ...form, porte: e.target.value })} required>
                 {porteOpts.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
             </div>
@@ -335,10 +339,10 @@ export default function ClientePetsPage() {
                   </select>
                   <input maxLength={80} className={inputCls} placeholder="Raça *" value={editForm.raca} onChange={(e) => setEditForm({ ...editForm, raca: e.target.value })} required />
                   <div className="grid grid-cols-2 gap-2">
-                    <select className={selectCls} value={editForm.sexo} onChange={(e) => setEditForm({ ...editForm, sexo: e.target.value })}>
+                    <select className={selectCls} value={editForm.sexo} onChange={(e) => setEditForm({ ...editForm, sexo: e.target.value })} required>
                       {sexoOpts.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                     </select>
-                    <select className={selectCls} value={editForm.porte} onChange={(e) => setEditForm({ ...editForm, porte: e.target.value })}>
+                    <select className={selectCls} value={editForm.porte} onChange={(e) => setEditForm({ ...editForm, porte: e.target.value })} required>
                       {porteOpts.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                     </select>
                   </div>

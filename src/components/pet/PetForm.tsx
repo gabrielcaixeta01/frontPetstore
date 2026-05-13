@@ -131,6 +131,16 @@ export default function PetForm({ petBeingEdited, onCreate, onUpdate, onCancelEd
       return;
     }
 
+    if (!sexo) {
+      alert("O sexo do pet é obrigatório.");
+      return;
+    }
+
+    if (!porte) {
+      alert("O porte do pet é obrigatório.");
+      return;
+    }
+
     if (normalizedPeso !== undefined && (!Number.isFinite(normalizedPeso) || normalizedPeso <= 0)) {
       alert("O peso do pet deve ser maior que 0.");
       return;
@@ -191,8 +201,8 @@ export default function PetForm({ petBeingEdited, onCreate, onUpdate, onCancelEd
 
         {/* Sexo */}
         <div className="space-y-1.5">
-          <label className="block text-xs font-medium text-gray-500">Sexo</label>
-          <select className={selectCls} value={sexo} onChange={(e) => setSexo(e.target.value as CreatePetDTO["sexo"] | "")}>
+          <label className="block text-xs font-medium text-gray-500">Sexo *</label>
+          <select className={selectCls} value={sexo} onChange={(e) => setSexo(e.target.value as CreatePetDTO["sexo"] | "")} required>
             <option value="">Selecionar...</option>
             <option value="macho">Macho</option>
             <option value="femea">Fêmea</option>
@@ -201,8 +211,8 @@ export default function PetForm({ petBeingEdited, onCreate, onUpdate, onCancelEd
 
         {/* Porte */}
         <div className="space-y-1.5">
-          <label className="block text-xs font-medium text-gray-500">Porte</label>
-          <select className={selectCls} value={porte} onChange={(e) => setPorte(e.target.value as CreatePetDTO["porte"] | "")}>
+          <label className="block text-xs font-medium text-gray-500">Porte *</label>
+          <select className={selectCls} value={porte} onChange={(e) => setPorte(e.target.value as CreatePetDTO["porte"] | "")} required>
             <option value="">Selecionar...</option>
             <option value="pequeno">Pequeno</option>
             <option value="medio">Médio</option>

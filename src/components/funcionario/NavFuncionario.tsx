@@ -104,13 +104,12 @@ export default function NavFuncionario() {
 
 	return (
 		<header className="sticky top-0 z-50 border-b border-gray-200 bg-white/85 shadow-sm backdrop-blur-xl">
-			<div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
+			<div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2.5 sm:px-6 sm:py-3">
 				<NavLink to="/" className="flex items-center gap-2">
-					<div className="bg-linear-to-r from-[#1c46f3] to-[#00bb69] bg-clip-text text-2xl font-bold text-transparent">
+					<div className="bg-linear-to-r from-[#1c46f3] to-[#00bb69] bg-clip-text text-lg font-bold text-transparent sm:text-2xl">
 						Apex
 					</div>
-
-					<div className="text-2xl font-light text-gray-900">Petstore</div>
+					<div className="text-lg font-light text-gray-900 sm:text-2xl">Petstore</div>
 				</NavLink>
 
 				<nav
@@ -119,7 +118,7 @@ export default function NavFuncionario() {
 						setHoveredPath(null);
 						movePillToActive();
 					}}
-					className="relative flex items-center gap-1 rounded-full border border-gray-200 bg-white/90 p-1 shadow-sm"
+					className="relative flex items-center gap-0.5 rounded-full border border-gray-200 bg-white/90 p-1 shadow-sm sm:gap-1"
 				>
 					<div
 						className="pointer-events-none absolute top-1 bottom-1 rounded-full bg-linear-to-r from-[#1c46f3] to-[#00bb69] shadow-[0_10px_26px_rgba(28,70,243,0.28)] transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
@@ -146,8 +145,9 @@ export default function NavFuncionario() {
 									movePillTo(link.to);
 								}}
 								className={`
-									relative z-10 flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold
+									relative z-10 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold
 									transition-all duration-300 hover:scale-[1.03]
+									sm:px-4 sm:py-2 sm:text-sm
 									${
 										isPillHere
 											? "text-white"
@@ -157,7 +157,8 @@ export default function NavFuncionario() {
 									}
 								`}
 							>
-								<link.icon size={14} />
+								<link.icon size={13} className="sm:hidden" />
+								<link.icon size={14} className="hidden sm:block" />
 								{link.label}
 							</NavLink>
 						);
