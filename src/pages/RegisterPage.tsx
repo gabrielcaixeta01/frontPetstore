@@ -50,7 +50,7 @@ function maskCEP(v: string) {
 }
 
 const inputCls =
-  "w-full rounded-xl border border-gray-200 bg-white py-3 pl-10 pr-4 text-sm outline-none transition focus:border-[#00bb69] focus:ring-2 focus:ring-[#00bb69]/20";
+  "w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-10 pr-4 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white focus:ring-2 focus:ring-[#1c46f3]/15";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -183,7 +183,7 @@ export default function RegisterPage() {
                   onClick={() => { setClientType("pessoa_fisica"); setCnpj(""); }}
                   className={`flex items-center justify-center gap-2 rounded-xl border py-2.5 text-sm font-medium transition ${
                     clientType === "pessoa_fisica"
-                      ? "border-[#00bb69] bg-[#00bb69]/10 text-[#009b57]"
+                      ? "border-[#1c46f3] bg-[#1c46f3]/8 text-[#1c46f3]"
                       : "border-gray-200 bg-white text-gray-500 hover:border-gray-300"
                   }`}
                 >
@@ -195,7 +195,7 @@ export default function RegisterPage() {
                   onClick={() => { setClientType("pessoa_juridica"); setCpf(""); }}
                   className={`flex items-center justify-center gap-2 rounded-xl border py-2.5 text-sm font-medium transition ${
                     clientType === "pessoa_juridica"
-                      ? "border-[#00bb69] bg-[#00bb69]/10 text-[#009b57]"
+                      ? "border-[#1c46f3] bg-[#1c46f3]/8 text-[#1c46f3]"
                       : "border-gray-200 bg-white text-gray-500 hover:border-gray-300"
                   }`}
                 >
@@ -311,7 +311,7 @@ export default function RegisterPage() {
                   <select
                     value={state}
                     onChange={(e) => setState(e.target.value)}
-                    className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-10 pr-4 text-sm outline-none transition focus:border-[#00bb69] focus:ring-2 focus:ring-[#00bb69]/20 appearance-none"
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-10 pr-4 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white focus:ring-2 focus:ring-[#1c46f3]/15 appearance-none"
                   >
                     <option value="">UF</option>
                     {BR_STATES.map((uf) => (
@@ -349,7 +349,7 @@ export default function RegisterPage() {
                   placeholder="Mínimo 6 caracteres"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-10 pr-11 text-sm outline-none transition focus:border-[#00bb69] focus:ring-2 focus:ring-[#00bb69]/20"
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-10 pr-11 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white focus:ring-2 focus:ring-[#1c46f3]/15"
                 />
                 <button
                   type="button"
@@ -373,7 +373,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#00bb69] to-[#009b57] py-3 text-sm font-semibold text-white shadow-md shadow-[#00bb69]/25 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] py-2.5 text-sm font-semibold text-white shadow-md shadow-[#1c46f3]/25 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loading ? "Criando conta..." : (
                 <>

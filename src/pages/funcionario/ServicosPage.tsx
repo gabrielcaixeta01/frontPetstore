@@ -201,27 +201,50 @@ export default function ServicosPage() {
           <button onClick={() => setShowForm(true)} className="mt-2 text-sm font-semibold text-[#1c46f3] hover:underline">Criar primeiro serviço</button>
         </div>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {servicos.map((s) => (
-            <div key={s.id} className="flex flex-col gap-3 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition hover:shadow-md">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-yellow-100">
-                  <Scissors size={16} className="text-yellow-600" />
+            <div key={s.id} className="group flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:border-[#1c46f3]/25 hover:shadow-md">
+              {/* Accent bar */}
+              <div className="h-1 bg-gradient-to-r from-[#1c46f3] to-[#00bb69]" />
+
+              <div className="flex flex-1 flex-col p-5">
+                {/* Icon + name + desc */}
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#1c46f3]/10 transition group-hover:bg-[#1c46f3]/15">
+                    <Scissors size={16} className="text-[#1c46f3]" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-semibold leading-snug text-gray-900">{s.nome}</h3>
+                    {s.descricao && (
+                      <p className="mt-1 text-xs leading-relaxed text-gray-400 line-clamp-2">{s.descricao}</p>
+                    )}
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <h3 className="font-semibold text-gray-900">{s.nome}</h3>
-                  {s.descricao && <p className="mt-0.5 text-xs text-gray-500 line-clamp-1">{s.descricao}</p>}
-                </div>
-              </div>
-              <div className="flex items-center justify-between border-t border-gray-50 pt-3">
-                <span className="text-lg font-bold text-[#1c46f3]">R$ {Number(s.preco).toFixed(2)}</span>
-                <div className="flex gap-2">
-                  <button onClick={() => setServicoBeingEdited(s)} className="flex items-center gap-1.5 rounded-xl border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 transition hover:bg-gray-50">
-                    <Pencil size={11} /> Editar
-                  </button>
-                  <button onClick={() => handleDelete(s.id)} className="flex items-center gap-1.5 rounded-xl border border-red-100 px-3 py-1.5 text-xs font-medium text-red-500 transition hover:bg-red-50">
-                    <Trash2 size={11} /> Excluir
-                  </button>
+
+                {/* Footer: price + actions */}
+                <div className="mt-4 flex items-center justify-between border-t border-gray-50 pt-3">
+                  <div>
+                    <p className="text-xs text-gray-400">Preço</p>
+                    <p className="text-base font-medium text-[#1c46f3]">
+                      R$ {Number(s.preco).toFixed(2)}
+                    </p>
+                  </div>
+                  <div className="flex gap-1.5">
+                    <button
+                      onClick={() => setServicoBeingEdited(s)}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:bg-gray-100"
+                      title="Editar"
+                    >
+                      <Pencil size={13} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(s.id)}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-red-100 text-red-400 transition hover:bg-red-50"
+                      title="Excluir"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
