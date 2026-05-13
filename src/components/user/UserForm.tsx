@@ -100,7 +100,10 @@ export default function UserForm({ userBeingEdited, onCreate, onUpdate, onCancel
   }
 
   return (
-    <form key={userBeingEdited?.id ?? "new"} onSubmit={handleSubmit} className="space-y-5">
+    <form key={userBeingEdited?.id ?? "new"} onSubmit={handleSubmit} className="space-y-5 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+      <h2 className="text-sm font-semibold text-gray-700">
+        {isEditing ? "Editar Usuário" : "Novo Usuário"}
+      </h2>
       {/* Tipo de perfil */}
       {!isEditing && (
         <div className="space-y-1.5">

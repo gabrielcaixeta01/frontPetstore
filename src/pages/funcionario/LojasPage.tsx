@@ -190,10 +190,10 @@ export default function LojasPage() {
           </div>
           <button
             onClick={() => setShowForm((v) => !v)}
-            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-[#1c46f3]/20 transition hover:opacity-90"
+            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-3 py-2 text-sm font-semibold text-white shadow-sm shadow-[#1c46f3]/20 transition hover:opacity-90 sm:px-4 sm:py-2.5"
           >
             {showForm ? <X size={15} /> : <Plus size={15} />}
-            {showForm ? "Cancelar" : "Nova loja"}
+            <span className="hidden sm:inline">{showForm ? "Cancelar" : "Nova loja"}</span>
           </button>
         </div>
 
@@ -209,96 +209,46 @@ export default function LojasPage() {
           </div>
         )}
 
-        {showForm && <form
-          onSubmit={handleCreateSubmit}
-          className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm"
-        >
-          <h2 className="text-base font-semibold text-gray-800 mb-4">Nova Loja</h2>
+        {showForm && (
+          <form onSubmit={handleCreateSubmit} className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+            <h2 className="mb-4 text-sm font-semibold text-gray-700">Nova Loja</h2>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <input
-              placeholder="Nome"
-              value={form.nome}
-              onChange={(e) => updateField("nome", e.target.value)}
-              required
-              className={inputClass}
-            />
-            <input
-              placeholder="CNPJ"
-              value={form.cnpj}
-              onChange={(e) => updateField("cnpj", e.target.value)}
-              required
-              className={inputClass}
-            />
-            <input
-              placeholder="Telefone"
-              value={form.telefone}
-              onChange={(e) => updateField("telefone", e.target.value)}
-              required
-              className={inputClass}
-            />
-            <input
-              type="email"
-              placeholder="Email"
-              value={form.email}
-              onChange={(e) => updateField("email", e.target.value)}
-              required
-              className={inputClass}
-            />
-            <input
-              placeholder="CEP"
-              value={form.cep}
-              onChange={(e) => updateField("cep", e.target.value)}
-              required
-              className={inputClass}
-            />
-            <input
-              placeholder="Cidade"
-              value={form.city}
-              onChange={(e) => updateField("city", e.target.value)}
-              required
-              className={inputClass}
-            />
-            <input
-              placeholder="Estado"
-              value={form.state}
-              onChange={(e) => updateField("state", e.target.value)}
-              required
-              className={inputClass}
-            />
-            <input
-              placeholder="Rua"
-              value={form.street}
-              onChange={(e) => updateField("street", e.target.value)}
-              required
-              className={inputClass}
-            />
-            <input
-              placeholder="Bairro"
-              value={form.neighborhood}
-              onChange={(e) => updateField("neighborhood", e.target.value)}
-              required
-              className={inputClass}
-            />
-            <input
-              placeholder="Número"
-              value={form.number}
-              onChange={(e) => updateField("number", e.target.value)}
-              required
-              className={inputClass}
-            />
-          </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {[
+                { label: "Nome *",     value: form.nome,         field: "nome" as const,         type: "text"  },
+                { label: "CNPJ *",     value: form.cnpj,         field: "cnpj" as const,         type: "text"  },
+                { label: "Telefone *", value: form.telefone,     field: "telefone" as const,     type: "tel"   },
+                { label: "E-mail *",   value: form.email,        field: "email" as const,        type: "email" },
+                { label: "CEP *",      value: form.cep,          field: "cep" as const,          type: "text"  },
+                { label: "Cidade *",   value: form.city,         field: "city" as const,         type: "text"  },
+                { label: "Estado *",   value: form.state,        field: "state" as const,        type: "text"  },
+                { label: "Rua *",      value: form.street,       field: "street" as const,       type: "text"  },
+                { label: "Bairro *",   value: form.neighborhood, field: "neighborhood" as const, type: "text"  },
+                { label: "Número *",   value: form.number,       field: "number" as const,       type: "text"  },
+              ].map(({ label, value, field, type }) => (
+                <div key={field} className="space-y-1">
+                  <label className="block text-xs font-medium text-gray-500">{label}</label>
+                  <input
+                    type={type}
+                    value={value}
+                    onChange={(e) => updateField(field, e.target.value)}
+                    required
+                    className={inputClass}
+                  />
+                </div>
+              ))}
+            </div>
 
-          <div className="mt-4 flex flex-wrap gap-3">
-            <button
-              type="submit"
-              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-[#1c46f3]/20 transition hover:opacity-90"
-            >
-              <Plus size={16} />
-              Cadastrar
-            </button>
-          </div>
-        </form>}
+            <div className="mt-4 flex gap-2">
+              <button type="submit" className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-[#1c46f3]/20 transition hover:opacity-90">
+                <Plus size={14} /> Cadastrar
+              </button>
+              <button type="button" onClick={() => setShowForm(false)} className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-medium text-gray-500 transition hover:bg-gray-50">
+                Cancelar
+              </button>
+            </div>
+          </form>
+        )}
 
         <EditModal
           isOpen={Boolean(lojaBeingEdited)}

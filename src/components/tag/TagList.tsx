@@ -38,11 +38,11 @@ export default function TagList({ tags, onEdit, onDelete, compact }: TagListProp
         {tags.map((tag, i) => (
           <span
             key={tag.id}
-            title={tag.descricao ?? undefined}
+            title={tag.nome + (tag.descricao ? ` — ${tag.descricao}` : "")}
             className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium ${chipColors[i % chipColors.length]}`}
           >
-            <Tag size={12} />
-            {tag.nome}
+            <Tag size={12} className="shrink-0" />
+            <span className="max-w-[10rem] truncate">{tag.nome}</span>
           </span>
         ))}
       </div>
@@ -60,9 +60,12 @@ export default function TagList({ tags, onEdit, onDelete, compact }: TagListProp
         {tags.map((tag, i) => (
           <div key={tag.id} className="flex items-center gap-4 px-5 py-3 transition hover:bg-gray-50/60">
             <div className="flex min-w-0 flex-1 items-center gap-3">
-              <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${chipColors[i % chipColors.length]}`}>
-                <Tag size={10} />
-                {tag.nome}
+              <span
+                title={tag.nome}
+                className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${chipColors[i % chipColors.length]}`}
+              >
+                <Tag size={10} className="shrink-0" />
+                <span className="max-w-[8rem] truncate">{tag.nome}</span>
               </span>
               {tag.descricao && (
                 <p className="truncate text-sm text-gray-400">{tag.descricao}</p>

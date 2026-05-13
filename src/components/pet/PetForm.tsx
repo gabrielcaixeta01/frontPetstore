@@ -176,12 +176,15 @@ export default function PetForm({ petBeingEdited, onCreate, onUpdate, onCancelEd
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+      <h2 className="text-sm font-semibold text-gray-700">
+        {petBeingEdited ? "Editar Pet" : "Novo Pet"}
+      </h2>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {/* Nome */}
         <div className="space-y-1.5">
           <label className="block text-xs font-medium text-gray-500">Nome *</label>
-          <input className={inputCls} placeholder="Nome do pet" value={nome} onChange={(e) => setNome(e.target.value)} required />
+          <input maxLength={60} className={inputCls} placeholder="Nome do pet" value={nome} onChange={(e) => setNome(e.target.value)} required />
         </div>
 
         {/* Raça */}

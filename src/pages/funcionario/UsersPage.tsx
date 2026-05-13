@@ -91,10 +91,10 @@ export default function UsersPage() {
           </div>
           <button
             onClick={() => setShowForm((v) => !v)}
-            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-[#1c46f3]/20 transition hover:opacity-90"
+            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-3 py-2 text-sm font-semibold text-white shadow-sm shadow-[#1c46f3]/20 transition hover:opacity-90 sm:px-4 sm:py-2.5"
           >
             {showForm ? <X size={15} /> : <Plus size={15} />}
-            {showForm ? "Cancelar" : "Novo usuário"}
+            <span className="hidden sm:inline">{showForm ? "Cancelar" : "Novo usuário"}</span>
           </button>
         </div>
 
