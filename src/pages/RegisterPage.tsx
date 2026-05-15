@@ -162,11 +162,6 @@ export default function RegisterPage() {
 
       {/* ── Painel direito (form) ── */}
       <div className="flex flex-1 flex-col items-center justify-center bg-gray-50 px-6 py-12">
-        <div className="mb-8 flex items-center gap-2 lg:hidden">
-          <PawPrint size={22} className="text-[#1c46f3]" />
-          <span className="text-lg font-bold text-gray-900">Apex Petstore</span>
-        </div>
-
         <div className="w-full max-w-md">
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-gray-900">Criar conta</h2>
