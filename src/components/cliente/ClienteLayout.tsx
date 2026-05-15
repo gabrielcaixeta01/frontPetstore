@@ -3,7 +3,6 @@ import { NavLink, useNavigate } from "react-router-dom";
 import {
   PawPrint,
   CalendarCheck,
-  LayoutGrid,
   Scissors,
   Store,
   Tag,
@@ -19,7 +18,6 @@ const navItems = [
   { to: "/pets", label: "Meus Pets", icon: PawPrint, end: false },
   { to: "/atendimentos", label: "Atendimentos", icon: CalendarCheck, end: false },
   { to: "/servicos", label: "Serviços", icon: Scissors, end: false },
-  { to: "/categorias", label: "Categorias", icon: LayoutGrid, end: false },
   { to: "/lojas", label: "Lojas", icon: Store, end: false },
   { to: "/tags", label: "Tags", icon: Tag, end: false },
 ];

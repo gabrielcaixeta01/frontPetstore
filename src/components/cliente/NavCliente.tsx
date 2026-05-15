@@ -3,7 +3,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
 	PawPrint,
-	LayoutGrid,
 	Scissors,
 	Store,
 	Tag,
@@ -18,7 +17,6 @@ type NavItem = { to: string; label: string; icon: LucideIcon };
 
 const links: NavItem[] = [
 	{ to: "/pets", label: "Pets", icon: PawPrint },
-	{ to: "/categorias", label: "Categorias", icon: LayoutGrid },
 	{ to: "/servicos", label: "Serviços", icon: Scissors },
 	{ to: "/lojas", label: "Lojas", icon: Store },
 	{ to: "/tags", label: "Tags", icon: Tag },

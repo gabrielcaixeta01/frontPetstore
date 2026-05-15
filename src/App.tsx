@@ -23,7 +23,6 @@ import ProfilePage from "./pages/funcionario/ProfilePage";
 import ClienteLayout from "./components/cliente/ClienteLayout";
 import ClienteHome from "./pages/cliente/Home";
 import ClientePetsPage from "./pages/cliente/PetsPage";
-import ClienteCategoriasPage from "./pages/cliente/CategoriasPage";
 import ClienteServicosPage from "./pages/cliente/ServicosPage";
 import ClienteTagsPage from "./pages/cliente/TagsPage";
 import ClienteLojasPage from "./pages/cliente/LojasPage";
@@ -64,7 +63,6 @@ function ClienteShell() {
       <Routes>
         <Route path="/" element={<ClienteHome />} />
         <Route path="/pets" element={<ClientePetsPage />} />
-        <Route path="/categorias" element={<ClienteCategoriasPage />} />
         <Route path="/servicos" element={<ClienteServicosPage />} />
         <Route path="/tags" element={<ClienteTagsPage />} />
         <Route path="/lojas" element={<ClienteLojasPage />} />
