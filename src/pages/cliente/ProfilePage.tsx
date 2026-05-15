@@ -47,6 +47,7 @@ export default function ClienteProfilePage() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editError, setEditError] = useState("");
@@ -274,15 +275,39 @@ export default function ClienteProfilePage() {
           </div>
         )}
 
-        {/* Logout */}
-        <button
-          onClick={logout}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl border border-red-200 bg-white py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
-        >
-          <LogOut size={15} />
-          Sair da conta
-        </button>
+        {/* Logout discreto */}
+        <div className="flex justify-end">
+          <button
+            onClick={() => setShowLogoutConfirm(true)}
+            className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
+          >
+            <LogOut size={14} /> Sair da conta
+          </button>
+        </div>
       </div>
+
+      {/* Modal de confirmação de logout */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/25 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50">
+              <LogOut size={20} className="text-red-500" />
+            </div>
+            <h3 className="text-lg font-bold text-gray-900">Sair da conta?</h3>
+            <p className="mt-1 text-sm text-gray-500">Você precisará fazer login novamente para acessar o sistema.</p>
+            <div className="mt-5 flex gap-3">
+              <button onClick={logout}
+                className="flex-1 rounded-xl bg-red-600 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700">
+                Sim, sair
+              </button>
+              <button onClick={() => setShowLogoutConfirm(false)}
+                className="flex-1 rounded-xl border border-gray-200 py-2.5 text-sm font-medium text-gray-600 transition hover:bg-gray-50">
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <EditModal
         isOpen={isEditing}
