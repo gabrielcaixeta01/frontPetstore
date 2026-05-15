@@ -4,39 +4,64 @@ import EditModal from "../../components/EditModal";
 import EditUserForm from "../../components/user/EditUserForm";
 import UserForm from "../../components/user/UserForm";
 import UserList from "../../components/user/UserList";
-import {
-  createUsuario,
-  deleteUsuario,
-  getUsuarios,
-  updateUsuario,
-} from "../../services/usuarioService";
+import { createUsuario, deleteUsuario, getUsuarios, updateUsuario } from "../../services/usuarioService";
+import { getPets } from "../../services/petService";
+import { getLojas } from "../../services/lojaService";
+import { getAppointments } from "../../services/atendimentoService";
 import type { CreateUsuarioDTO, UpdateUsuarioDTO, Usuario } from "../../types/usuario";
+import type { Pet } from "../../types/pet";
 
 export default function UsersPage() {
   const [users, setUsers] = useState<Usuario[]>([]);
+  const [petsByUser, setPetsByUser] = useState<Record<number, Pet[]>>({});
+  const [lojaById, setLojaById] = useState<Record<number, string>>({});
+  const [gastoByUser, setGastoByUser] = useState<Record<number, number>>({});
   const [userBeingEdited, setUserBeingEdited] = useState<Usuario | null>(null);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [error, setError] = useState("");
 
-  async function loadUsers() {
+  async function loadAll() {
     try {
       setLoading(true);
-      const data = await getUsuarios();
-      setUsers(data);
+      const [userData, petData, lojaData, atendData] = await Promise.all([
+        getUsuarios(),
+        getPets().catch(() => [] as Pet[]),
+        getLojas().catch(() => []),
+        getAppointments().catch(() => []),
+      ]);
+
+      setUsers(userData);
+
+      const petMap: Record<number, Pet[]> = {};
+      petData.forEach((p) => {
+        if (!petMap[p.dono_id]) petMap[p.dono_id] = [];
+        petMap[p.dono_id].push(p);
+      });
+      setPetsByUser(petMap);
+
+      const lojaMap: Record<number, string> = {};
+      lojaData.forEach((l) => { lojaMap[l.id] = l.nome; });
+      setLojaById(lojaMap);
+
+      const gastoMap: Record<number, number> = {};
+      atendData.forEach((at) => {
+        if (at.status === "concluido") {
+          gastoMap[at.cliente_id] = (gastoMap[at.cliente_id] ?? 0) + at.valor_final;
+        }
+      });
+      setGastoByUser(gastoMap);
+
       setError("");
-    } catch (err) {
-      console.error(err);
+    } catch {
       setError("Erro ao carregar usuários.");
     } finally {
       setLoading(false);
     }
   }
 
-  useEffect(() => {
-    loadUsers();
-  }, []);
+  useEffect(() => { loadAll(); }, []);
 
   function extractApiError(err: unknown, fallback: string): string {
     const detail = (err as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail;
@@ -49,9 +74,8 @@ export default function UsersPage() {
     try {
       await createUsuario(data);
       setFeedback("Usuário cadastrado com sucesso.");
-      setUserBeingEdited(null);
       setShowForm(false);
-      await loadUsers();
+      await loadAll();
     } catch (err) {
       setError(extractApiError(err, "Erro ao cadastrar usuário. Verifique os dados e tente novamente."));
     }
@@ -62,7 +86,7 @@ export default function UsersPage() {
       await updateUsuario(id, data);
       setFeedback("Usuário atualizado com sucesso.");
       setUserBeingEdited(null);
-      await loadUsers();
+      await loadAll();
     } catch (err) {
       setError(extractApiError(err, "Erro ao atualizar usuário."));
     }
@@ -70,12 +94,11 @@ export default function UsersPage() {
 
   async function handleDeleteUser(id: number) {
     if (!window.confirm("Tem certeza que deseja excluir este usuário?")) return;
-
     try {
       await deleteUsuario(id);
       setFeedback("Usuário excluído com sucesso.");
       if (userBeingEdited?.id === id) setUserBeingEdited(null);
-      await loadUsers();
+      await loadAll();
     } catch (err) {
       setError(extractApiError(err, "Erro ao excluir usuário."));
     }
@@ -83,8 +106,8 @@ export default function UsersPage() {
 
   return (
     <div className="px-4 py-6 sm:px-6 sm:py-8">
-      <div className="mx-auto max-w-6xl space-y-8">
-        <div className="mb-6 flex items-center justify-between">
+      <div className="mx-auto max-w-6xl space-y-6">
+        <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Usuários</h1>
             <p className="mt-0.5 text-sm text-gray-500">Gerencie clientes e funcionários do sistema.</p>
@@ -99,15 +122,10 @@ export default function UsersPage() {
         </div>
 
         {feedback && (
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-            {feedback}
-          </div>
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{feedback}</div>
         )}
-
         {error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-            {error}
-          </div>
+          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>
         )}
 
         {showForm && (
@@ -119,11 +137,7 @@ export default function UsersPage() {
           />
         )}
 
-        <EditModal
-          isOpen={Boolean(userBeingEdited)}
-          title="Editar Usuário"
-          onClose={() => setUserBeingEdited(null)}
-        >
+        <EditModal isOpen={Boolean(userBeingEdited)} title="Editar Usuário" onClose={() => setUserBeingEdited(null)}>
           {userBeingEdited && (
             <EditUserForm
               user={userBeingEdited}
@@ -134,14 +148,13 @@ export default function UsersPage() {
         </EditModal>
 
         <section className="space-y-4">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-800">Lista de usuários</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-gray-800">Base de usuários</h2>
             <button
-              onClick={loadUsers}
+              onClick={loadAll}
               className="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
             >
-              <RefreshCw size={14} />
-              Atualizar
+              <RefreshCw size={14} /> Atualizar
             </button>
           </div>
 
@@ -154,6 +167,9 @@ export default function UsersPage() {
               users={users}
               onEdit={setUserBeingEdited}
               onDelete={handleDeleteUser}
+              petsByUser={petsByUser}
+              lojaById={lojaById}
+              gastoByUser={gastoByUser}
             />
           )}
         </section>
