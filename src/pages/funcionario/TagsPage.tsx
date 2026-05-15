@@ -4,12 +4,8 @@ import EditModal from "../../components/EditModal";
 import EditTagForm from "../../components/tag/EditTagForm";
 import TagForm from "../../components/tag/TagForm";
 import TagList from "../../components/tag/TagList";
-import {
-  createTag,
-  deleteTag,
-  getTags,
-  updateTag,
-} from "../../services/tagService";
+import { createTag, deleteTag, getTags, updateTag } from "../../services/tagService";
+import { getPets } from "../../services/petService";
 import type { CreateEtiquetaDTO, Etiqueta, UpdateEtiquetaDTO } from "../../types/tag";
 
 function getApiErrorMessage(error: unknown, fallback: string) {
@@ -33,6 +29,7 @@ function getApiErrorMessage(error: unknown, fallback: string) {
 
 export default function TagsPage() {
   const [tags, setTags] = useState<Etiqueta[]>([]);
+  const [petCountByTag, setPetCountByTag] = useState<Record<number, number>>({});
   const [tagBeingEdited, setTagBeingEdited] = useState<Etiqueta | null>(null);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -42,11 +39,20 @@ export default function TagsPage() {
   async function loadTags() {
     try {
       setLoading(true);
-      const data = await getTags();
-      setTags(data);
+      const [tagData, petData] = await Promise.all([
+        getTags(),
+        getPets().catch(() => []),
+      ]);
+      setTags(tagData);
+      const counts: Record<number, number> = {};
+      petData.forEach((p) => {
+        p.tags?.forEach((t) => {
+          counts[t.id] = (counts[t.id] ?? 0) + 1;
+        });
+      });
+      setPetCountByTag(counts);
       setError("");
-    } catch (err) {
-      console.error(err);
+    } catch {
       setError("Erro ao carregar tags.");
     } finally {
       setLoading(false);
@@ -169,6 +175,7 @@ export default function TagsPage() {
               tags={tags}
               onEdit={setTagBeingEdited}
               onDelete={handleDeleteTag}
+              petCountByTag={petCountByTag}
             />
           )}
         </section>
