@@ -22,6 +22,7 @@ export interface Loja {
   street: string;
   neighborhood: string;
   number: string;
+  horario_funcionamento?: string;
   funcionarios: FuncionarioLoja[];
 }
 
@@ -36,6 +37,7 @@ export interface CreateLojaDTO {
   street: string;
   neighborhood: string;
   number: string;
+  horario_funcionamento?: string;
 }
 
 export interface UpdateLojaDTO {
@@ -49,4 +51,5 @@ export interface UpdateLojaDTO {
   street?: string;
   neighborhood?: string;
   number?: string;
+  horario_funcionamento?: string;
 }

@@ -25,6 +25,8 @@ type ApiStore = {
   number: string;
   active: boolean;
   created_at: string;
+  business_hours?: string;
+  horario_funcionamento?: string;
   employees?: ApiStoreEmployee[];
 };
 
@@ -43,6 +45,7 @@ function toLoja(store: ApiStore): Loja {
     street: store.street,
     neighborhood: store.neighborhood,
     number: store.number,
+    horario_funcionamento: store.business_hours ?? store.horario_funcionamento ?? undefined,
     funcionarios: (store.employees ?? []).map((employee) => ({
       usuario_id: employee.user_id,
       nome: employee.employee_name ?? `Usuário #${employee.user_id}`,
