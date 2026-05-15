@@ -6,6 +6,7 @@ interface TagListProps {
   onEdit?: (tag: Etiqueta) => void;
   onDelete?: (id: number) => Promise<void>;
   compact?: boolean;
+  cards?: boolean; // read-only card grid (no actions)
   petCountByTag?: Record<number, number>;
 }
 
@@ -45,8 +46,9 @@ function getTagColor(nome: string): string {
   return "border-slate-200 bg-slate-50 text-slate-600";
 }
 
-export default function TagList({ tags, onEdit, onDelete, compact, petCountByTag }: TagListProps) {
+export default function TagList({ tags, onEdit, onDelete, compact, cards, petCountByTag }: TagListProps) {
   const canEdit = Boolean(onEdit || onDelete);
+  const showCards = canEdit || cards;
 
   if (tags.length === 0) {
     return (
@@ -56,8 +58,8 @@ export default function TagList({ tags, onEdit, onDelete, compact, petCountByTag
     );
   }
 
-  // Chips — read-only, no compact flag
-  if (!canEdit && !compact) {
+  // Chips — read-only, no compact, no cards
+  if (!canEdit && !compact && !cards) {
     return (
       <div className="flex flex-wrap gap-2">
         {tags.map((tag) => (
@@ -115,7 +117,8 @@ export default function TagList({ tags, onEdit, onDelete, compact, petCountByTag
     );
   }
 
-  // Admin cards — full CRUD view with usage counter
+  // Card grid — admin (with buttons) or read-only (cards prop)
+  if (!showCards) return null; // unreachable but satisfies TS
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {tags.map((tag) => {

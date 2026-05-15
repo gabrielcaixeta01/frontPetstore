@@ -1,9 +1,16 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, Mail, Phone, Shield, LogOut, CalendarDays, Pencil, X, Save } from "lucide-react";
+import {
+  CheckCircle, XCircle, Pencil, Save, X,
+  LogOut, Key, Lock, Eye, EyeOff, ChevronDown,
+  PawPrint, CalendarCheck,
+} from "lucide-react";
 import EditModal from "../../components/EditModal";
 import { getUsuarios, updateUsuario } from "../../services/usuarioService";
+import { getPets } from "../../services/petService";
+import { getAppointments } from "../../services/atendimentoService";
 import { api } from "../../services/api";
+import type { Atendimento } from "../../types/atendimento";
 
 type UserProfile = {
   id: number;
@@ -25,29 +32,51 @@ type UserProfile = {
   } | null;
 };
 
-function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value?: string }) {
-  return (
-    <div className="flex items-start gap-3 py-3">
-      <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-500">
-        {icon}
-      </div>
-      <div>
-        <p className="text-xs text-gray-400">{label}</p>
-        <p className="text-sm font-semibold text-gray-800">{value || "—"}</p>
-      </div>
-    </div>
-  );
-}
+const STATUS_CFG: Record<string, { label: string; cls: string }> = {
+  concluido: { label: "Concluído", cls: "border-emerald-200 bg-emerald-50 text-emerald-700" },
+  agendado:  { label: "Agendado",  cls: "border-blue-200 bg-blue-50 text-blue-700"          },
+  cancelado: { label: "Cancelado", cls: "border-red-200 bg-red-50 text-red-600"             },
+};
+
+const inputCls = "w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white focus:ring-2 focus:ring-[#1c46f3]/15";
 
 function getInitials(name: string) {
   return name.split(" ").slice(0, 2).map((n) => n[0]).join("").toUpperCase();
 }
 
+function formatDateLong(dateStr?: string) {
+  if (!dateStr) return "—";
+  const d = new Date(dateStr);
+  return Number.isNaN(d.getTime()) ? dateStr : d.toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
+}
+
+function formatDateShort(dateStr: string) {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
+}
+
+function formatMoney(value: number) {
+  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
+}
+
+function InfoField({ label, value }: { label: string; value?: string }) {
+  return (
+    <div>
+      <p className="text-xs font-medium text-gray-400">{label}</p>
+      <p className="mt-0.5 text-sm font-semibold text-gray-800">{value || "—"}</p>
+    </div>
+  );
+}
+
 export default function ClienteProfilePage() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [petCount, setPetCount] = useState(0);
+  const [recentAtend, setRecentAtend] = useState<Atendimento[]>([]);
+  const [totalAtend, setTotalAtend] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+  // Edit profile
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editError, setEditError] = useState("");
@@ -58,26 +87,52 @@ export default function ClienteProfilePage() {
   const [editState, setEditState] = useState("");
   const [editCity, setEditCity] = useState("");
 
+  // Change password
+  const [showPwdForm, setShowPwdForm] = useState(false);
+  const [currentPwd, setCurrentPwd] = useState("");
+  const [newPwd, setNewPwd] = useState("");
+  const [confirmPwd, setConfirmPwd] = useState("");
+  const [pwdError, setPwdError] = useState("");
+  const [pwdSaving, setPwdSaving] = useState(false);
+  const [showCurPwd, setShowCurPwd] = useState(false);
+  const [showNewPwdVis, setShowNewPwdVis] = useState(false);
+
+  // Logout modal
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
   useEffect(() => {
-    api.get<UserProfile>("/auth/me")
-      .then((r) => setProfile(r.data))
-      .catch(() => {
+    async function init() {
+      try {
+        const userData = await api.get<UserProfile>("/auth/me").then((r) => r.data);
+        setProfile(userData);
+        setEditName(userData.name);
+        setEditEmail(userData.email);
+        setEditPhone(userData.phone ?? "");
+        setEditCep(userData.client_profile?.cep ?? "");
+        setEditState(userData.client_profile?.state ?? "");
+        setEditCity(userData.client_profile?.city ?? "");
+
+        const [petData, atendData] = await Promise.all([
+          getPets().catch(() => []),
+          getAppointments().catch(() => [] as Atendimento[]),
+        ]);
+
+        setPetCount(petData.filter((p) => p.dono_id === userData.id).length);
+
+        const myAtend = atendData
+          .filter((a) => a.cliente_id === userData.id)
+          .sort((a, b) => new Date(b.data_atendimento).getTime() - new Date(a.data_atendimento).getTime());
+        setTotalAtend(myAtend.length);
+        setRecentAtend(myAtend.slice(0, 5));
+      } catch {
         const stored = localStorage.getItem("user");
         if (stored) setProfile(JSON.parse(stored));
-      })
-      .finally(() => setLoading(false));
+      } finally {
+        setLoading(false);
+      }
+    }
+    init();
   }, []);
-
-  useEffect(() => {
-    if (!profile) return;
-
-    setEditName(profile.name);
-    setEditEmail(profile.email);
-    setEditPhone(profile.phone ?? "");
-    setEditCep(profile.client_profile?.cep ?? "");
-    setEditState(profile.client_profile?.state ?? "");
-    setEditCity(profile.client_profile?.city ?? "");
-  }, [profile]);
 
   function logout() {
     localStorage.removeItem("token");
@@ -87,7 +142,6 @@ export default function ClienteProfilePage() {
 
   function startEditing() {
     if (!profile) return;
-
     setEditError("");
     setEditName(profile.name);
     setEditEmail(profile.email);
@@ -99,178 +153,248 @@ export default function ClienteProfilePage() {
   }
 
   function cancelEditing() {
-    if (!profile) return;
-
     setEditError("");
-    setEditName(profile.name);
-    setEditEmail(profile.email);
-    setEditPhone(profile.phone ?? "");
-    setEditCep(profile.client_profile?.cep ?? "");
-    setEditState(profile.client_profile?.state ?? "");
-    setEditCity(profile.client_profile?.city ?? "");
     setIsEditing(false);
   }
 
   async function saveProfile() {
     if (!profile) return;
-
     const normalizedName = editName.trim();
     const normalizedEmail = editEmail.trim();
-    const normalizedPhone = editPhone.trim();
-    const normalizedCep = editCep.trim();
-    const normalizedState = editState.trim().toUpperCase();
-    const normalizedCity = editCity.trim();
-
-    if (!normalizedName) {
-      setEditError("Informe o nome.");
-      return;
-    }
-
-    if (!normalizedEmail) {
-      setEditError("Informe o e-mail.");
-      return;
-    }
-
-    if (!normalizedPhone) {
-      setEditError("Informe o telefone.");
-      return;
-    }
-
-    if (!normalizedCep) {
-      setEditError("Informe o CEP.");
-      return;
-    }
-
-    if (!normalizedState) {
-      setEditError("Informe o estado.");
-      return;
-    }
-
-    if (!normalizedCity) {
-      setEditError("Informe a cidade.");
-      return;
-    }
+    if (!normalizedName) { setEditError("Informe o nome."); return; }
+    if (!normalizedEmail) { setEditError("Informe o e-mail."); return; }
 
     setSaving(true);
     setEditError("");
-
     try {
       const existingUsers = await getUsuarios();
-      const duplicatedEmail = existingUsers.some(
-        (userItem) => userItem.id !== profile.id && userItem.email.trim().toLowerCase() === normalizedEmail.toLowerCase()
-      );
-
-      if (duplicatedEmail) {
+      if (existingUsers.some((u) => u.id !== profile.id && u.email.trim().toLowerCase() === normalizedEmail.toLowerCase())) {
         setEditError("Este e-mail já está em uso por outro usuário.");
         return;
       }
-
       await updateUsuario(profile.id, {
-        nome: normalizedName,
-        email: normalizedEmail,
-        telefone: normalizedPhone,
-        cep: normalizedCep,
-        state: normalizedState,
-        city: normalizedCity,
+        nome: normalizedName, email: normalizedEmail, telefone: editPhone.trim(),
+        cep: editCep.trim(), state: editState.trim().toUpperCase(), city: editCity.trim(),
       });
-
-      const refreshed = await api.get<UserProfile>("/auth/me").then((response) => response.data);
-
+      const refreshed = await api.get<UserProfile>("/auth/me").then((r) => r.data);
       setProfile(refreshed);
       localStorage.setItem("user", JSON.stringify(refreshed));
       setIsEditing(false);
     } catch {
-      setEditError("Não foi possível salvar as alterações. Tente novamente.");
+      setEditError("Não foi possível salvar as alterações.");
     } finally {
       setSaving(false);
     }
   }
 
-  if (loading) {
-    return (
-      <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
-        <p className="text-sm text-gray-400">Carregando perfil...</p>
-      </div>
-    );
+  async function handleChangePassword(e: React.FormEvent) {
+    e.preventDefault();
+    setPwdError("");
+    if (!newPwd.trim()) { setPwdError("Informe a nova senha."); return; }
+    if (newPwd.length < 6) { setPwdError("A nova senha deve ter no mínimo 6 caracteres."); return; }
+    if (newPwd !== confirmPwd) { setPwdError("As senhas não coincidem."); return; }
+    if (!profile) return;
+    setPwdSaving(true);
+    try {
+      await api.put(`/user/${profile.id}`, null, { params: { password: newPwd } });
+      setCurrentPwd(""); setNewPwd(""); setConfirmPwd("");
+      setShowPwdForm(false);
+    } catch {
+      setPwdError("Não foi possível alterar a senha.");
+    } finally {
+      setPwdSaving(false);
+    }
   }
 
-  if (!profile) {
-    return (
-      <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
-        <p className="text-sm text-red-500">Não foi possível carregar o perfil.</p>
-      </div>
-    );
-  }
+  if (loading) return (
+    <div className="mx-auto w-full max-w-4xl px-4 py-6 text-sm text-gray-400 sm:px-6 sm:py-8">
+      Carregando perfil...
+    </div>
+  );
+  if (!profile) return (
+    <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 sm:py-8">
+      <p className="text-sm text-red-500">Não foi possível carregar o perfil.</p>
+    </div>
+  );
 
   const cp = profile.client_profile;
   const clientTypeLabel = cp?.client_type === "pessoa_juridica" ? "Pessoa Jurídica" : "Pessoa Física";
   const hasCnpj = Boolean(profile.cnpj ?? cp?.cnpj);
   const docLabel = hasCnpj ? "CNPJ" : "CPF";
   const docValue = profile.cnpj ?? cp?.cnpj ?? profile.cpf ?? cp?.cpf;
-  const cepValue = cp?.cep ?? "";
-  const stateValue = cp?.state ?? "";
-  const cityValue = cp?.city ?? "";
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-4 py-6 sm:px-6 sm:py-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Meu Perfil</h1>
-        <p className="mt-0.5 text-sm text-gray-500">Suas informações cadastradas no Apex Petstore.</p>
-      </div>
-
+    <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 sm:py-8">
       <div className="space-y-5">
-        {/* Avatar card */}
-        <div className="flex items-center gap-5 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#1c46f3] to-[#00bb69] text-xl font-bold text-white shadow-md shadow-[#1c46f3]/20">
-            {getInitials(profile.name)}
-          </div>
-          <div className="flex-1 min-w-0">
-            <h2 className="text-lg font-bold text-gray-900">{profile.name}</h2>
-            <div className="mt-1 flex flex-wrap gap-2">
-              <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
-                Cliente
-              </span>
-              {cp && (
-                <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
-                  {clientTypeLabel}
-                </span>
-              )}
-              <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${profile.active ? "bg-[#00bb69]/10 text-[#00bb69]" : "bg-red-100 text-red-600"}`}>
-                {profile.active ? "Ativo" : "Inativo"}
-              </span>
+
+        {/* Hero banner */}
+        <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+          <div className="bg-gradient-to-r from-[#1c46f3] to-[#00bb69] px-6 py-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-4">
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white/20 text-xl font-bold text-white">
+                  {getInitials(profile.name)}
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-white/60">Cliente</p>
+                  <h2 className="text-xl font-bold leading-tight text-white">{profile.name}</h2>
+                  {cp && <p className="mt-0.5 text-xs text-white/60">{clientTypeLabel}</p>}
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <div className="rounded-xl bg-white/15 px-4 py-2.5 text-white">
+                  <p className="text-xs font-medium text-white/70">Meus Pets</p>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-2xl font-bold">{petCount}</span>
+                    <PawPrint size={13} className="mb-0.5 opacity-70" />
+                  </div>
+                </div>
+                <div className="rounded-xl bg-white/15 px-4 py-2.5 text-white">
+                  <p className="text-xs font-medium text-white/70">Atendimentos</p>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-2xl font-bold">{totalAtend}</span>
+                    <CalendarCheck size={13} className="mb-0.5 opacity-70" />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-
-          <button
-            type="button"
-            onClick={startEditing}
-            className="flex shrink-0 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 sm:px-4"
-          >
-            <Pencil size={14} />
-            <span className="hidden sm:inline">Editar perfil</span>
-          </button>
-        </div>
-
-        {/* Dados pessoais */}
-        <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-          <h3 className="mb-1 text-xs font-semibold uppercase tracking-wider text-gray-400">Dados pessoais</h3>
-          <div className="divide-y divide-gray-50">
-            <InfoRow icon={<User size={14} />} label="Nome completo" value={profile.name} />
-            <InfoRow icon={<Mail size={14} />} label="E-mail" value={profile.email} />
-            <InfoRow icon={<Phone size={14} />} label="Telefone" value={profile.phone} />
-            <InfoRow icon={<Shield size={14} />} label={docLabel} value={docValue} />
-            <InfoRow icon={<CalendarDays size={14} />} label="Membro desde" value={profile.created_at ? new Date(profile.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" }) : undefined} />
+          <div className="flex items-center justify-between px-6 py-3">
+            <span className={`flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${profile.active ? "bg-[#00bb69]/10 text-[#00bb69]" : "bg-red-100 text-red-600"}`}>
+              {profile.active ? <><CheckCircle size={11} /> Ativo</> : <><XCircle size={11} /> Inativo</>}
+            </span>
+            {!isEditing && (
+              <button
+                onClick={startEditing}
+                className="flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-600 transition hover:bg-gray-50 sm:px-4"
+              >
+                <Pencil size={13} /> <span className="hidden sm:inline">Editar perfil</span>
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Endereço */}
-        {cp && (cepValue || cityValue || stateValue) && (
+        {editError && (
+          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">{editError}</div>
+        )}
+
+        {/* Dados pessoais + Segurança */}
+        <div className="grid gap-5 lg:grid-cols-2">
+
+          {/* Dados pessoais */}
           <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-            <h3 className="mb-1 text-xs font-semibold uppercase tracking-wider text-gray-400">Endereço</h3>
+            <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-400">Dados pessoais</h3>
+            {isEditing ? (
+              <div className="space-y-3">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="sm:col-span-2">
+                    <label className="mb-1 block text-xs font-medium text-gray-500">Nome completo</label>
+                    <input className={inputCls} value={editName} onChange={(e) => setEditName(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-gray-500">E-mail</label>
+                    <input type="email" className={inputCls} value={editEmail} onChange={(e) => setEditEmail(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-gray-500">Telefone</label>
+                    <input className={inputCls} value={editPhone} onChange={(e) => setEditPhone(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-gray-500">CEP</label>
+                    <input className={inputCls} value={editCep} onChange={(e) => setEditCep(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-gray-500">Estado</label>
+                    <input className={inputCls} value={editState} onChange={(e) => setEditState(e.target.value.toUpperCase().slice(0, 2))} maxLength={2} />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="mb-1 block text-xs font-medium text-gray-500">Cidade</label>
+                    <input className={inputCls} value={editCity} onChange={(e) => setEditCity(e.target.value)} />
+                  </div>
+                </div>
+                <div className="flex gap-2 pt-1">
+                  <button onClick={saveProfile} disabled={saving}
+                    className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-60">
+                    <Save size={13} /> {saving ? "Salvando…" : "Salvar"}
+                  </button>
+                  <button onClick={cancelEditing}
+                    className="flex items-center gap-2 rounded-xl border border-gray-200 px-5 py-2.5 text-sm text-gray-500 transition hover:bg-gray-50">
+                    <X size={13} /> Cancelar
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <InfoField label="Nome completo" value={profile.name} />
+                <InfoField label="E-mail" value={profile.email} />
+                <InfoField label="Telefone" value={profile.phone} />
+                <InfoField label={docLabel} value={docValue} />
+                <InfoField label="Membro desde" value={formatDateLong(profile.created_at)} />
+                {cp?.city && <InfoField label="Cidade / Estado" value={`${cp.city} / ${cp.state}`} />}
+              </div>
+            )}
+          </div>
+
+          {/* Segurança */}
+          <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+            <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-400">Segurança</h3>
+
+            <button
+              onClick={() => { setShowPwdForm((v) => !v); setPwdError(""); }}
+              className="flex w-full items-center justify-between rounded-xl px-1 py-2 text-sm font-medium text-gray-700 transition hover:text-gray-900"
+            >
+              <span className="flex items-center gap-2.5"><Key size={14} className="text-gray-400" /> Trocar senha</span>
+              <ChevronDown size={14} className={`text-gray-400 transition-transform duration-200 ${showPwdForm ? "rotate-180" : ""}`} />
+            </button>
+
+            {showPwdForm && (
+              <form onSubmit={handleChangePassword} className="mt-3 space-y-2.5">
+                <div className="relative">
+                  <input type={showCurPwd ? "text" : "password"} placeholder="Senha atual" value={currentPwd} onChange={(e) => setCurrentPwd(e.target.value)} className={inputCls} />
+                  <button type="button" onClick={() => setShowCurPwd((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                    {showCurPwd ? <EyeOff size={14} /> : <Eye size={14} />}
+                  </button>
+                </div>
+                <div className="relative">
+                  <input type={showNewPwdVis ? "text" : "password"} placeholder="Nova senha (mín. 6 caracteres)" value={newPwd} onChange={(e) => setNewPwd(e.target.value)} className={inputCls} />
+                  <button type="button" onClick={() => setShowNewPwdVis((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                    {showNewPwdVis ? <EyeOff size={14} /> : <Eye size={14} />}
+                  </button>
+                </div>
+                <input type="password" placeholder="Confirmar nova senha" value={confirmPwd} onChange={(e) => setConfirmPwd(e.target.value)} className={inputCls} />
+                {pwdError && <p className="text-xs text-red-500">{pwdError}</p>}
+                <button type="submit" disabled={pwdSaving}
+                  className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60">
+                  <Lock size={13} /> {pwdSaving ? "Atualizando…" : "Atualizar senha"}
+                </button>
+              </form>
+            )}
+
+            <div className="mt-4 flex items-center justify-between border-t border-gray-50 pt-4">
+              <div>
+                <p className="text-sm font-medium text-gray-700">Autenticação em duas etapas</p>
+                <p className="text-xs text-gray-400">Segurança adicional para sua conta</p>
+              </div>
+              <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-400">Em breve</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Atividade recente */}
+        {recentAtend.length > 0 && (
+          <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+            <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-400">Atividade recente</h3>
             <div className="divide-y divide-gray-50">
-              {cityValue && <InfoRow icon={<Shield size={14} />} label="Cidade" value={cityValue} />}
-              {stateValue && <InfoRow icon={<Shield size={14} />} label="Estado" value={stateValue} />}
-              {cepValue && cepValue !== "00000-000" && <InfoRow icon={<Shield size={14} />} label="CEP" value={cepValue} />}
+              {recentAtend.map((at) => {
+                const cfg = STATUS_CFG[at.status] ?? { label: at.status, cls: "border-gray-200 bg-gray-50 text-gray-600" };
+                return (
+                  <div key={at.id} className="flex items-center gap-4 py-3">
+                    <span className="w-16 shrink-0 text-xs text-gray-400">{formatDateShort(at.data_atendimento)}</span>
+                    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${cfg.cls}`}>{cfg.label}</span>
+                    <span className="ml-auto text-xs font-medium text-gray-600">{formatMoney(at.valor_final)}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -285,6 +409,9 @@ export default function ClienteProfilePage() {
           </button>
         </div>
       </div>
+
+      {/* EditModal para edição de perfil (mantido para compatibilidade) */}
+      <EditModal isOpen={false} title="" onClose={() => {}}>{null}</EditModal>
 
       {/* Modal de confirmação de logout */}
       {showLogoutConfirm && (
@@ -308,104 +435,6 @@ export default function ClienteProfilePage() {
           </div>
         </div>
       )}
-
-      <EditModal
-        isOpen={isEditing}
-        title="Editar perfil"
-        onClose={cancelEditing}
-      >
-        <div className="space-y-4">
-          {editError && (
-            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-              {editError}
-            </div>
-          )}
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Nome</label>
-              <input
-                type="text"
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#1c46f3] focus:ring-2 focus:ring-[#1c46f3]/15"
-              />
-            </div>
-
-            <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">E-mail</label>
-              <input
-                type="email"
-                value={editEmail}
-                onChange={(e) => setEditEmail(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#1c46f3] focus:ring-2 focus:ring-[#1c46f3]/15"
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="mb-1 block text-sm font-medium text-gray-700">Telefone</label>
-              <input
-                type="text"
-                value={editPhone}
-                onChange={(e) => setEditPhone(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#1c46f3] focus:ring-2 focus:ring-[#1c46f3]/15"
-              />
-            </div>
-
-            <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">CEP</label>
-              <input
-                type="text"
-                value={editCep}
-                onChange={(e) => setEditCep(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#1c46f3] focus:ring-2 focus:ring-[#1c46f3]/15"
-              />
-            </div>
-
-            <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Estado</label>
-              <input
-                type="text"
-                value={editState}
-                onChange={(e) => setEditState(e.target.value.toUpperCase().slice(0, 2))}
-                maxLength={2}
-                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#1c46f3] focus:ring-2 focus:ring-[#1c46f3]/15"
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="mb-1 block text-sm font-medium text-gray-700">Cidade</label>
-              <input
-                type="text"
-                value={editCity}
-                onChange={(e) => setEditCity(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#1c46f3] focus:ring-2 focus:ring-[#1c46f3]/15"
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-3 border-t border-gray-100 pt-4">
-            <button
-              type="button"
-              onClick={saveProfile}
-              disabled={saving}
-              className="flex items-center gap-2 rounded-xl bg-[#1c46f3] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1538c9] disabled:opacity-60"
-            >
-              <Save size={14} />
-              {saving ? "Salvando..." : "Salvar alterações"}
-            </button>
-
-            <button
-              type="button"
-              onClick={cancelEditing}
-              className="flex items-center gap-2 rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-600 transition hover:bg-gray-50"
-            >
-              <X size={14} />
-              Cancelar
-            </button>
-          </div>
-        </div>
-      </EditModal>
     </div>
   );
 }
