@@ -1,5 +1,5 @@
 import { api } from "./api";
-import type { Loja, CreateLojaDTO, UpdateLojaDTO } from "../types/loja";
+import type { FuncionarioLoja, Loja, CreateLojaDTO, UpdateLojaDTO } from "../types/loja";
 
 type ApiStoreEmployee = {
   user_id: number;
@@ -107,4 +107,17 @@ export async function updateLoja(id: number, data: UpdateLojaDTO): Promise<Loja>
 export async function deleteLoja(id: number): Promise<{ message: string }> {
   const response = await api.delete(`/store/${id}`);
   return response.data;
+}
+
+export async function getStoreEmployees(storeId: number): Promise<FuncionarioLoja[]> {
+  const response = await api.get<ApiStoreEmployee[]>(`/store/${storeId}/employees`);
+  return response.data.map((e) => ({
+    usuario_id: e.user_id,
+    nome: e.employee_name ?? `Usuário #${e.user_id}`,
+    matricula: e.matricula,
+    cargo: e.job_title,
+    salario: Number(e.salary),
+    data_contratacao: e.hired_at,
+    loja_id: e.store_id,
+  }));
 }

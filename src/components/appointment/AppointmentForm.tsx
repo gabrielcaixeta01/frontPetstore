@@ -249,9 +249,10 @@ export default function AppointmentForm({
             onChange={(e) => setFormaPagamento(e.target.value as Appointment["forma_pagamento"])}
             className={selectCls}>
             <option value="pix">Pix</option>
-            <option value="cartao_credito">Cartão de Crédito</option>
-            <option value="cartao_debito">Cartão de Débito</option>
+            <option value="cartão de crédito">Cartão de Crédito</option>
+            <option value="cartão de débito">Cartão de Débito</option>
             <option value="dinheiro">Dinheiro</option>
+            <option value="transferência bancária">Transferência Bancária</option>
           </select>
         </div>
         <div>
@@ -260,6 +261,7 @@ export default function AppointmentForm({
             onChange={(e) => setStatus(e.target.value as Appointment["status"])}
             className={selectCls}>
             <option value="agendado">Agendado</option>
+            <option value="em andamento">Em andamento</option>
             <option value="concluido">Concluído</option>
             <option value="cancelado">Cancelado</option>
           </select>

@@ -29,10 +29,9 @@ function fromApiSex(value?: string | null): Pet["sexo"] | undefined {
 }
 
 function toApiSex(value?: Pet["sexo"]): string | undefined {
-  // backend _normalize_sex does .lower() before dict lookup;
-  // "M"/"F" become "m"/"f" which aren't keys → 400.
-  // "macho"/"femea" survive .lower() and ARE keys → works.
-  return value || undefined;
+  if (value === "macho") return "M";
+  if (value === "femea") return "F";
+  return undefined;
 }
 
 function toPet(pet: ApiPet): Pet {

@@ -16,17 +16,23 @@ import { getUsuarios } from "../../services/usuarioService";
 import type { Appointment, CreateAppointmentDTO, UpdateAppointmentDTO } from "../../types/atendimento";
 
 const statusConfig: Record<string, { label: string; icon: typeof Clock; cls: string; dot: string }> = {
-  agendado:  { label: "Agendado",  icon: Clock,        cls: "text-yellow-700 bg-yellow-50 border-yellow-200",   dot: "bg-yellow-400"  },
-  concluido: { label: "Concluído", icon: CheckCircle2, cls: "text-emerald-700 bg-emerald-50 border-emerald-200", dot: "bg-emerald-400" },
-  cancelado: { label: "Cancelado", icon: XCircle,      cls: "text-red-600 bg-red-50 border-red-200",             dot: "bg-red-400"     },
+  agendado:      { label: "Agendado",     icon: Clock,        cls: "text-yellow-700 bg-yellow-50 border-yellow-200",   dot: "bg-yellow-400"  },
+  "em andamento":{ label: "Em andamento", icon: Clock,        cls: "text-blue-700 bg-blue-50 border-blue-200",         dot: "bg-blue-400"    },
+  concluido:     { label: "Concluído",    icon: CheckCircle2, cls: "text-emerald-700 bg-emerald-50 border-emerald-200", dot: "bg-emerald-400" },
+  cancelado:     { label: "Cancelado",    icon: XCircle,      cls: "text-red-600 bg-red-50 border-red-200",             dot: "bg-red-400"     },
 };
 
 const pgmtLabel: Record<string, string> = {
-  pix: "Pix", cartao_credito: "Cartão de Crédito",
-  cartao_debito: "Cartão de Débito", dinheiro: "Dinheiro",
+  pix: "Pix",
+  "cartão de crédito": "Cartão de Crédito",
+  "cartão de débito": "Cartão de Débito",
+  dinheiro: "Dinheiro",
+  "transferência bancária": "Transferência Bancária",
+  cartao_credito: "Cartão de Crédito",
+  cartao_debito: "Cartão de Débito",
 };
 
-type HistoryFilter = "todos" | "concluido" | "cancelado";
+type HistoryFilter = "todos" | "em andamento" | "concluido" | "cancelado";
 
 export default function AppointmentsPage() {
   const [atendimentos, setAtendimentos] = useState<Appointment[]>([]);
@@ -401,7 +407,7 @@ export default function AppointmentsPage() {
         </div>
 
         <div className="mb-4 flex flex-wrap gap-2">
-          {(["todos", "concluido", "cancelado"] as HistoryFilter[]).map((s) => {
+          {(["todos", "em andamento", "concluido", "cancelado"] as HistoryFilter[]).map((s) => {
             const cfg = s !== "todos" ? statusConfig[s] : null;
             const count = s === "todos" ? historico.length : historico.filter((a) => a.status === s).length;
             return (

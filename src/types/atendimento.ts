@@ -1,3 +1,12 @@
+export type FormaPagamento =
+  | 'pix'
+  | 'cartão de crédito'
+  | 'cartão de débito'
+  | 'dinheiro'
+  | 'transferência bancária';
+
+export type StatusAtendimento = 'agendado' | 'em andamento' | 'concluido' | 'cancelado';
+
 export interface AppointmentItem {
   appointment_id: number;
   service_id: number;
@@ -11,8 +20,8 @@ export interface Atendimento {
   id: number;
   valor_final: number;
   data_atendimento: string;
-  forma_pagamento: 'pix' | 'cartao_credito' | 'cartao_debito' | 'dinheiro';
-  status: 'agendado' | 'concluido' | 'cancelado';
+  forma_pagamento: FormaPagamento;
+  status: StatusAtendimento;
   online: boolean;
   observacoes?: string;
   loja_id: number;
@@ -23,19 +32,20 @@ export interface Atendimento {
 }
 
 export interface CreateAtendimentoDTO {
-  forma_pagamento: 'pix' | 'cartao_credito' | 'cartao_debito' | 'dinheiro';
-  status: 'agendado' | 'concluido' | 'cancelado';
+  forma_pagamento: FormaPagamento;
+  status: StatusAtendimento;
   online?: boolean;
   observacoes?: string;
+  data_atendimento?: string;
   loja_id: number;
   cliente_id: number;
-  funcionario_id: number;
+  funcionario_id?: number;
   pet_id: number;
 }
 
 export interface UpdateAtendimentoDTO {
-  forma_pagamento?: 'pix' | 'cartao_credito' | 'cartao_debito' | 'dinheiro';
-  status?: 'agendado' | 'concluido' | 'cancelado';
+  forma_pagamento?: FormaPagamento;
+  status?: StatusAtendimento;
   online?: boolean;
   observacoes?: string;
   loja_id?: number;

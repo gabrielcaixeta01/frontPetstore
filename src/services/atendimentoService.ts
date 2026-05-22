@@ -7,6 +7,8 @@ import type {
   AtendimentoServico,
   CreateAtendimentoServicoDTO,
   UpdateAtendimentoServicoDTO,
+  FormaPagamento,
+  StatusAtendimento,
 } from "../types/atendimento";
 
 type ApiAppointment = {
@@ -74,18 +76,21 @@ type ApiAppointmentService = {
   observations?: string | null;
 };
 
-function normalizeAppointmentStatus(status?: string): 'agendado' | 'concluido' | 'cancelado' {
-  const normalized = (status ?? '').toLowerCase();
-
-  if (normalized === 'concluído' || normalized === 'concluido' || normalized === 'completed') {
-    return 'concluido';
-  }
-
-  if (normalized === 'cancelado' || normalized === 'canceled' || normalized === 'cancelled') {
-    return 'cancelado';
-  }
-
+function normalizeAppointmentStatus(status?: string): StatusAtendimento {
+  const s = (status ?? '').toLowerCase();
+  if (s === 'concluído' || s === 'concluido' || s === 'completed') return 'concluido';
+  if (s === 'cancelado' || s === 'canceled' || s === 'cancelled') return 'cancelado';
+  if (s === 'em andamento' || s === 'em_andamento' || s === 'in_progress') return 'em andamento';
   return 'agendado';
+}
+
+function normalizePaymentMethod(value?: string): FormaPagamento {
+  const v = (value ?? '').toLowerCase();
+  if (v === 'cartão de crédito' || v === 'cartao_credito' || v === 'cartao de credito' || v === 'credit_card') return 'cartão de crédito';
+  if (v === 'cartão de débito' || v === 'cartao_debito' || v === 'cartao de debito' || v === 'debit_card') return 'cartão de débito';
+  if (v === 'transferência bancária' || v === 'transferencia_bancaria' || v === 'bank_transfer') return 'transferência bancária';
+  if (v === 'dinheiro' || v === 'cash') return 'dinheiro';
+  return 'pix';
 }
 
 function toAppointmentItem(item: ApiAppointmentItem): AppointmentItem {
@@ -114,8 +119,9 @@ function toAtendimento(appointment: ApiAppointment): Atendimento {
       appointment.atendimento_em ??
       appointment.created_at ??
       "",
-    forma_pagamento:
-      (appointment.payment_method ?? appointment.payment_type ?? appointment.forma_pagamento ?? "pix") as Atendimento["forma_pagamento"],
+    forma_pagamento: normalizePaymentMethod(
+      appointment.payment_method ?? appointment.payment_type ?? appointment.forma_pagamento
+    ),
     status: normalizeAppointmentStatus(appointment.status),
     online: appointment.online,
     observacoes: appointment.notes ?? appointment.observations ?? appointment.observacoes ?? undefined,
@@ -185,6 +191,7 @@ export async function createAppointment(data: CreateAtendimentoDTO, serviceIds: 
       status: data.status,
       online: data.online,
       notes: data.observacoes,
+      service_at: data.data_atendimento,
       store_id: data.loja_id,
       client_id: data.cliente_id,
       employee_id: data.funcionario_id,
