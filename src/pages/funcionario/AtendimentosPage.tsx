@@ -4,7 +4,10 @@ import {
   CalendarCheck, Clock, CheckCircle2, XCircle,
   Store, PawPrint, ChevronDown, ChevronUp,
   Wallet, TrendingUp, Scissors, User,
+  ChevronLeft, ChevronRight,
 } from "lucide-react";
+
+const PAGE_SIZE = 5;
 import EditModal from "../../components/EditModal";
 import AppointmentForm from "../../components/appointment/AppointmentForm";
 import EditAppointmentForm from "../../components/appointment/EditAppointmentForm";
@@ -47,6 +50,7 @@ export default function AppointmentsPage() {
   const [petsById, setPetsById] = useState<Record<number, string>>({});
   const [servicosById, setServicosById] = useState<Record<number, string>>({});
   const [filter, setFilter] = useState<HistoryFilter>("todos");
+  const [page, setPage]     = useState(1);
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
   async function loadAtendimentos() {
@@ -119,6 +123,11 @@ export default function AppointmentsPage() {
     filter === "todos" ? historico : historico.filter((a) => a.status === filter),
     [historico, filter],
   );
+
+  useEffect(() => { setPage(1); }, [filter]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const paginated  = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   const concluidos = useMemo(() => historico.filter((a) => a.status === "concluido"), [historico]);
   const receitaTotal = useMemo(() => concluidos.reduce((s, a) => s + Number(a.valor_final), 0), [concluidos]);
 
@@ -436,9 +445,59 @@ export default function AppointmentsPage() {
             <p className="text-sm text-gray-400">Nenhum atendimento nesta categoria.</p>
           </div>
         ) : (
-          <div className="space-y-2">
-            {filtered.map((at) => <AtendimentoRow key={at.id} at={at} />)}
-          </div>
+          <>
+            <div className="space-y-2">
+              {paginated.map((at) => <AtendimentoRow key={at.id} at={at} />)}
+            </div>
+
+            {totalPages > 1 && (
+              <div className="mt-4 flex items-center justify-between rounded-2xl border border-gray-100 bg-white px-4 py-3 shadow-sm">
+                <p className="text-xs text-gray-400">
+                  {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} de {filtered.length}
+                </p>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setPage((p) => p - 1)}
+                    disabled={page === 1}
+                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:border-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <ChevronLeft size={14} />
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter((n) => n === 1 || n === totalPages || Math.abs(n - page) <= 1)
+                    .reduce<(number | "…")[]>((acc, n, i, arr) => {
+                      if (i > 0 && n - (arr[i - 1] as number) > 1) acc.push("…");
+                      acc.push(n);
+                      return acc;
+                    }, [])
+                    .map((n, i) =>
+                      n === "…" ? (
+                        <span key={`ellipsis-${i}`} className="px-1 text-xs text-gray-300">…</span>
+                      ) : (
+                        <button
+                          key={n}
+                          onClick={() => setPage(n as number)}
+                          className={`flex h-8 w-8 items-center justify-center rounded-lg border text-xs font-semibold transition ${
+                            page === n
+                              ? "border-[#1c46f3] bg-[#1c46f3] text-white"
+                              : "border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50"
+                          }`}
+                        >
+                          {n}
+                        </button>
+                      )
+                    )}
+                  <button
+                    onClick={() => setPage((p) => p + 1)}
+                    disabled={page === totalPages}
+                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:border-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <ChevronRight size={14} />
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
