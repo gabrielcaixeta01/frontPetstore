@@ -5,7 +5,7 @@ export type FormaPagamento =
   | 'dinheiro'
   | 'transferência bancária';
 
-export type StatusAtendimento = 'agendado' | 'em andamento' | 'concluido' | 'cancelado';
+export type StatusAtendimento = 'agendado' | 'concluido' | 'cancelado';
 
 export interface AppointmentItem {
   appointment_id: number;

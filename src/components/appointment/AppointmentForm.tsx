@@ -261,7 +261,6 @@ export default function AppointmentForm({
             onChange={(e) => setStatus(e.target.value as Appointment["status"])}
             className={selectCls}>
             <option value="agendado">Agendado</option>
-            <option value="em andamento">Em andamento</option>
             <option value="concluido">Concluído</option>
             <option value="cancelado">Cancelado</option>
           </select>

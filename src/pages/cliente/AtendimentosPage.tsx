@@ -18,7 +18,6 @@ function getStoredUser() {
 
 const statusConfig: Record<string, { label: string; icon: typeof Clock; cls: string; dot: string }> = {
   agendado:      { label: "Agendado",      icon: Clock,        cls: "text-yellow-700 bg-yellow-50 border-yellow-200",   dot: "bg-yellow-400"  },
-  "em andamento":{ label: "Em andamento",  icon: Clock,        cls: "text-blue-700 bg-blue-50 border-blue-200",         dot: "bg-blue-400"    },
   concluido:     { label: "Concluído",     icon: CheckCircle2, cls: "text-emerald-700 bg-emerald-50 border-emerald-200", dot: "bg-emerald-400" },
   cancelado:     { label: "Cancelado",     icon: XCircle,      cls: "text-red-600 bg-red-50 border-red-200",             dot: "bg-red-400"     },
 };
@@ -44,7 +43,7 @@ const pgmtOptions = [
   { value: "transferência bancária",label: "Transferência Bancária" },
 ];
 
-type HistoryFilter = "todos" | "em andamento" | "concluido" | "cancelado";
+type HistoryFilter = "todos" | "agendado" | "concluido" | "cancelado";
 
 interface FormState {
   pet_id: string;
@@ -671,7 +670,7 @@ export default function ClienteAtendimentosPage() {
         </div>
 
         <div className="mb-4 flex flex-wrap gap-2">
-          {(["todos", "em andamento", "concluido", "cancelado"] as HistoryFilter[]).map((s) => {
+          {(["todos", "agendado", "concluido", "cancelado"] as HistoryFilter[]).map((s) => {
             const cfg = s !== "todos" ? statusConfig[s] : null;
             const count = s === "todos" ? historico.length : historico.filter((a) => a.status === s).length;
             return (

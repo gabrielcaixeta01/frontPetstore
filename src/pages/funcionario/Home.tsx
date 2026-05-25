@@ -63,7 +63,6 @@ export default function FuncionarioHome() {
   const lastMonthYear = thisMonth === 0 ? thisYear - 1 : thisYear;
 
   const [totalPets, setTotalPets] = useState(0);
-  const [petsComAlertas, setPetsComAlertas] = useState(0);
   const [atendimentos, setAtendimentos] = useState<Atendimento[]>([]);
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [lojas, setLojas] = useState<Loja[]>([]);
@@ -82,7 +81,6 @@ export default function FuncionarioHome() {
           getServicos().catch(() => []),
         ]);
         setTotalPets(pets.length);
-        setPetsComAlertas(pets.filter((p) => p.observacoes_saude).length);
         setAtendimentos(allAtend.sort((a, b) => new Date(b.data_atendimento).getTime() - new Date(a.data_atendimento).getTime()));
         setUsuarios(allUsers);
         setLojas(allLojas);
@@ -190,9 +188,8 @@ export default function FuncionarioHome() {
       label: "Pets cadastrados",
       value: loading ? "—" : String(totalPets),
       delta: null,
-      badge: petsComAlertas > 0 ? `${petsComAlertas} com alerta` : null,
-      badgeCls: "text-amber-600",
-      icon: PawPrint, bg: "bg-amber-100", iconCls: "text-amber-600", to: "/pets",
+      badgeCls: "text-gray-500",
+      icon: PawPrint, bg: "bg-gray-100", iconCls: "text-gray-600", to: "/pets",
     },
   ];
 

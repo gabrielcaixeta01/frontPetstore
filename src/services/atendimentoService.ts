@@ -80,7 +80,6 @@ function normalizeAppointmentStatus(status?: string): StatusAtendimento {
   const s = (status ?? '').toLowerCase();
   if (s === 'concluído' || s === 'concluido' || s === 'completed') return 'concluido';
   if (s === 'cancelado' || s === 'canceled' || s === 'cancelled') return 'cancelado';
-  if (s === 'em andamento' || s === 'em_andamento' || s === 'in_progress') return 'em andamento';
   return 'agendado';
 }
 
