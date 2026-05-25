@@ -64,7 +64,7 @@ export default function PetList({ pets, onEdit, onDelete, categoriasById, donosB
                     .join(" · ") || "Sem detalhes"}
                 </p>
                 {pet.observacoes_saude && (
-                  <p className="mt-0.5 truncate text-xs text-amber-600" title={pet.observacoes_saude}>
+                  <p className="mt-0.5 truncate text-xs text-gray-500" title={pet.observacoes_saude}>
                     {pet.observacoes_saude}
                   </p>
                 )}

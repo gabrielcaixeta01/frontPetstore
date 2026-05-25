@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Plus, X, RefreshCw, AlertCircle, Check, Pencil, Trash2, PawPrint, Users } from "lucide-react";
+import { Plus, X, RefreshCw, Check, Pencil, Trash2, PawPrint, Users } from "lucide-react";
 import EditModal from "../../components/EditModal";
 import EditPetForm from "../../components/pet/EditPetForm";
 import PetForm from "../../components/pet/PetForm";
@@ -136,15 +136,14 @@ export default function PetsPage() {
         )}
       </EditModal>
 
-      {/* Alert banner */}
+      {/* Observações cadastradas */}
       {!loading && pets.some((p) => p.observacoes_saude) && (
-        <div className="mb-4 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
-          <AlertCircle size={16} className="mt-0.5 shrink-0 text-amber-500" />
-          <p className="text-sm text-amber-700">
-            <span className="font-semibold">
-              {pets.filter((p) => p.observacoes_saude).length === 1 ? "1 pet tem" : `${pets.filter((p) => p.observacoes_saude).length} pets têm`}
+        <div className="mb-4 rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3">
+          <p className="text-sm text-gray-600">
+            <span className="font-semibold text-gray-700">
+              {pets.filter((p) => p.observacoes_saude).length === 1 ? "1 pet possui" : `${pets.filter((p) => p.observacoes_saude).length} pets possuem`}
             </span>{" "}
-            observações de saúde — verifique os detalhes abaixo.
+            observações de saúde cadastradas.
           </p>
         </div>
       )}
@@ -200,9 +199,8 @@ export default function PetsPage() {
                 )}
 
                 {pet.observacoes_saude && (
-                  <div className="mt-2 flex items-start gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-2.5 py-2">
-                    <AlertCircle size={12} className="mt-0.5 shrink-0 text-amber-500" />
-                    <p className="line-clamp-2 text-xs leading-relaxed text-amber-700">{pet.observacoes_saude}</p>
+                  <div className="mt-2 rounded-xl border border-gray-200 bg-gray-50 px-2.5 py-2">
+                    <p className="line-clamp-2 text-xs leading-relaxed text-gray-600">{pet.observacoes_saude}</p>
                   </div>
                 )}
 
