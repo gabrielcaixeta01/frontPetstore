@@ -136,18 +136,6 @@ export default function PetsPage() {
         )}
       </EditModal>
 
-      {/* Observações cadastradas */}
-      {!loading && pets.some((p) => p.observacoes_saude) && (
-        <div className="mb-4 rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3">
-          <p className="text-sm text-gray-600">
-            <span className="font-semibold text-gray-700">
-              {pets.filter((p) => p.observacoes_saude).length === 1 ? "1 pet possui" : `${pets.filter((p) => p.observacoes_saude).length} pets possuem`}
-            </span>{" "}
-            observações de saúde cadastradas.
-          </p>
-        </div>
-      )}
-
       {!loading && pets.length > 0 && (
         <div className="mb-4 flex items-center justify-between">
           <p className="text-sm text-gray-500">{pets.length} {pets.length === 1 ? "pet cadastrado" : "pets cadastrados"}</p>

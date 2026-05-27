@@ -29,8 +29,8 @@ function fromApiSex(value?: string | null): Pet["sexo"] | undefined {
 }
 
 function toApiSex(value?: Pet["sexo"]): string | undefined {
-  if (value === "macho") return "M";
-  if (value === "femea") return "F";
+  if (value === "macho") return "macho";
+  if (value === "femea") return "femea";
   return undefined;
 }
 
@@ -87,7 +87,10 @@ export async function updatePet(id: number, data: UpdatePetDTO): Promise<Pet> {
       health_notes: data.observacoes_saude,
       category_id: data.categoria_id,
       owner_id: data.dono_id,
-      tag_ids: data.tag_ids?.length ? data.tag_ids : undefined,
+      // Send [""] when empty so backend receives tag_ids= and clears tags via _normalize_tag_ids
+      tag_ids: data.tag_ids !== undefined
+        ? (data.tag_ids.length > 0 ? data.tag_ids : [""])
+        : undefined,
     },
   });
   return toPet(response.data);
