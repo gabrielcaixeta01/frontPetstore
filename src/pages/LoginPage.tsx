@@ -3,20 +3,68 @@ import { Link, useNavigate } from "react-router-dom";
 import { Mail, Lock, Eye, EyeOff, PawPrint, CalendarCheck, Store, ArrowRight } from "lucide-react";
 import { api } from "../services/api";
 
+const BLUE  = "#1A3CB8";
+const YELL  = "#F5A800";
+const GREEN = "#00A651";
+const BG    = "#F4F4F4";
+const BORD  = "#E0E0E0";
+const MUTED = "#6B6B6B";
+
 const features = [
-  { icon: PawPrint, text: "Gerencie pets, raças e histórico de saúde" },
+  { icon: PawPrint,      text: "Gerencie pets, raças e histórico de saúde" },
   { icon: CalendarCheck, text: "Acompanhe atendimentos em tempo real" },
-  { icon: Store, text: "Controle lojas, serviços e equipes" },
+  { icon: Store,         text: "Controle lojas, serviços e equipes" },
 ];
+
+function GeometricDecor() {
+  return (
+    <div className="pointer-events-none absolute inset-0 select-none overflow-hidden">
+      <div className="absolute right-8 top-10 h-14 w-14 opacity-85"
+        style={{ background: YELL, clipPath: "polygon(50% 0%, 0% 100%, 100% 100%)" }} />
+      <div className="absolute right-3 top-[38%] h-10 w-10 rotate-45 opacity-75"
+        style={{ background: GREEN }} />
+      <div className="absolute right-24 top-[16%] h-16 w-16 rounded-full"
+        style={{ border: "2.5px solid rgba(255,255,255,0.2)" }} />
+      <div className="absolute bottom-20 right-6 h-7 w-7 opacity-55"
+        style={{ background: YELL }} />
+      <div className="absolute right-40 bottom-14 h-10 w-10 opacity-10"
+        style={{ background: "#FFFFFF", clipPath: "polygon(50% 0%, 0% 100%, 100% 100%)" }} />
+      <div className="absolute right-0 top-[58%] h-24 w-12 rounded-l-full opacity-12"
+        style={{ background: GREEN }} />
+    </div>
+  );
+}
+
+const inputCls = {
+  display: "block" as const,
+  width: "100%",
+  padding: "10px 16px 10px 40px",
+  fontSize: "14px",
+  border: `1px solid ${BORD}`,
+  borderRadius: "4px",
+  background: "#FFFFFF",
+  outline: "none",
+  transition: "border-color 0.15s, box-shadow 0.15s",
+};
+
+function Field({
+  label, children,
+}: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-1.5">
+      <label className="block text-sm font-medium" style={{ color: "#1A1A1A" }}>{label}</label>
+      {children}
+    </div>
+  );
+}
 
 export default function LoginPage() {
   const navigate = useNavigate();
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail]               = useState("");
+  const [password, setPassword]         = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [loading, setLoading]           = useState(false);
+  const [error, setError]               = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -35,21 +83,29 @@ export default function LoginPage() {
     }
   }
 
+  function focusStyle(e: React.FocusEvent<HTMLInputElement>) {
+    e.target.style.borderColor = BLUE;
+    e.target.style.boxShadow  = "0 0 0 3px rgba(26,60,184,0.10)";
+  }
+  function blurStyle(e: React.FocusEvent<HTMLInputElement>) {
+    e.target.style.borderColor = BORD;
+    e.target.style.boxShadow  = "none";
+  }
+
   return (
     <main className="flex min-h-screen">
-      {/* ── Painel esquerdo ── */}
-      <div className="relative hidden lg:flex lg:w-[480px] flex-col justify-between overflow-hidden bg-gradient-to-br from-[#1c46f3] via-[#1840e0] to-[#00bb69] p-12 text-white">
-        {/* Decoração de fundo */}
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-white/5" />
-          <div className="absolute top-1/2 -left-20 h-72 w-72 rounded-full bg-white/5" />
-          <div className="absolute -bottom-16 right-1/3 h-60 w-60 rounded-full bg-[#ffd200]/10" />
-        </div>
+      {/* ── Left panel ── */}
+      <div
+        className="relative hidden lg:flex lg:w-[480px] flex-col justify-between overflow-hidden p-12 text-white"
+        style={{ background: BLUE }}
+      >
+        <GeometricDecor />
 
         {/* Logo */}
         <div className="relative flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15">
-            <PawPrint size={20} className="text-[#ffd200]" />
+          <div className="flex h-10 w-10 items-center justify-center"
+            style={{ background: "rgba(255,255,255,0.15)", borderRadius: "4px" }}>
+            <PawPrint size={20} style={{ color: YELL }} />
           </div>
           <span className="text-xl font-bold tracking-tight">Apex Petstore</span>
         </div>
@@ -57,52 +113,51 @@ export default function LoginPage() {
         {/* Headline */}
         <div className="relative space-y-6">
           <div>
-            <span className="inline-block rounded-full bg-[#ffd200] px-3 py-1 text-xs font-bold uppercase tracking-widest text-gray-900">
+            <span className="inline-block px-3 py-1 text-xs font-bold uppercase tracking-widest text-gray-900"
+              style={{ background: YELL, borderRadius: "20px" }}>
               Bem-vindo de volta
             </span>
             <h1 className="mt-5 text-4xl font-bold leading-tight">
               Tudo do seu petshop,<br />em um só lugar.
             </h1>
-            <p className="mt-4 text-base text-white/70">
+            <p className="mt-4 text-base" style={{ color: "rgba(255,255,255,0.72)" }}>
               Entre na sua conta e acesse a gestão completa da sua operação.
             </p>
           </div>
-
           <ul className="space-y-4">
             {features.map((f) => (
               <li key={f.text} className="flex items-center gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/15">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center"
+                  style={{ background: "rgba(255,255,255,0.15)", borderRadius: "4px" }}>
                   <f.icon size={15} />
                 </div>
-                <span className="text-sm text-white/85">{f.text}</span>
+                <span className="text-sm" style={{ color: "rgba(255,255,255,0.85)" }}>{f.text}</span>
               </li>
             ))}
           </ul>
         </div>
 
-        {/* Rodapé do painel */}
-        <div className="relative border-t border-white/20 pt-6 text-sm text-white/60">
+        {/* Footer */}
+        <div className="relative pt-6 text-sm" style={{ borderTop: "1px solid rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.60)" }}>
           Ainda não tem conta?{" "}
-          <Link to="/register" className="font-semibold text-white hover:text-[#ffd200] transition-colors">
+          <Link to="/register" className="font-semibold text-white hover:opacity-80 transition-opacity">
             Criar cadastro
           </Link>
         </div>
       </div>
 
-      {/* ── Painel direito (form) ── */}
-      <div className="flex flex-1 flex-col items-center justify-center bg-gray-50 px-6 py-12">
+      {/* ── Right panel (form) ── */}
+      <div className="flex flex-1 flex-col items-center justify-center px-6 py-12" style={{ background: BG }}>
         <div className="w-full max-w-md">
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900">Acesse sua conta</h2>
-            <p className="mt-1 text-sm text-gray-500">Informe seu e-mail e senha para continuar.</p>
+            <h2 className="text-2xl font-bold" style={{ color: "#1A1A1A" }}>Acesse sua conta</h2>
+            <p className="mt-1 text-sm" style={{ color: MUTED }}>Informe seu e-mail e senha para continuar.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* E-mail */}
-            <div className="space-y-1.5">
-              <label className="block text-sm font-medium text-gray-700">E-mail</label>
+            <Field label="E-mail">
               <div className="relative">
-                <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: MUTED }} />
                 <input
                   type="email"
                   required
@@ -110,16 +165,16 @@ export default function LoginPage() {
                   placeholder="seuemail@exemplo.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-10 pr-4 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white focus:ring-2 focus:ring-[#1c46f3]/15"
+                  style={inputCls}
+                  onFocus={focusStyle}
+                  onBlur={blurStyle}
                 />
               </div>
-            </div>
+            </Field>
 
-            {/* Senha */}
-            <div className="space-y-1.5">
-              <label className="block text-sm font-medium text-gray-700">Senha</label>
+            <Field label="Senha">
               <div className="relative">
-                <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: MUTED }} />
                 <input
                   type={showPassword ? "text" : "password"}
                   required
@@ -128,45 +183,46 @@ export default function LoginPage() {
                   placeholder="Sua senha"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-10 pr-11 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white focus:ring-2 focus:ring-[#1c46f3]/15"
+                  style={{ ...inputCls, paddingRight: "44px" }}
+                  onFocus={focusStyle}
+                  onBlur={blurStyle}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 transition hover:opacity-70"
+                  style={{ color: MUTED }}
                   tabIndex={-1}
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
-            </div>
+            </Field>
 
-            {/* Erro */}
             {error && (
-              <div className={`rounded-xl border px-4 py-3 text-sm ${error.toLowerCase().includes("desativada") ? "border-amber-200 bg-amber-50 text-amber-700" : "border-red-200 bg-red-50 text-red-600"}`}>
+              <div className="px-4 py-3 text-sm" style={{
+                borderRadius: "4px",
+                border: error.toLowerCase().includes("desativada") ? `1px solid ${YELL}` : "1px solid #FECACA",
+                background: error.toLowerCase().includes("desativada") ? "rgba(245,168,0,0.08)" : "rgba(254,202,202,0.3)",
+                color: error.toLowerCase().includes("desativada") ? "#92400E" : "#DC2626",
+              }}>
                 {error}
               </div>
             )}
 
-            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] py-2.5 text-sm font-semibold text-white shadow-md shadow-[#1c46f3]/25 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex w-full items-center justify-center gap-2 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+              style={{ background: BLUE, borderRadius: "4px" }}
             >
-              {loading ? "Entrando..." : (
-                <>
-                  Entrar
-                  <ArrowRight size={15} />
-                </>
-              )}
+              {loading ? "Entrando..." : <><span>Entrar</span><ArrowRight size={15} /></>}
             </button>
           </form>
 
-          {/* Link mobile */}
-          <p className="mt-6 text-center text-sm text-gray-500 lg:hidden">
+          <p className="mt-6 text-center text-sm lg:hidden" style={{ color: MUTED }}>
             Não tem conta?{" "}
-            <Link to="/register" className="font-semibold text-[#1c46f3] hover:underline">
+            <Link to="/register" className="font-semibold hover:underline" style={{ color: BLUE }}>
               Criar cadastro
             </Link>
           </p>
