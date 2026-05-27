@@ -301,7 +301,7 @@ export default function CategoriasPage() {
               const count = petCounts[cat.id] ?? 0;
               const desc = cat.description ? fixDescription(cat.description) : undefined;
               return (
-                <div key={cat.id} className={`flex flex-col gap-3 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition hover:shadow-md border-l-4 ${color.borderAccent}`}>
+                <div key={cat.id} className="flex flex-col gap-3 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition hover:shadow-md">
                   <div className="flex items-start gap-3">
                     <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${color.iconBg}`}>
                       <Icon size={18} className={color.iconText} />

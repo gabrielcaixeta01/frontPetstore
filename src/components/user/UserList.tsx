@@ -1,10 +1,12 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Pencil, Trash2, CheckCircle, XCircle,
   Search, ChevronDown, PawPrint, Banknote,
   Calendar, Briefcase, Building2, MapPin, Users,
-  UserCheck, UserX,
+  UserCheck, UserX, ChevronLeft, ChevronRight,
 } from "lucide-react";
+
+const PAGE_SIZE = 8;
 import type { Usuario } from "../../types/usuario";
 import type { Pet } from "../../types/pet";
 
@@ -50,6 +52,7 @@ export default function UserList({ users, onEdit, onDelete, petsByUser, lojaById
   const [filterTipo, setFilterTipo] = useState<"all" | "cliente" | "funcionario">("all");
   const [filterStatus, setFilterStatus] = useState<"all" | "ativo" | "inativo">("all");
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [page, setPage] = useState(1);
 
   const summary = useMemo(() => ({
     total:        users.length,
@@ -68,6 +71,11 @@ export default function UserList({ users, onEdit, onDelete, petsByUser, lojaById
       return true;
     });
   }, [users, search, filterTipo, filterStatus]);
+
+  useEffect(() => { setPage(1); }, [search, filterTipo, filterStatus]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const paginated  = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   if (users.length === 0) {
     return (
@@ -160,7 +168,7 @@ export default function UserList({ users, onEdit, onDelete, petsByUser, lojaById
           </div>
         ) : (
           <div className="divide-y divide-gray-50">
-            {filtered.map((user) => {
+            {paginated.map((user) => {
               const cfg = perfilCfg[user.tipo_perfil] ?? { label: user.tipo_perfil, badge: "bg-gray-100 text-gray-700 border-gray-200", avatar: "bg-gray-100 text-gray-600" };
               const isExpanded = expandedId === user.id;
               const pets = petsByUser[user.id] ?? [];
@@ -337,6 +345,54 @@ export default function UserList({ users, onEdit, onDelete, petsByUser, lojaById
           </div>
         )}
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white px-4 py-3 shadow-sm">
+          <p className="text-xs text-gray-400">
+            {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} de {filtered.length}
+          </p>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setPage((p) => p - 1)}
+              disabled={page === 1}
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:border-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <ChevronLeft size={14} />
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter((n) => n === 1 || n === totalPages || Math.abs(n - page) <= 1)
+              .reduce<(number | "…")[]>((acc, n, i, arr) => {
+                if (i > 0 && n - (arr[i - 1] as number) > 1) acc.push("…");
+                acc.push(n);
+                return acc;
+              }, [])
+              .map((n, i) =>
+                n === "…" ? (
+                  <span key={`ellipsis-${i}`} className="px-1 text-xs text-gray-300">…</span>
+                ) : (
+                  <button
+                    key={n}
+                    onClick={() => setPage(n as number)}
+                    className={`flex h-8 w-8 items-center justify-center rounded-lg border text-xs font-semibold transition ${
+                      page === n
+                        ? "border-[#1c46f3] bg-[#1c46f3] text-white"
+                        : "border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50"
+                    }`}
+                  >
+                    {n}
+                  </button>
+                )
+              )}
+            <button
+              onClick={() => setPage((p) => p + 1)}
+              disabled={page === totalPages}
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:border-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <ChevronRight size={14} />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

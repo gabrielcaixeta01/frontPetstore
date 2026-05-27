@@ -104,8 +104,8 @@ export default function FuncionarioHome() {
     () => atendimentos.filter((a) => sameYM(new Date(a.data_atendimento), lastMonthYear, lastMonth)),
     [atendimentos],
   );
-  const revenueMes    = useMemo(() => atendMes.filter((a) => a.status === "concluido").reduce((s, a) => s + a.valor_final, 0), [atendMes]);
-  const revenueMesAnt = useMemo(() => atendMesAnt.filter((a) => a.status === "concluido").reduce((s, a) => s + a.valor_final, 0), [atendMesAnt]);
+  const revenueMes    = useMemo(() => atendMes.filter((a) => a.status === "concluido").reduce((s, a) => s + Number(a.valor_final), 0), [atendMes]);
+  const revenueMesAnt = useMemo(() => atendMesAnt.filter((a) => a.status === "concluido").reduce((s, a) => s + Number(a.valor_final), 0), [atendMesAnt]);
   const atendDelta   = useMemo(() => pct(atendMes.length, atendMesAnt.length),   [atendMes, atendMesAnt]);
   const revenueDelta = useMemo(() => pct(revenueMes, revenueMesAnt),              [revenueMes, revenueMesAnt]);
 
@@ -132,7 +132,7 @@ export default function FuncionarioHome() {
     atendMes.forEach((a) => {
       if (map[a.loja_id]) {
         map[a.loja_id].atend++;
-        if (a.status === "concluido") map[a.loja_id].revenue += a.valor_final;
+        if (a.status === "concluido") map[a.loja_id].revenue += Number(a.valor_final);
       }
     });
     return Object.values(map).sort((a, b) => b.atend - a.atend).slice(0, 5);

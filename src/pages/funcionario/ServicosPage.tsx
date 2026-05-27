@@ -278,7 +278,7 @@ export default function ServicosPage() {
                 onClick={() => setCatFilter(cat.id)}
                 className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-sm font-medium transition ${
                   catFilter === cat.id
-                    ? "border-[#1c46f3] bg-[#1c46f3] text-white"
+                    ? "border-transparent bg-[#1c46f3] text-white"
                     : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
                 }`}
               >
@@ -311,7 +311,6 @@ export default function ServicosPage() {
             const col  = getColor(s.nome);
             return (
             <div key={s.id} className="group flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:border-[#1c46f3]/25 hover:shadow-md">
-              <div className="h-1 bg-gradient-to-r from-[#1c46f3] to-[#00bb69]" />
               <div className="flex flex-1 flex-col p-5">
                 <div className="flex items-start gap-3">
                   <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${col.bg}`}>

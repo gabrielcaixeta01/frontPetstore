@@ -61,9 +61,9 @@ function formatMoney(value: number) {
 
 function InfoField({ label, value }: { label: string; value?: string }) {
   return (
-    <div>
+    <div className="min-w-0">
       <p className="text-xs font-medium text-gray-400">{label}</p>
-      <p className="mt-0.5 text-sm font-semibold text-gray-800">{value || "—"}</p>
+      <p className="mt-0.5 truncate text-sm font-semibold text-gray-800" title={value || "—"}>{value || "—"}</p>
     </div>
   );
 }
@@ -279,105 +279,92 @@ export default function ClienteProfilePage() {
         )}
 
         {/* Dados pessoais + Segurança */}
-        <div className="grid gap-5 lg:grid-cols-2">
-
-          {/* Dados pessoais */}
-          <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-            <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-400">Dados pessoais</h3>
-            {isEditing ? (
-              <div className="space-y-3">
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="sm:col-span-2">
-                    <label className="mb-1 block text-xs font-medium text-gray-500">Nome completo</label>
-                    <input className={inputCls} value={editName} onChange={(e) => setEditName(e.target.value)} />
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-xs font-medium text-gray-500">E-mail</label>
-                    <input type="email" className={inputCls} value={editEmail} onChange={(e) => setEditEmail(e.target.value)} />
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-xs font-medium text-gray-500">Telefone</label>
-                    <input className={inputCls} value={editPhone} onChange={(e) => setEditPhone(e.target.value)} />
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-xs font-medium text-gray-500">CEP</label>
-                    <input className={inputCls} value={editCep} onChange={(e) => setEditCep(e.target.value)} />
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-xs font-medium text-gray-500">Estado</label>
-                    <input className={inputCls} value={editState} onChange={(e) => setEditState(e.target.value.toUpperCase().slice(0, 2))} maxLength={2} />
-                  </div>
-                  <div className="sm:col-span-2">
-                    <label className="mb-1 block text-xs font-medium text-gray-500">Cidade</label>
-                    <input className={inputCls} value={editCity} onChange={(e) => setEditCity(e.target.value)} />
-                  </div>
+        <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+          <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-400">Dados pessoais</h3>
+          {isEditing ? (
+            <div className="space-y-3">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <label className="mb-1 block text-xs font-medium text-gray-500">Nome completo</label>
+                  <input className={inputCls} value={editName} onChange={(e) => setEditName(e.target.value)} />
                 </div>
-                <div className="flex gap-2 pt-1">
-                  <button onClick={saveProfile} disabled={saving}
-                    className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-60">
-                    <Save size={13} /> {saving ? "Salvando…" : "Salvar"}
-                  </button>
-                  <button onClick={cancelEditing}
-                    className="flex items-center gap-2 rounded-xl border border-gray-200 px-5 py-2.5 text-sm text-gray-500 transition hover:bg-gray-50">
-                    <X size={13} /> Cancelar
-                  </button>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-gray-500">E-mail</label>
+                  <input type="email" className={inputCls} value={editEmail} onChange={(e) => setEditEmail(e.target.value)} />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-gray-500">Telefone</label>
+                  <input className={inputCls} value={editPhone} onChange={(e) => setEditPhone(e.target.value)} />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-gray-500">CEP</label>
+                  <input className={inputCls} value={editCep} onChange={(e) => setEditCep(e.target.value)} />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-gray-500">Estado</label>
+                  <input className={inputCls} value={editState} onChange={(e) => setEditState(e.target.value.toUpperCase().slice(0, 2))} maxLength={2} />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="mb-1 block text-xs font-medium text-gray-500">Cidade</label>
+                  <input className={inputCls} value={editCity} onChange={(e) => setEditCity(e.target.value)} />
                 </div>
               </div>
-            ) : (
-              <div className="grid gap-4 sm:grid-cols-2">
-                <InfoField label="Nome completo" value={profile.name} />
-                <InfoField label="E-mail" value={profile.email} />
-                <InfoField label="Telefone" value={profile.phone} />
-                <InfoField label={docLabel} value={docValue} />
-                <InfoField label="Membro desde" value={formatDateLong(profile.created_at)} />
-                {cp?.city && <InfoField label="Cidade / Estado" value={`${cp.city} / ${cp.state}`} />}
-              </div>
-            )}
-          </div>
-
-          {/* Segurança */}
-          <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-            <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-400">Segurança</h3>
-
-            <button
-              onClick={() => { setShowPwdForm((v) => !v); setPwdError(""); }}
-              className="flex w-full items-center justify-between rounded-xl px-1 py-2 text-sm font-medium text-gray-700 transition hover:text-gray-900"
-            >
-              <span className="flex items-center gap-2.5"><Key size={14} className="text-gray-400" /> Trocar senha</span>
-              <ChevronDown size={14} className={`text-gray-400 transition-transform duration-200 ${showPwdForm ? "rotate-180" : ""}`} />
-            </button>
-
-            {showPwdForm && (
-              <form onSubmit={handleChangePassword} className="mt-3 space-y-2.5">
-                <div className="relative">
-                  <input type={showCurPwd ? "text" : "password"} placeholder="Senha atual" value={currentPwd} onChange={(e) => setCurrentPwd(e.target.value)} className={inputCls} />
-                  <button type="button" onClick={() => setShowCurPwd((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                    {showCurPwd ? <EyeOff size={14} /> : <Eye size={14} />}
-                  </button>
-                </div>
-                <div className="relative">
-                  <input type={showNewPwdVis ? "text" : "password"} placeholder="Nova senha (mín. 6 caracteres)" value={newPwd} onChange={(e) => setNewPwd(e.target.value)} className={inputCls} />
-                  <button type="button" onClick={() => setShowNewPwdVis((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                    {showNewPwdVis ? <EyeOff size={14} /> : <Eye size={14} />}
-                  </button>
-                </div>
-                <input type="password" placeholder="Confirmar nova senha" value={confirmPwd} onChange={(e) => setConfirmPwd(e.target.value)} className={inputCls} />
-                {pwdError && <p className="text-xs text-red-500">{pwdError}</p>}
-                <button type="submit" disabled={pwdSaving}
-                  className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60">
-                  <Lock size={13} /> {pwdSaving ? "Atualizando…" : "Atualizar senha"}
+              <div className="flex gap-2 pt-1">
+                <button onClick={saveProfile} disabled={saving}
+                  className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-60">
+                  <Save size={13} /> {saving ? "Salvando…" : "Salvar"}
                 </button>
-              </form>
-            )}
-
-            <div className="mt-4 flex items-center justify-between border-t border-gray-50 pt-4">
-              <div>
-                <p className="text-sm font-medium text-gray-700">Autenticação em duas etapas</p>
-                <p className="text-xs text-gray-400">Segurança adicional para sua conta</p>
+                <button onClick={cancelEditing}
+                  className="flex items-center gap-2 rounded-xl border border-gray-200 px-5 py-2.5 text-sm text-gray-500 transition hover:bg-gray-50">
+                  <X size={13} /> Cancelar
+                </button>
               </div>
-              <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-400">Em breve</span>
             </div>
-          </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-3">
+              <InfoField label="Nome completo" value={profile.name} />
+              <InfoField label="E-mail" value={profile.email} />
+              <InfoField label="Telefone" value={profile.phone} />
+              <InfoField label={docLabel} value={docValue} />
+              <InfoField label="Membro desde" value={formatDateLong(profile.created_at)} />
+              {cp?.city && <InfoField label="Cidade / Estado" value={`${cp.city} / ${cp.state}`} />}
+            </div>
+          )}
+
+          <div className="my-5 border-t border-gray-100" />
+
+          <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-400">Segurança</h3>
+
+          <button
+            onClick={() => { setShowPwdForm((v) => !v); setPwdError(""); }}
+            className="flex w-full items-center justify-between rounded-xl px-1 py-2 text-sm font-medium text-gray-700 transition hover:text-gray-900"
+          >
+            <span className="flex items-center gap-2.5"><Key size={14} className="text-gray-400" /> Trocar senha</span>
+            <ChevronDown size={14} className={`text-gray-400 transition-transform duration-200 ${showPwdForm ? "rotate-180" : ""}`} />
+          </button>
+
+          {showPwdForm && (
+            <form onSubmit={handleChangePassword} className="mt-3 space-y-2.5">
+              <div className="relative">
+                <input type={showCurPwd ? "text" : "password"} placeholder="Senha atual" value={currentPwd} onChange={(e) => setCurrentPwd(e.target.value)} className={inputCls} />
+                <button type="button" onClick={() => setShowCurPwd((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                  {showCurPwd ? <EyeOff size={14} /> : <Eye size={14} />}
+                </button>
+              </div>
+              <div className="relative">
+                <input type={showNewPwdVis ? "text" : "password"} placeholder="Nova senha (mín. 6 caracteres)" value={newPwd} onChange={(e) => setNewPwd(e.target.value)} className={inputCls} />
+                <button type="button" onClick={() => setShowNewPwdVis((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                  {showNewPwdVis ? <EyeOff size={14} /> : <Eye size={14} />}
+                </button>
+              </div>
+              <input type="password" placeholder="Confirmar nova senha" value={confirmPwd} onChange={(e) => setConfirmPwd(e.target.value)} className={inputCls} />
+              {pwdError && <p className="text-xs text-red-500">{pwdError}</p>}
+              <button type="submit" disabled={pwdSaving}
+                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60">
+                <Lock size={13} /> {pwdSaving ? "Atualizando…" : "Atualizar senha"}
+              </button>
+            </form>
+          )}
         </div>
 
         {/* Atividade recente */}
