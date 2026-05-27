@@ -114,6 +114,11 @@ export async function createUsuario(data: CreateUsuarioDTO): Promise<Usuario> {
       cep: data.cep || undefined,
       state: data.state || undefined,
       city: data.city || undefined,
+      employee_code: data.employee_code || undefined,
+      job_title: data.job_title || undefined,
+      salary: data.salary ?? undefined,
+      hired_at: data.hired_at || undefined,
+      store_id: data.store_id ?? undefined,
     },
   });
   return toUsuario(response.data);

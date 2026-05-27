@@ -10,10 +10,12 @@ import { getLojas } from "../../services/lojaService";
 import { getAppointments } from "../../services/atendimentoService";
 import type { CreateUsuarioDTO, UpdateUsuarioDTO, Usuario } from "../../types/usuario";
 import type { Pet } from "../../types/pet";
+import type { Loja } from "../../types/loja";
 
 export default function UsersPage() {
   const [users, setUsers] = useState<Usuario[]>([]);
   const [petsByUser, setPetsByUser] = useState<Record<number, Pet[]>>({});
+  const [lojas, setLojas] = useState<Loja[]>([]);
   const [lojaById, setLojaById] = useState<Record<number, string>>({});
   const [gastoByUser, setGastoByUser] = useState<Record<number, number>>({});
   const [userBeingEdited, setUserBeingEdited] = useState<Usuario | null>(null);
@@ -41,6 +43,7 @@ export default function UsersPage() {
       });
       setPetsByUser(petMap);
 
+      setLojas(lojaData);
       const lojaMap: Record<number, string> = {};
       lojaData.forEach((l) => { lojaMap[l.id] = l.nome; });
       setLojaById(lojaMap);
@@ -134,6 +137,7 @@ export default function UsersPage() {
             onCreate={handleCreateUser}
             onUpdate={handleUpdateUser}
             onCancelEdit={() => { setUserBeingEdited(null); setShowForm(false); }}
+            lojas={lojas}
           />
         )}
 

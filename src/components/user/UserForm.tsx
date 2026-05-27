@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { User, Mail, Phone, Lock, Building2, CreditCard, Eye, EyeOff, Plus, MapPin } from "lucide-react";
+import { User, Mail, Phone, Lock, Building2, CreditCard, Eye, EyeOff, Plus, MapPin, Briefcase, Banknote, Calendar, Store } from "lucide-react";
 import type { CreateUsuarioDTO, UpdateUsuarioDTO, Usuario } from "../../types/usuario";
+import type { Loja } from "../../types/loja";
 
 interface UserFormProps {
   userBeingEdited: Usuario | null;
   onCreate: (data: CreateUsuarioDTO) => Promise<void>;
   onUpdate: (id: number, data: UpdateUsuarioDTO) => Promise<void>;
   onCancelEdit: () => void;
+  lojas?: Loja[];
 }
 
 const inputCls = "w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white focus:ring-2 focus:ring-[#1c46f3]/15";
@@ -30,7 +32,7 @@ function maskCEP(v: string) {
   return v.replace(/\D/g, "").slice(0, 8).replace(/(\d{5})(\d)/, "$1-$2");
 }
 
-export default function UserForm({ userBeingEdited, onCreate, onUpdate, onCancelEdit }: UserFormProps) {
+export default function UserForm({ userBeingEdited, onCreate, onUpdate, onCancelEdit, lojas }: UserFormProps) {
   const [tipoPerfil, setTipoPerfil] = useState<"cliente" | "funcionario">(
     userBeingEdited?.tipo_perfil ?? "cliente"
   );
@@ -49,6 +51,13 @@ export default function UserForm({ userBeingEdited, onCreate, onUpdate, onCancel
   const [estado, setEstado] = useState("");
   const [cidade, setCidade] = useState("");
 
+  // Employee-specific fields (create only)
+  const [employeeCode, setEmployeeCode] = useState("");
+  const [jobTitle, setJobTitle] = useState("");
+  const [salary, setSalary] = useState("");
+  const [hiredAt, setHiredAt] = useState("");
+  const [storeId, setStoreId] = useState<number | "">("");
+
   const [localError, setLocalError] = useState("");
 
   const isEditing = Boolean(userBeingEdited);
@@ -63,6 +72,15 @@ export default function UserForm({ userBeingEdited, onCreate, onUpdate, onCancel
       if (!cep.trim()) { setLocalError("CEP é obrigatório para clientes."); return; }
       if (!estado.trim()) { setLocalError("Estado é obrigatório para clientes."); return; }
       if (!cidade.trim()) { setLocalError("Cidade é obrigatória para clientes."); return; }
+    }
+
+    // Employee-specific validation (create only)
+    if (!isEditing && !isCliente) {
+      if (!employeeCode.trim()) { setLocalError("Matrícula é obrigatória para funcionários."); return; }
+      if (!jobTitle.trim()) { setLocalError("Cargo é obrigatório para funcionários."); return; }
+      if (!salary || isNaN(Number(salary)) || Number(salary) < 0) { setLocalError("Salário válido é obrigatório para funcionários."); return; }
+      if (!hiredAt) { setLocalError("Data de contratação é obrigatória para funcionários."); return; }
+      if (!storeId) { setLocalError("Loja é obrigatória para funcionários."); return; }
     }
 
     if (isEditing && userBeingEdited) {
@@ -91,11 +109,19 @@ export default function UserForm({ userBeingEdited, onCreate, onUpdate, onCancel
           state: estado.trim().toUpperCase(),
           city: cidade.trim(),
         }),
+        ...(!isCliente && {
+          employee_code: employeeCode.trim(),
+          job_title: jobTitle.trim(),
+          salary: Number(salary),
+          hired_at: hiredAt,
+          store_id: Number(storeId),
+        }),
       };
       await onCreate(payload);
       setNome(""); setEmail(""); setSenha(""); setTelefone("");
       setTipoPerfil("cliente"); setCpf(""); setCnpj(""); setAtivo(true);
       setClientType("pessoa_fisica"); setCep(""); setEstado(""); setCidade("");
+      setEmployeeCode(""); setJobTitle(""); setSalary(""); setHiredAt(""); setStoreId("");
     }
   }
 
@@ -246,6 +272,88 @@ export default function UserForm({ userBeingEdited, onCreate, onUpdate, onCancel
                 value={cidade}
                 onChange={(e) => setCidade(e.target.value)}
               />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Campos de funcionário — somente funcionários novos */}
+      {!isEditing && !isCliente && (
+        <div className="space-y-4 rounded-2xl border border-gray-100 bg-gray-50/60 p-4">
+          <div className="flex items-center gap-2">
+            <Briefcase size={14} className="text-[#1c46f3]" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">Dados do funcionário</span>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <label className="block text-xs font-medium text-gray-500">Matrícula *</label>
+              <div className="relative">
+                <Briefcase size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  className={inputCls + " pl-9"}
+                  placeholder="EMP001"
+                  value={employeeCode}
+                  onChange={(e) => setEmployeeCode(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-medium text-gray-500">Cargo *</label>
+              <div className="relative">
+                <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  className={inputCls + " pl-9"}
+                  placeholder="Tosador, Veterinário..."
+                  value={jobTitle}
+                  onChange={(e) => setJobTitle(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-medium text-gray-500">Salário (R$) *</label>
+              <div className="relative">
+                <Banknote size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  className={inputCls + " pl-9"}
+                  placeholder="2500.00"
+                  value={salary}
+                  onChange={(e) => setSalary(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-medium text-gray-500">Data de contratação *</label>
+              <div className="relative">
+                <Calendar size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="date"
+                  className={inputCls + " pl-9"}
+                  value={hiredAt}
+                  onChange={(e) => setHiredAt(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="space-y-1.5 sm:col-span-2">
+              <label className="block text-xs font-medium text-gray-500">Loja *</label>
+              <div className="relative">
+                <Store size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <select
+                  className={inputCls + " pl-9"}
+                  value={storeId}
+                  onChange={(e) => setStoreId(e.target.value === "" ? "" : Number(e.target.value))}
+                >
+                  <option value="">Selecione uma loja</option>
+                  {(lojas ?? []).map((l) => (
+                    <option key={l.id} value={l.id}>{l.nome}</option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
         </div>
