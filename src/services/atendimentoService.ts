@@ -22,7 +22,7 @@ type ApiAppointment = {
   payment_method?: string;
   payment_type?: string;
   forma_pagamento?: string;
-  status: 'agendado' | 'concluido' | 'cancelado';
+  status: 'agendado' | 'concluido' | 'cancelado' | 'atrasado';
   online: boolean;
   notes?: string | null;
   observations?: string | null;
@@ -80,6 +80,7 @@ function normalizeAppointmentStatus(status?: string): StatusAtendimento {
   const s = (status ?? '').toLowerCase();
   if (s === 'concluído' || s === 'concluido' || s === 'completed') return 'concluido';
   if (s === 'cancelado' || s === 'canceled' || s === 'cancelled') return 'cancelado';
+  if (s === 'atrasado' || s === 'delayed' || s === 'late') return 'atrasado';
   return 'agendado';
 }
 
@@ -116,7 +117,6 @@ function toAtendimento(appointment: ApiAppointment): Atendimento {
     data_atendimento:
       appointment.service_at ??
       appointment.atendimento_em ??
-      appointment.created_at ??
       "",
     forma_pagamento: normalizePaymentMethod(
       appointment.payment_method ?? appointment.payment_type ?? appointment.forma_pagamento
@@ -208,6 +208,7 @@ export async function updateAppointment(id: number, data: UpdateAtendimentoDTO):
       status: data.status,
       online: data.online,
       notes: data.observacoes,
+      service_at: data.data_atendimento,
       store_id: data.loja_id,
       client_id: data.cliente_id,
       employee_id: data.funcionario_id,
