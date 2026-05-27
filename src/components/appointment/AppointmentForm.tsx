@@ -67,7 +67,9 @@ export default function AppointmentForm({
     return dt && dt.includes("T") ? dt.slice(11, 16) : "";
   });
 
-  const isPastDate = data ? new Date(data + "T23:59:59") < new Date() : false;
+  const dateTime = data && hora ? new Date(`${data}T${hora}:00`) : null;
+  const isPastDateTime = dateTime ? dateTime < new Date() : false;
+  const isFutureDateTime = dateTime ? dateTime > new Date() : false;
 
   const lojaSelecionada = useMemo(() => lojas.find((l) => String(l.id) === lojaId), [lojas, lojaId]);
   const funcionariosDaLoja = useMemo(() => lojaSelecionada?.funcionarios ?? [], [lojaSelecionada]);
@@ -134,6 +136,11 @@ export default function AppointmentForm({
     }
   }, [funcionariosDaLoja, funcionarioId]);
 
+  useEffect(() => {
+    if (isPastDateTime && status === "agendado") setStatus("atrasado");
+    if (isFutureDateTime && status === "atrasado") setStatus("agendado");
+  }, [isPastDateTime, isFutureDateTime, status]);
+
   const valorTotal = servicoIdsSelecionados.reduce((total, id) => {
     const s = servicos.find((sv) => sv.id === id);
     return total + getPrecoSeguro(s?.preco ?? 0);
@@ -155,8 +162,12 @@ export default function AppointmentForm({
       alert("Informe a data e o horário do atendimento.");
       return;
     }
-    if (isPastDate && status === "agendado") {
-      alert("Atendimentos com data passada não podem ter status 'Agendado'. Use 'Atrasado', 'Concluído' ou 'Cancelado'.");
+    if (isPastDateTime && status === "agendado") {
+      alert("Atendimentos com data/hora passada não podem ter status 'Agendado'.");
+      return;
+    }
+    if (isFutureDateTime && status === "atrasado") {
+      alert("Atendimentos com data/hora futura não podem ter status 'Atrasado'.");
       return;
     }
     if (servicoIdsSelecionados.length === 0) {
@@ -308,8 +319,8 @@ export default function AppointmentForm({
           <select value={status}
             onChange={(e) => setStatus(e.target.value as Appointment["status"])}
             className={selectCls}>
-            <option value="agendado" disabled={isPastDate}>Agendado{isPastDate ? " (data passada)" : ""}</option>
-            <option value="atrasado">Atrasado</option>
+            <option value="agendado" disabled={isPastDateTime}>Agendado{isPastDateTime ? " (data passada)" : ""}</option>
+            <option value="atrasado" disabled={isFutureDateTime}>Atrasado{isFutureDateTime ? " (data futura)" : ""}</option>
             <option value="concluido">Concluído</option>
             <option value="cancelado">Cancelado</option>
           </select>

@@ -6,6 +6,7 @@ import {
   ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { getAppointments, createAtendimento } from "../../services/atendimentoService";
+import { getApiErrorMessage } from "../../utils/apiError";
 import { getLojas, getStoreEmployees } from "../../services/lojaService";
 import { getPets } from "../../services/petService";
 import { getServicos } from "../../services/servicoService";
@@ -230,8 +231,7 @@ export default function ClienteAtendimentosPage() {
       setForm(emptyForm());
       showToast("success", "Atendimento agendado com sucesso!");
     } catch (err) {
-      console.error(err);
-      showToast("error", "Erro ao criar atendimento. Tente novamente.");
+      showToast("error", getApiErrorMessage(err, "Erro ao criar atendimento. Tente novamente."));
     } finally {
       setSubmitting(false);
     }

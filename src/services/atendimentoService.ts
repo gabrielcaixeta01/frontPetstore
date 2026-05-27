@@ -106,6 +106,12 @@ function toAppointmentItem(item: ApiAppointmentItem): AppointmentItem {
 
 function toAtendimento(appointment: ApiAppointment): Atendimento {
   const rawItems = appointment.items ?? appointment.services ?? [];
+  const dataAtendimento = appointment.service_at ?? appointment.atendimento_em ?? "";
+  const normalizedStatus = normalizeAppointmentStatus(appointment.status);
+  const effectiveStatus: StatusAtendimento =
+    normalizedStatus === "agendado" && dataAtendimento && new Date(dataAtendimento) < new Date()
+      ? "atrasado"
+      : normalizedStatus;
 
   return {
     id: appointment.id,
@@ -114,14 +120,11 @@ function toAtendimento(appointment: ApiAppointment): Atendimento {
       appointment.final_value ??
       appointment.valor_final ??
       0,
-    data_atendimento:
-      appointment.service_at ??
-      appointment.atendimento_em ??
-      "",
+    data_atendimento: dataAtendimento,
     forma_pagamento: normalizePaymentMethod(
       appointment.payment_method ?? appointment.payment_type ?? appointment.forma_pagamento
     ),
-    status: normalizeAppointmentStatus(appointment.status),
+    status: effectiveStatus,
     online: appointment.online,
     observacoes: appointment.notes ?? appointment.observations ?? appointment.observacoes ?? undefined,
     loja_id: appointment.store_id ?? appointment.loja_id ?? 0,

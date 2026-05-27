@@ -17,6 +17,7 @@ import { getServicos } from "../../services/servicoService";
 import { createAppointment, deleteAppointment, getAppointments, updateAppointment } from "../../services/atendimentoService";
 import { getUsuarios } from "../../services/usuarioService";
 import type { Appointment, CreateAppointmentDTO, UpdateAppointmentDTO } from "../../types/atendimento";
+import { getApiErrorMessage } from "../../utils/apiError";
 
 const statusConfig: Record<string, { label: string; icon: typeof Clock; cls: string; dot: string }> = {
   agendado:      { label: "Agendado",     icon: Clock,        cls: "text-yellow-700 bg-yellow-50 border-yellow-200",   dot: "bg-yellow-400"  },
@@ -91,7 +92,7 @@ export default function AppointmentsPage() {
       setFeedback("Atendimento cadastrado com sucesso.");
       setShowForm(false);
       await loadAtendimentos();
-    } catch { setError("Erro ao cadastrar atendimento."); }
+    } catch (err) { setError(getApiErrorMessage(err, "Erro ao cadastrar atendimento.")); }
   }
 
   async function handleUpdateAtendimento(id: number, data: UpdateAppointmentDTO, serviceIds: number[]) {
@@ -100,7 +101,7 @@ export default function AppointmentsPage() {
       setFeedback("Atendimento atualizado com sucesso.");
       setAtendimentoBeingEdited(null);
       await loadAtendimentos();
-    } catch { setError("Erro ao atualizar atendimento."); }
+    } catch (err) { setError(getApiErrorMessage(err, "Erro ao atualizar atendimento.")); }
   }
 
   async function handleDeleteAtendimento(id: number) {
