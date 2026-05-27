@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import {
   PawPrint, CalendarCheck, Users, Store,
   Clock, CheckCircle2, XCircle, TrendingUp,
-  ArrowRight, ArrowUp, ArrowDown, Trophy,
+  ArrowRight, ArrowUp, ArrowDown,
   AlertTriangle, AlertCircle,
 } from "lucide-react";
 import { getPets } from "../../services/petService";
@@ -14,6 +14,7 @@ import { getServicos } from "../../services/servicoService";
 import type { Atendimento } from "../../types/atendimento";
 import type { Loja } from "../../types/loja";
 import type { Usuario } from "../../types/usuario";
+import { useFuncionarioStore } from "../../hooks/useFuncionarioStore";
 
 function getStoredUser() {
   try { return JSON.parse(localStorage.getItem("user") || "{}"); } catch { return {}; }
@@ -51,6 +52,7 @@ function Delta({ value }: { value: number | null }) {
 }
 
 export default function FuncionarioHome() {
+  const { lojaId } = useFuncionarioStore();
   const user = getStoredUser();
   const firstName = user.name?.split(" ")[0] ?? "Funcionário";
   const hour = new Date().getHours();
@@ -95,14 +97,20 @@ export default function FuncionarioHome() {
     load();
   }, []);
 
+  // ── Filter by employee's store ──────────────────────────────
+  const filteredAtend = useMemo(
+    () => lojaId != null ? atendimentos.filter((a) => a.loja_id === lojaId) : atendimentos,
+    [atendimentos, lojaId],
+  );
+
   // ── Monthly splits ─────────────────────────────────────────
   const atendMes = useMemo(
-    () => atendimentos.filter((a) => sameYM(new Date(a.data_atendimento), thisYear, thisMonth)),
-    [atendimentos],
+    () => filteredAtend.filter((a) => sameYM(new Date(a.data_atendimento), thisYear, thisMonth)),
+    [filteredAtend],
   );
   const atendMesAnt = useMemo(
-    () => atendimentos.filter((a) => sameYM(new Date(a.data_atendimento), lastMonthYear, lastMonth)),
-    [atendimentos],
+    () => filteredAtend.filter((a) => sameYM(new Date(a.data_atendimento), lastMonthYear, lastMonth)),
+    [filteredAtend],
   );
   const revenueMes    = useMemo(() => atendMes.filter((a) => a.status === "concluido").reduce((s, a) => s + Number(a.valor_final), 0), [atendMes]);
   const revenueMesAnt = useMemo(() => atendMesAnt.filter((a) => a.status === "concluido").reduce((s, a) => s + Number(a.valor_final), 0), [atendMesAnt]);
@@ -119,29 +127,16 @@ export default function FuncionarioHome() {
   // ── Operational alerts ──────────────────────────────────────
   const agendadosAtrasados = useMemo(() => {
     const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
-    return atendimentos.filter((a) => a.status === "agendado" && new Date(a.data_atendimento) < hoje).length;
-  }, [atendimentos]);
+    return filteredAtend.filter((a) => a.status === "agendado" && new Date(a.data_atendimento) < hoje).length;
+  }, [filteredAtend]);
   const lojasSemEquipe   = useMemo(() => lojas.filter((l) => l.funcionarios.length === 0).length, [lojas]);
   const clientesInativos = useMemo(() => usuarios.filter((u) => u.tipo_perfil === "cliente" && !u.ativo).length, [usuarios]);
   const hasAlerts = agendadosAtrasados > 0 || lojasSemEquipe > 0 || clientesInativos > 0;
 
-  // ── Loja ranking ────────────────────────────────────────────
-  const lojaRanking = useMemo(() => {
-    const map: Record<number, { id: number; nome: string; atend: number; revenue: number }> = {};
-    lojas.forEach((l) => { map[l.id] = { id: l.id, nome: l.nome, atend: 0, revenue: 0 }; });
-    atendMes.forEach((a) => {
-      if (map[a.loja_id]) {
-        map[a.loja_id].atend++;
-        if (a.status === "concluido") map[a.loja_id].revenue += Number(a.valor_final);
-      }
-    });
-    return Object.values(map).sort((a, b) => b.atend - a.atend).slice(0, 5);
-  }, [lojas, atendMes]);
-
   // ── Monthly volume chart ────────────────────────────────────
   const monthlyChart = useMemo(() => {
     const counts: Record<string, number> = {};
-    atendimentos.forEach((a) => {
+    filteredAtend.forEach((a) => {
       const d = new Date(a.data_atendimento);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
       counts[key] = (counts[key] ?? 0) + 1;
@@ -152,7 +147,7 @@ export default function FuncionarioHome() {
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
       return { label: d.toLocaleDateString("pt-BR", { month: "short" }).replace(".", ""), value: counts[key] ?? 0 };
     });
-  }, [atendimentos]);
+  }, [filteredAtend]);
   const chartMax = Math.max(...monthlyChart.map((m) => m.value), 1);
 
   function serviceNames(at: Atendimento): string {
@@ -203,8 +198,8 @@ export default function FuncionarioHome() {
         </p>
         <h1 className="mt-1 text-2xl font-bold text-gray-900">{greeting}, {firstName}!</h1>
         <p className="mt-1 text-sm text-gray-500">
-          {atendimentos.filter((a) => a.status === "agendado").length > 0
-            ? `${atendimentos.filter((a) => a.status === "agendado").length} atendimento(s) agendado(s) · ${atendimentos.filter((a) => a.status === "concluido").length} concluído(s).`
+          {filteredAtend.filter((a) => a.status === "agendado").length > 0
+            ? `${filteredAtend.filter((a) => a.status === "agendado").length} atendimento(s) agendado(s) · ${filteredAtend.filter((a) => a.status === "concluido").length} concluído(s).`
             : "Nenhum atendimento agendado no momento."}
         </p>
       </div>
@@ -328,14 +323,14 @@ export default function FuncionarioHome() {
 
           {loading ? (
             <p className="px-5 py-6 text-sm text-gray-400">Carregando...</p>
-          ) : atendimentos.length === 0 ? (
+          ) : filteredAtend.length === 0 ? (
             <div className="px-5 py-8 text-center">
               <CalendarCheck size={32} className="mx-auto mb-2 text-gray-200" />
               <p className="text-sm text-gray-400">Nenhum atendimento registrado.</p>
             </div>
           ) : (
             <div className="divide-y divide-gray-50">
-              {atendimentos.slice(0, 6).map((at) => {
+              {filteredAtend.slice(0, 6).map((at) => {
                 const cfg = statusConfig[at.status] ?? statusConfig.agendado;
                 const services = serviceNames(at);
                 const petName = petsById[at.pet_id];
@@ -369,50 +364,48 @@ export default function FuncionarioHome() {
           )}
         </div>
 
-        {/* Loja ranking */}
+        {/* Minha Loja */}
         <div className="rounded-2xl border border-gray-100 bg-white shadow-sm">
           <div className="flex items-center justify-between border-b border-gray-50 px-5 py-4">
             <div className="flex items-center gap-2">
-              <Trophy size={16} className="text-[#ffd200]" />
-              <h2 className="font-semibold text-gray-800">Lojas — este mês</h2>
+              <Store size={16} className="text-[#1c46f3]" />
+              <h2 className="font-semibold text-gray-800">Minha loja</h2>
             </div>
             <Link to="/lojas" className="text-xs font-medium text-[#1c46f3] hover:underline">
-              Ver todas
+              Ver detalhes
             </Link>
           </div>
 
           {loading ? (
             <p className="px-5 py-6 text-sm text-gray-400">Carregando...</p>
-          ) : lojaRanking.length === 0 ? (
-            <div className="px-5 py-8 text-center">
-              <Store size={32} className="mx-auto mb-2 text-gray-200" />
-              <p className="text-sm text-gray-400">Nenhuma loja cadastrada.</p>
-            </div>
           ) : (
-            <div className="divide-y divide-gray-50">
-              {lojaRanking.map((item, i) => (
-                <Link
-                  key={item.id}
-                  to={`/lojas/${item.id}`}
-                  className="group flex items-center gap-2 px-3 py-3 transition hover:bg-gray-50/60 sm:gap-3 sm:px-5 sm:py-3.5"
-                >
-                  <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold sm:h-7 sm:w-7 ${
-                    i === 0 ? "bg-yellow-100 text-yellow-700" :
-                    i === 1 ? "bg-gray-100 text-gray-600" :
-                    i === 2 ? "bg-orange-100 text-orange-600" :
-                    "bg-gray-50 text-gray-400"
-                  }`}>
-                    {i + 1}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-gray-800 group-hover:text-[#1c46f3]">{item.nome}</p>
-                    <p className="truncate text-xs text-gray-400">
-                      {item.atend} atend.{item.revenue > 0 && ` · R$ ${Math.round(item.revenue).toLocaleString("pt-BR")}`}
-                    </p>
-                  </div>
-                  <ArrowRight size={13} className="shrink-0 text-gray-300 transition group-hover:text-[#1c46f3]" />
-                </Link>
-              ))}
+            <div className="space-y-3 p-5">
+              <div className="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3">
+                <span className="text-xs text-gray-500">Atendimentos este mês</span>
+                <span className="text-sm font-bold text-gray-900">{atendMes.length}</span>
+              </div>
+              <div className="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3">
+                <span className="text-xs text-gray-500">Receita este mês</span>
+                <span className="text-sm font-bold text-gray-900">{formatKPIMoney(revenueMes)}</span>
+              </div>
+              <div className="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3">
+                <span className="text-xs text-gray-500">Agendados</span>
+                <span className="text-sm font-bold text-gray-900">
+                  {filteredAtend.filter((a) => a.status === "agendado").length}
+                </span>
+              </div>
+              <div className="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3">
+                <span className="text-xs text-gray-500">Concluídos</span>
+                <span className="text-sm font-bold text-emerald-700">
+                  {filteredAtend.filter((a) => a.status === "concluido").length}
+                </span>
+              </div>
+              <Link
+                to="/lojas"
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#1c46f3]/20 bg-[#1c46f3]/5 py-2.5 text-sm font-semibold text-[#1c46f3] transition hover:bg-[#1c46f3]/10"
+              >
+                <Store size={14} /> Acessar minha loja
+              </Link>
             </div>
           )}
         </div>

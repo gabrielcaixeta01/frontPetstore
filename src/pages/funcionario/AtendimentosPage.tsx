@@ -18,6 +18,7 @@ import { createAppointment, deleteAppointment, getAppointments, updateAppointmen
 import { getUsuarios } from "../../services/usuarioService";
 import type { Appointment, CreateAppointmentDTO, UpdateAppointmentDTO } from "../../types/atendimento";
 import { getApiErrorMessage } from "../../utils/apiError";
+import { useFuncionarioStore } from "../../hooks/useFuncionarioStore";
 
 const statusConfig: Record<string, { label: string; icon: typeof Clock; cls: string; dot: string }> = {
   agendado:      { label: "Agendado",     icon: Clock,        cls: "text-yellow-700 bg-yellow-50 border-yellow-200",   dot: "bg-yellow-400"  },
@@ -39,6 +40,7 @@ const pgmtLabel: Record<string, string> = {
 type HistoryFilter = "todos" | "agendado" | "atrasado" | "concluido" | "cancelado";
 
 export default function AppointmentsPage() {
+  const { lojaId } = useFuncionarioStore();
   const [atendimentos, setAtendimentos] = useState<Appointment[]>([]);
   const [atendimentoBeingEdited, setAtendimentoBeingEdited] = useState<Appointment | null>(null);
   const [loading, setLoading] = useState(true);
@@ -124,7 +126,10 @@ export default function AppointmentsPage() {
       .sort((a, b) => new Date(a.data_atendimento).getTime() - new Date(b.data_atendimento).getTime()),
     [atendimentos],
   );
-  const historico = useMemo(() => atendimentos, [atendimentos]);
+  const historico = useMemo(
+    () => lojaId != null ? atendimentos.filter((a) => a.loja_id === lojaId) : atendimentos,
+    [atendimentos, lojaId],
+  );
   const filtered = useMemo(() =>
     filter === "todos" ? historico : historico.filter((a) => a.status === filter),
     [historico, filter],
@@ -335,6 +340,7 @@ export default function AppointmentsPage() {
             onCreate={handleCreateAtendimento}
             onUpdate={handleUpdateAtendimento}
             onCancelEdit={() => setShowForm(false)}
+            fixedLojaId={lojaId ?? undefined}
           />
         </div>
       )}

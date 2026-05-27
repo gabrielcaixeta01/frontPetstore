@@ -9,6 +9,7 @@ import { getUsuarios } from "../../services/usuarioService";
 import { getAppointments } from "../../services/atendimentoService";
 import type { CreatePetDTO, Pet, UpdatePetDTO } from "../../types/pet";
 import type { Appointment } from "../../types/atendimento";
+import { useFuncionarioStore } from "../../hooks/useFuncionarioStore";
 
 function tagColor(nome: string): string {
   const n = nome.toLowerCase();
@@ -19,6 +20,7 @@ function tagColor(nome: string): string {
 }
 
 export default function PetsPage() {
+  const { lojaId } = useFuncionarioStore();
   const [pets, setPets] = useState<Pet[]>([]);
   const [petBeingEdited, setPetBeingEdited] = useState<Pet | null>(null);
   const [atendimentos, setAtendimentos] = useState<Appointment[]>([]);
@@ -59,6 +61,16 @@ export default function PetsPage() {
       return acc;
     }, {}),
     [atendimentos],
+  );
+
+  const petIdsNaLoja = useMemo(() => {
+    if (lojaId == null) return null;
+    return new Set(atendimentos.filter((a) => a.loja_id === lojaId).map((a) => a.pet_id));
+  }, [atendimentos, lojaId]);
+
+  const visiblePets = useMemo(
+    () => petIdsNaLoja != null ? pets.filter((p) => petIdsNaLoja.has(p.id)) : pets,
+    [pets, petIdsNaLoja],
   );
 
   async function handleCreatePet(data: CreatePetDTO) {
@@ -136,9 +148,9 @@ export default function PetsPage() {
         )}
       </EditModal>
 
-      {!loading && pets.length > 0 && (
+      {!loading && visiblePets.length > 0 && (
         <div className="mb-4 flex items-center justify-between">
-          <p className="text-sm text-gray-500">{pets.length} {pets.length === 1 ? "pet cadastrado" : "pets cadastrados"}</p>
+          <p className="text-sm text-gray-500">{visiblePets.length} {visiblePets.length === 1 ? "pet cadastrado" : "pets cadastrados"}</p>
           <button onClick={loadAll} className="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50">
             <RefreshCw size={14} /> Atualizar
           </button>
@@ -147,15 +159,15 @@ export default function PetsPage() {
 
       {loading ? (
         <div className="rounded-2xl border border-gray-100 bg-white p-8 text-center text-sm text-gray-400">Carregando pets...</div>
-      ) : pets.length === 0 ? (
+      ) : visiblePets.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-12 text-center">
           <PawPrint size={40} className="mx-auto mb-3 text-gray-200" />
-          <p className="text-sm font-medium text-gray-500">Nenhum pet cadastrado no sistema.</p>
+          <p className="text-sm font-medium text-gray-500">Nenhum pet cadastrado nesta loja.</p>
           <button onClick={() => setShowForm(true)} className="mt-3 text-sm font-semibold text-[#1c46f3] hover:underline">Cadastrar primeiro pet</button>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {pets.map((pet) => {
+          {visiblePets.map((pet) => {
             const ats = atendimentosByPetId[pet.id] ?? [];
             const gasto = ats.filter((a) => a.status === "concluido").reduce((s, a) => s + Number(a.valor_final), 0);
             const ultimo = ats[0];

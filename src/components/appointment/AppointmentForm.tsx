@@ -19,6 +19,7 @@ type AppointmentFormProps = {
   onCreate: (data: CreateAppointmentDTO, servicoIds: number[]) => Promise<void>;
   onUpdate: (id: number, data: UpdateAppointmentDTO, servicoIds: number[]) => Promise<void>;
   onCancelEdit: () => void;
+  fixedLojaId?: number;
 };
 
 const selectCls = "w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white focus:ring-2 focus:ring-[#1c46f3]/15 disabled:opacity-60 appearance-none";
@@ -30,6 +31,7 @@ export default function AppointmentForm({
   onCreate,
   onUpdate,
   onCancelEdit,
+  fixedLojaId,
 }: AppointmentFormProps) {
   const [lojas, setLojas] = useState<Loja[]>([]);
   const [clientes, setClientes] = useState<Usuario[]>([]);
@@ -46,6 +48,7 @@ export default function AppointmentForm({
   const [online, setOnline] = useState(appointmentBeingEdited?.online ?? false);
   const [observacoes, setObservacoes] = useState(appointmentBeingEdited?.observacoes ?? "");
   const [lojaId, setLojaId] = useState(
+    fixedLojaId != null ? String(fixedLojaId) :
     appointmentBeingEdited?.loja_id != null ? String(appointmentBeingEdited.loja_id) : ""
   );
   const [clienteId, setClienteId] = useState(
@@ -117,9 +120,9 @@ export default function AppointmentForm({
 
   useEffect(() => {
     if (appointmentBeingEdited) return;
-    if (!lojaId && lojas.length > 0) setLojaId(String(lojas[0].id));
+    if (!lojaId && lojas.length > 0) setLojaId(fixedLojaId != null ? String(fixedLojaId) : String(lojas[0].id));
     if (!clienteId && clientes.length > 0) setClienteId(String(clientes[0].id));
-  }, [appointmentBeingEdited, lojas, clientes, lojaId, clienteId]);
+  }, [appointmentBeingEdited, lojas, clientes, lojaId, clienteId, fixedLojaId]);
 
   useEffect(() => {
     const petsDoCliente = clienteId ? pets.filter((p) => String(p.dono_id) === clienteId) : [];
@@ -205,7 +208,7 @@ export default function AppointmentForm({
     };
     await onCreate(payload, servicoIdsSelecionados);
     setFormaPagamento("pix"); setStatus("agendado"); setOnline(false); setObservacoes("");
-    setLojaId(lojas.length > 0 ? String(lojas[0].id) : "");
+    setLojaId(fixedLojaId != null ? String(fixedLojaId) : lojas.length > 0 ? String(lojas[0].id) : "");
     setClienteId(clientes.length > 0 ? String(clientes[0].id) : "");
     setPetId(""); setServicoIdsSelecionados([]);
     setData(""); setHora("");
@@ -225,15 +228,17 @@ export default function AppointmentForm({
 
       {/* Row 1 — Loja + Cliente */}
       <div className="grid gap-3 sm:grid-cols-2">
-        <div>
-          <label className={labelCls}>Loja *</label>
-          <select value={lojaId} onChange={(e) => setLojaId(e.target.value)}
-            disabled={loadingRelacionamentos || lojas.length === 0} className={selectCls}>
-            {loadingRelacionamentos ? <option value="">Carregando...</option>
-              : lojas.length === 0 ? <option value="">Nenhuma loja</option>
-              : lojas.map((l) => <option key={l.id} value={String(l.id)}>{l.nome}</option>)}
-          </select>
-        </div>
+        {fixedLojaId == null && (
+          <div>
+            <label className={labelCls}>Loja *</label>
+            <select value={lojaId} onChange={(e) => setLojaId(e.target.value)}
+              disabled={loadingRelacionamentos || lojas.length === 0} className={selectCls}>
+              {loadingRelacionamentos ? <option value="">Carregando...</option>
+                : lojas.length === 0 ? <option value="">Nenhuma loja</option>
+                : lojas.map((l) => <option key={l.id} value={String(l.id)}>{l.nome}</option>)}
+            </select>
+          </div>
+        )}
         <div>
           <label className={labelCls}>Cliente *</label>
           <select value={clienteId} onChange={(e) => setClienteId(e.target.value)}
