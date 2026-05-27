@@ -58,6 +58,16 @@ export default function AppointmentForm({
     appointmentBeingEdited?.pet_id != null ? String(appointmentBeingEdited.pet_id) : ""
   );
   const [servicoIdsSelecionados, setServicoIdsSelecionados] = useState<number[]>([]);
+  const [data, setData] = useState(() => {
+    const dt = appointmentBeingEdited?.data_atendimento;
+    return dt ? dt.slice(0, 10) : "";
+  });
+  const [hora, setHora] = useState(() => {
+    const dt = appointmentBeingEdited?.data_atendimento;
+    return dt && dt.includes("T") ? dt.slice(11, 16) : "";
+  });
+
+  const isPastDate = data ? new Date(data + "T23:59:59") < new Date() : false;
 
   const lojaSelecionada = useMemo(() => lojas.find((l) => String(l.id) === lojaId), [lojas, lojaId]);
   const funcionariosDaLoja = useMemo(() => lojaSelecionada?.funcionarios ?? [], [lojaSelecionada]);
@@ -98,6 +108,9 @@ export default function AppointmentForm({
     setFuncionarioId(String(appointmentBeingEdited.funcionario_id ?? ""));
     setPetId(String(appointmentBeingEdited.pet_id ?? ""));
     setServicoIdsSelecionados(appointmentBeingEdited.items?.map((i) => i.service_id) ?? []);
+    const dt = appointmentBeingEdited.data_atendimento;
+    setData(dt ? dt.slice(0, 10) : "");
+    setHora(dt && dt.includes("T") ? dt.slice(11, 16) : "");
   }, [appointmentBeingEdited]);
 
   useEffect(() => {
@@ -138,6 +151,14 @@ export default function AppointmentForm({
       alert("Informe loja, cliente, funcionário e pet.");
       return;
     }
+    if (!data || !hora) {
+      alert("Informe a data e o horário do atendimento.");
+      return;
+    }
+    if (isPastDate && status === "agendado") {
+      alert("Atendimentos com data passada não podem ter status 'Agendado'. Use 'Atrasado', 'Concluído' ou 'Cancelado'.");
+      return;
+    }
     if (servicoIdsSelecionados.length === 0) {
       alert("Selecione pelo menos um serviço.");
       return;
@@ -158,6 +179,7 @@ export default function AppointmentForm({
         observacoes: observacoes.trim(),
         loja_id: Number(lojaId), cliente_id: Number(clienteId),
         funcionario_id: Number(funcionarioId), pet_id: Number(petId),
+        data_atendimento: data && hora ? `${data}T${hora}:00` : undefined,
       };
       await onUpdate(appointmentBeingEdited.id, payload, servicoIdsSelecionados);
       return;
@@ -168,12 +190,14 @@ export default function AppointmentForm({
       observacoes: observacoes.trim() || undefined,
       loja_id: Number(lojaId), cliente_id: Number(clienteId),
       funcionario_id: Number(funcionarioId), pet_id: Number(petId),
+      data_atendimento: `${data}T${hora}:00`,
     };
     await onCreate(payload, servicoIdsSelecionados);
     setFormaPagamento("pix"); setStatus("agendado"); setOnline(false); setObservacoes("");
     setLojaId(lojas.length > 0 ? String(lojas[0].id) : "");
     setClienteId(clientes.length > 0 ? String(clientes[0].id) : "");
     setPetId(""); setServicoIdsSelecionados([]);
+    setData(""); setHora("");
   }
 
   const petsDoCliente = clienteId ? pets.filter((p) => String(p.dono_id) === clienteId) : [];
@@ -241,7 +265,31 @@ export default function AppointmentForm({
         </div>
       </div>
 
-      {/* Row 3 — Pagamento + Status */}
+      {/* Row 3 — Data + Hora */}
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div>
+          <label className={labelCls}>Data *</label>
+          <input
+            type="date"
+            value={data}
+            onChange={(e) => setData(e.target.value)}
+            required
+            className={inputCls}
+          />
+        </div>
+        <div>
+          <label className={labelCls}>Horário *</label>
+          <input
+            type="time"
+            value={hora}
+            onChange={(e) => setHora(e.target.value)}
+            required
+            className={inputCls}
+          />
+        </div>
+      </div>
+
+      {/* Row 4 — Pagamento + Status */}
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
           <label className={labelCls}>Forma de pagamento *</label>
@@ -260,7 +308,8 @@ export default function AppointmentForm({
           <select value={status}
             onChange={(e) => setStatus(e.target.value as Appointment["status"])}
             className={selectCls}>
-            <option value="agendado">Agendado</option>
+            <option value="agendado" disabled={isPastDate}>Agendado{isPastDate ? " (data passada)" : ""}</option>
+            <option value="atrasado">Atrasado</option>
             <option value="concluido">Concluído</option>
             <option value="cancelado">Cancelado</option>
           </select>

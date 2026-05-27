@@ -5,7 +5,7 @@ export type FormaPagamento =
   | 'dinheiro'
   | 'transferência bancária';
 
-export type StatusAtendimento = 'agendado' | 'concluido' | 'cancelado';
+export type StatusAtendimento = 'agendado' | 'concluido' | 'cancelado' | 'atrasado';
 
 export interface AppointmentItem {
   appointment_id: number;
@@ -48,6 +48,7 @@ export interface UpdateAtendimentoDTO {
   status?: StatusAtendimento;
   online?: boolean;
   observacoes?: string;
+  data_atendimento?: string;
   loja_id?: number;
   cliente_id?: number;
   funcionario_id?: number;

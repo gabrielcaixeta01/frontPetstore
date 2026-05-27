@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Plus, X, Pencil, Trash2,
-  CalendarCheck, Clock, CheckCircle2, XCircle,
+  CalendarCheck, Clock, CheckCircle2, XCircle, AlertCircle,
   Store, PawPrint, ChevronDown, ChevronUp,
   Wallet, TrendingUp, Scissors, User,
   ChevronLeft, ChevronRight,
@@ -22,6 +22,7 @@ const statusConfig: Record<string, { label: string; icon: typeof Clock; cls: str
   agendado:      { label: "Agendado",     icon: Clock,        cls: "text-yellow-700 bg-yellow-50 border-yellow-200",   dot: "bg-yellow-400"  },
   concluido:     { label: "Concluído",    icon: CheckCircle2, cls: "text-emerald-700 bg-emerald-50 border-emerald-200", dot: "bg-emerald-400" },
   cancelado:     { label: "Cancelado",    icon: XCircle,      cls: "text-red-600 bg-red-50 border-red-200",             dot: "bg-red-400"     },
+  atrasado:      { label: "Atrasado",     icon: AlertCircle,  cls: "text-orange-700 bg-orange-50 border-orange-200",   dot: "bg-orange-400"  },
 };
 
 const pgmtLabel: Record<string, string> = {
@@ -34,7 +35,7 @@ const pgmtLabel: Record<string, string> = {
   cartao_debito: "Cartão de Débito",
 };
 
-type HistoryFilter = "todos" | "agendado" | "concluido" | "cancelado";
+type HistoryFilter = "todos" | "agendado" | "atrasado" | "concluido" | "cancelado";
 
 export default function AppointmentsPage() {
   const [atendimentos, setAtendimentos] = useState<Appointment[]>([]);
@@ -117,7 +118,12 @@ export default function AppointmentsPage() {
       .sort((a, b) => new Date(a.data_atendimento).getTime() - new Date(b.data_atendimento).getTime()),
     [atendimentos],
   );
-  const historico = useMemo(() => atendimentos.filter((a) => a.status !== "agendado"), [atendimentos]);
+  const atrasados = useMemo(() =>
+    atendimentos.filter((a) => a.status === "atrasado")
+      .sort((a, b) => new Date(a.data_atendimento).getTime() - new Date(b.data_atendimento).getTime()),
+    [atendimentos],
+  );
+  const historico = useMemo(() => atendimentos, [atendimentos]);
   const filtered = useMemo(() =>
     filter === "todos" ? historico : historico.filter((a) => a.status === filter),
     [historico, filter],
@@ -225,9 +231,11 @@ export default function AppointmentsPage() {
           <div className="border-t border-gray-50 bg-gray-50/50 px-4 py-4 sm:px-5">
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <p className="text-xs font-medium text-gray-400">Data completa</p>
+                <p className="text-xs font-medium text-gray-400">Data e horário</p>
                 <p className="mt-0.5 text-sm font-medium text-gray-800">
                   {new Date(at.data_atendimento).toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                  {" às "}
+                  {new Date(at.data_atendimento).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
                 </p>
               </div>
               <div>
@@ -407,6 +415,20 @@ export default function AppointmentsPage() {
         </div>
       )}
 
+      {/* Atrasados */}
+      {!loading && atrasados.length > 0 && (
+        <div className="mb-8">
+          <div className="mb-3 flex items-center gap-2">
+            <AlertCircle size={15} className="text-orange-500" />
+            <h2 className="text-sm font-semibold text-gray-700">Atrasados</h2>
+            <span className="rounded-full bg-orange-100 px-2 py-0.5 text-xs font-bold text-orange-700">{atrasados.length}</span>
+          </div>
+          <div className="space-y-2">
+            {atrasados.map((at) => <AtendimentoRow key={at.id} at={at} />)}
+          </div>
+        </div>
+      )}
+
       {/* Histórico */}
       <div>
         <div className="mb-3 flex items-center gap-2">
@@ -415,7 +437,7 @@ export default function AppointmentsPage() {
         </div>
 
         <div className="mb-4 flex flex-wrap gap-2">
-          {(["todos", "agendado", "concluido", "cancelado"] as HistoryFilter[]).map((s) => {
+          {(["todos", "agendado", "atrasado", "concluido", "cancelado"] as HistoryFilter[]).map((s) => {
             const cfg = s !== "todos" ? statusConfig[s] : null;
             const count = s === "todos" ? historico.length : historico.filter((a) => a.status === s).length;
             return (

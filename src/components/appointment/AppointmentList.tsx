@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pencil, Trash2, Store, User, Users, PawPrint, ChevronDown, ChevronUp, Clock, CheckCircle2, XCircle } from "lucide-react";
+import { Pencil, Trash2, Store, User, Users, PawPrint, ChevronDown, ChevronUp, Clock, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 import type { Appointment } from "../../types/atendimento";
 
 type AppointmentListProps = {
@@ -17,6 +17,7 @@ const statusCfg: Record<string, { label: string; icon: typeof Clock; cls: string
   agendado:     { label: "Agendado",     icon: Clock,        cls: "text-yellow-700 bg-yellow-50 border-yellow-200",   dot: "bg-yellow-400" },
   concluido:    { label: "Concluído",    icon: CheckCircle2, cls: "text-emerald-700 bg-emerald-50 border-emerald-200", dot: "bg-emerald-400" },
   cancelado:    { label: "Cancelado",    icon: XCircle,      cls: "text-red-600 bg-red-50 border-red-200",            dot: "bg-red-400" },
+  atrasado:     { label: "Atrasado",     icon: AlertCircle,  cls: "text-orange-700 bg-orange-50 border-orange-200",   dot: "bg-orange-400" },
 };
 
 const pgmtLabel: Record<string, string> = {
@@ -24,11 +25,12 @@ const pgmtLabel: Record<string, string> = {
 };
 
 function dateCircle(dateStr?: string) {
-  if (!dateStr) return { day: "—", month: "" };
+  if (!dateStr) return { day: "—", month: "", time: "" };
   const d = new Date(dateStr);
   return {
     day: d.getDate().toString().padStart(2, "0"),
     month: d.toLocaleDateString("pt-BR", { month: "short" }).replace(".", ""),
+    time: d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }),
   };
 }
 
@@ -50,7 +52,7 @@ export default function AppointmentList({
     <div className="space-y-2">
       {appointments.map((apt) => {
         const cfg = statusCfg[apt.status?.toLowerCase()] ?? statusCfg.agendado;
-        const { day, month } = dateCircle(apt.data_atendimento);
+        const { day, month, time } = dateCircle(apt.data_atendimento);
         const isExpanded = expandedId === apt.id;
         const items = apt.items ?? [];
 
@@ -75,6 +77,9 @@ export default function AppointmentList({
                   )}
                 </div>
                 <div className="mt-0.5 flex flex-wrap gap-x-2 gap-y-0.5 text-xs text-gray-400 sm:gap-x-3">
+                  {time && (
+                    <span className="flex items-center gap-1"><Clock size={11} />{time}</span>
+                  )}
                   {lojasById[apt.loja_id] && (
                     <span className="flex items-center gap-1"><Store size={11} />{lojasById[apt.loja_id]}</span>
                   )}

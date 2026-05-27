@@ -310,11 +310,13 @@ export default function ClienteAtendimentosPage() {
           <div className="border-t border-gray-50 bg-gray-50/50 px-4 py-4 sm:px-5">
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <p className="text-xs font-medium text-gray-400">Data completa</p>
+                <p className="text-xs font-medium text-gray-400">Data e horário</p>
                 <p className="mt-0.5 text-sm font-medium text-gray-800">
                   {new Date(at.data_atendimento).toLocaleDateString("pt-BR", {
                     weekday: "long", day: "numeric", month: "long", year: "numeric",
                   })}
+                  {" às "}
+                  {new Date(at.data_atendimento).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
                 </p>
               </div>
               <div>

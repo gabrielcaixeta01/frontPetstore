@@ -149,6 +149,7 @@ export default function ClientePetsPage() {
     if (!form.sexo) { setError("O sexo do pet é obrigatório."); return; }
     if (!form.porte) { setError("O porte do pet é obrigatório."); return; }
     if (normalizedPeso !== undefined && (!Number.isFinite(normalizedPeso) || normalizedPeso <= 0)) { setError("O peso do pet deve ser maior que 0."); return; }
+    if (normalizedPeso !== undefined && normalizedPeso > 100) { setError("O peso do pet não pode ultrapassar 100 kg."); return; }
     if (normalizedObservacoes.length > MAX_OBSERVACOES_SAUDE) {
       normalizedObservacoes = normalizedObservacoes.slice(0, MAX_OBSERVACOES_SAUDE);
       alert(`Observações muito longas — truncadas para ${MAX_OBSERVACOES_SAUDE} caracteres.`);
@@ -188,6 +189,7 @@ export default function ClientePetsPage() {
     if (!editForm.sexo) { setError("O sexo do pet é obrigatório."); return; }
     if (!editForm.porte) { setError("O porte do pet é obrigatório."); return; }
     if (normalizedPeso !== undefined && (!Number.isFinite(normalizedPeso) || normalizedPeso <= 0)) { setError("O peso do pet deve ser maior que 0."); return; }
+    if (normalizedPeso !== undefined && normalizedPeso > 100) { setError("O peso do pet não pode ultrapassar 100 kg."); return; }
     if (normalizedObservacoes.length > MAX_OBSERVACOES_SAUDE) {
       normalizedObservacoes = normalizedObservacoes.slice(0, MAX_OBSERVACOES_SAUDE);
       alert(`Observações muito longas — truncadas para ${MAX_OBSERVACOES_SAUDE} caracteres.`);
@@ -297,7 +299,7 @@ export default function ClientePetsPage() {
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-gray-500">Peso (kg)</label>
-              <input type="number" step="0.1" min="0" className={inputCls} placeholder="Ex: 5.2" value={form.peso} onChange={(e) => setForm({ ...form, peso: e.target.value })} />
+              <input type="number" step="0.1" min="0" max="100" className={inputCls} placeholder="Ex: 5.2" value={form.peso} onChange={(e) => setForm({ ...form, peso: e.target.value })} />
             </div>
             <div className="sm:col-span-2 lg:col-span-2">
               <label className="mb-1 block text-xs font-medium text-gray-500">Observações de saúde</label>
@@ -366,7 +368,7 @@ export default function ClientePetsPage() {
                       {porteOpts.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                     </select>
                   </div>
-                  <input type="number" step="0.1" min="0" className={inputCls} placeholder="Peso (kg)" value={editForm.peso} onChange={(e) => setEditForm({ ...editForm, peso: e.target.value })} />
+                  <input type="number" step="0.1" min="0" max="100" className={inputCls} placeholder="Peso (kg)" value={editForm.peso} onChange={(e) => setEditForm({ ...editForm, peso: e.target.value })} />
                   <input maxLength={MAX_OBSERVACOES_SAUDE} className={inputCls} placeholder="Observações de saúde" value={editForm.observacoes_saude} onChange={(e) => setEditForm({ ...editForm, observacoes_saude: e.target.value })} />
                   {tagsDisponiveis.length > 0 && (
                     <div>
