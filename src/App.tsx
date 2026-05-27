@@ -6,6 +6,19 @@ import PublicHome from "./pages/Home";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 
+// Admin layout + pages
+import AdminLayout from "./components/admin/AdminLayout";
+import AdminHome from "./pages/admin/Home";
+import AdminAtendimentosPage from "./pages/admin/AtendimentosPage";
+import AdminPetsPage from "./pages/admin/PetsPage";
+import AdminServicosPage from "./pages/admin/ServicosPage";
+import AdminCategoriasPage from "./pages/admin/CategoriasPage";
+import AdminLojasPage from "./pages/admin/LojasPage";
+import AdminLojaPage from "./pages/admin/LojaPage";
+import AdminUsersPage from "./pages/admin/UsersPage";
+import AdminTagsPage from "./pages/admin/TagsPage";
+import AdminProfilePage from "./pages/admin/ProfilePage";
+
 // Funcionario layout + pages
 import FuncionarioLayout from "./components/funcionario/FuncionarioLayout";
 import FuncionarioHome from "./pages/funcionario/Home";
@@ -30,14 +43,11 @@ import ClienteLojaPage from "./pages/cliente/LojaPage";
 import ClienteAtendimentosPage from "./pages/cliente/AtendimentosPage";
 import ClienteProfilePage from "./pages/cliente/ProfilePage";
 
-type UserRole = "cliente" | "funcionario" | string | null;
-
-function getStoredRole(): UserRole {
+function getStoredUser() {
   try {
     const stored = localStorage.getItem("user");
     if (!stored) return null;
-    const user = JSON.parse(stored);
-    return user.role ?? user.profile_type ?? user.tipo_perfil ?? null;
+    return JSON.parse(stored);
   } catch {
     return null;
   }
@@ -54,6 +64,27 @@ function PublicShell() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
+  );
+}
+
+function AdminShell() {
+  return (
+    <AdminLayout>
+      <Routes>
+        <Route path="/" element={<AdminHome />} />
+        <Route path="/pets" element={<AdminPetsPage />} />
+        <Route path="/atendimentos" element={<AdminAtendimentosPage />} />
+        <Route path="/servicos" element={<AdminServicosPage />} />
+        <Route path="/categorias" element={<AdminCategoriasPage />} />
+        <Route path="/lojas" element={<AdminLojasPage />} />
+        <Route path="/lojas/:id" element={<AdminLojaPage />} />
+        <Route path="/usuarios" element={<AdminUsersPage />} />
+        <Route path="/users" element={<AdminUsersPage />} />
+        <Route path="/tags" element={<AdminTagsPage />} />
+        <Route path="/perfil" element={<AdminProfilePage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </AdminLayout>
   );
 }
 
@@ -99,10 +130,15 @@ function FuncionarioShell() {
 function AppShell() {
   useLocation();
   const isLogged = !!localStorage.getItem("token");
-  const userRole = getStoredRole();
+  const user = getStoredUser();
 
   if (!isLogged) return <PublicShell />;
-  if (userRole === "cliente") return <ClienteShell />;
+
+  const role = user?.role ?? user?.profile_type ?? user?.tipo_perfil;
+  const isSuperuser = user?.is_superuser === true;
+
+  if (role === "cliente") return <ClienteShell />;
+  if (isSuperuser) return <AdminShell />;
   return <FuncionarioShell />;
 }
 
