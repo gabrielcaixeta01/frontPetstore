@@ -35,7 +35,7 @@ interface PetFormProps {
   onCancelEdit: () => void;
 }
 
-const inputCls = "w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white focus:ring-2 focus:ring-[#1c46f3]/15";
+const inputCls = "w-full rounded border border-gray-200 bg-gray-50 px-3 py-2 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white";
 const selectCls = inputCls + " appearance-none";
 const MAX_OBSERVACOES_SAUDE = 50;
 
@@ -180,8 +180,8 @@ export default function PetForm({ petBeingEdited, onCreate, onUpdate, onCancelEd
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-      <h2 className="text-sm font-semibold text-gray-700">
+    <form onSubmit={handleSubmit} className="space-y-4 rounded border border-gray-200 bg-white p-5">
+      <h2 className="text-sm font-semibold text-gray-800">
         {petBeingEdited ? "Editar Pet" : "Novo Pet"}
       </h2>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -266,9 +266,9 @@ export default function PetForm({ petBeingEdited, onCreate, onUpdate, onCancelEd
                         setOwnerSearch(c.nome);
                         setShowDropdown(false);
                       }}
-                      className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition hover:bg-gray-50"
+                      className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm transition hover:bg-gray-50"
                     >
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#1c46f3]/10 text-xs font-bold text-[#1c46f3]">
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#e8eeff] text-xs font-bold text-[#1c46f3]">
                         {c.nome[0]?.toUpperCase()}
                       </div>
                       <div>
@@ -303,10 +303,10 @@ export default function PetForm({ petBeingEdited, onCreate, onUpdate, onCancelEd
                     onClick={() => setTagIdsSelecionados((ids) =>
                       ids.includes(tag.id) ? ids.filter((id) => id !== tag.id) : [...ids, tag.id]
                     )}
-                    className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                    className={`rounded border px-3 py-1 text-xs font-medium transition ${
                       selecionada
                         ? "border-[#1c46f3] bg-[#1c46f3] text-white"
-                        : "border-gray-200 bg-gray-50 text-gray-600 hover:border-[#1c46f3]/50 hover:text-[#1c46f3]"
+                        : "border-gray-200 bg-gray-50 text-gray-600 hover:border-[#1c46f3] hover:text-[#1c46f3]"
                     }`}
                   >
                     {tag.nome}
@@ -322,13 +322,13 @@ export default function PetForm({ petBeingEdited, onCreate, onUpdate, onCancelEd
         <button
           type="submit"
           disabled={categorias.length === 0}
-          className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-[#1c46f3]/20 transition hover:opacity-90 disabled:opacity-50"
+          className="flex items-center gap-2 rounded bg-[#1c46f3] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#1840e0] disabled:opacity-50"
         >
           <Plus size={14} />
           {petBeingEdited ? "Salvar alterações" : "Cadastrar"}
         </button>
         {petBeingEdited && (
-          <button type="button" onClick={onCancelEdit} className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm text-gray-500 transition hover:bg-gray-50">
+          <button type="button" onClick={onCancelEdit} className="rounded border border-gray-200 px-5 py-2 text-sm text-gray-500 transition hover:bg-gray-50">
             Cancelar
           </button>
         )}
