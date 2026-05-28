@@ -96,7 +96,7 @@ export default function LoginPage() {
     <main className="flex min-h-screen">
       {/* ── Left panel ── */}
       <div
-        className="relative hidden lg:flex lg:w-[480px] flex-col justify-between overflow-hidden p-12 text-white"
+        className="relative hidden lg:flex lg:w-[480px] flex-col justify-between overflow-hidden p-12 text-white lg:pt-20"
         style={{ background: BLUE }}
       >
         <GeometricDecor />

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import {
-  ArrowLeft, Store, Phone, Mail, MapPin, FileText,
+  Store, Phone, Mail, MapPin, FileText,
   Users, Briefcase, Banknote, Calendar, CalendarCheck,
   TrendingUp, Clock, ExternalLink,
 } from "lucide-react";
@@ -67,7 +67,6 @@ function InfoField({ icon, label, value }: { icon: React.ReactNode; label: strin
 
 export default function LojaPage() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const [loja, setLoja] = useState<Loja | null>(null);
   const [atendimentos, setAtendimentos] = useState<Atendimento[]>([]);
   const [loading, setLoading] = useState(true);
@@ -97,7 +96,7 @@ export default function LojaPage() {
       const d = new Date(at.data_atendimento);
       if (d.getFullYear() === thisYear && d.getMonth() === thisMonth) {
         count++;
-        if (at.status === "concluido") fatur += at.valor_final;
+        if (at.status === "concluido") fatur += Number(at.valor_final);
       }
     });
     return { atendMes: count, faturMes: fatur };
@@ -105,13 +104,6 @@ export default function LojaPage() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
-      <button
-        onClick={() => navigate("/lojas")}
-        className="mb-6 flex items-center gap-2 text-sm text-gray-500 transition hover:text-gray-800"
-      >
-        <ArrowLeft size={15} /> Voltar para lojas
-      </button>
-
       {loading && <p className="text-sm text-gray-400">Carregando loja...</p>}
       {error && <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>}
 

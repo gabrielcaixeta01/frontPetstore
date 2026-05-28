@@ -4,16 +4,14 @@ import {
   PawPrint, CalendarCheck, Users, Store,
   Clock, CheckCircle2, XCircle, TrendingUp,
   ArrowRight, ArrowUp, ArrowDown,
-  AlertTriangle, AlertCircle,
+  AlertTriangle,
 } from "lucide-react";
 import { getPets } from "../../services/petService";
 import { getAppointments } from "../../services/atendimentoService";
-import { getUsuarios } from "../../services/usuarioService";
 import { getLojas } from "../../services/lojaService";
 import { getServicos } from "../../services/servicoService";
 import type { Atendimento } from "../../types/atendimento";
 import type { Loja } from "../../types/loja";
-import type { Usuario } from "../../types/usuario";
 import { useFuncionarioStore } from "../../hooks/useFuncionarioStore";
 
 function getStoredUser() {
@@ -64,9 +62,7 @@ export default function FuncionarioHome() {
   const lastMonth = thisMonth === 0 ? 11 : thisMonth - 1;
   const lastMonthYear = thisMonth === 0 ? thisYear - 1 : thisYear;
 
-  const [totalPets, setTotalPets] = useState(0);
   const [atendimentos, setAtendimentos] = useState<Atendimento[]>([]);
-  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [lojas, setLojas] = useState<Loja[]>([]);
   const [petsById, setPetsById] = useState<Record<number, string>>({});
   const [servicosById, setServicosById] = useState<Record<number, string>>({});
@@ -75,16 +71,13 @@ export default function FuncionarioHome() {
   useEffect(() => {
     async function load() {
       try {
-        const [pets, allAtend, allUsers, allLojas, allServicos] = await Promise.all([
+        const [pets, allAtend, allLojas, allServicos] = await Promise.all([
           getPets(),
           getAppointments(),
-          getUsuarios(),
           getLojas(),
           getServicos().catch(() => []),
         ]);
-        setTotalPets(pets.length);
         setAtendimentos(allAtend.sort((a, b) => new Date(b.data_atendimento).getTime() - new Date(a.data_atendimento).getTime()));
-        setUsuarios(allUsers);
         setLojas(allLojas);
         setPetsById(Object.fromEntries(pets.map((p) => [p.id, p.nome])));
         setServicosById(Object.fromEntries(allServicos.map((s) => [s.id, s.nome])));
@@ -97,13 +90,19 @@ export default function FuncionarioHome() {
     load();
   }, []);
 
+  // ── Current store ───────────────────────────────────────────
+  const lojaInfo = useMemo(
+    () => lojaId != null ? lojas.find((l) => l.id === lojaId) ?? null : null,
+    [lojas, lojaId],
+  );
+
   // ── Filter by employee's store ──────────────────────────────
   const filteredAtend = useMemo(
     () => lojaId != null ? atendimentos.filter((a) => a.loja_id === lojaId) : atendimentos,
     [atendimentos, lojaId],
   );
 
-  // ── Monthly splits ─────────────────────────────────────────
+  // ── Monthly splits ──────────────────────────────────────────
   const atendMes = useMemo(
     () => filteredAtend.filter((a) => sameYM(new Date(a.data_atendimento), thisYear, thisMonth)),
     [filteredAtend],
@@ -114,24 +113,37 @@ export default function FuncionarioHome() {
   );
   const revenueMes    = useMemo(() => atendMes.filter((a) => a.status === "concluido").reduce((s, a) => s + Number(a.valor_final), 0), [atendMes]);
   const revenueMesAnt = useMemo(() => atendMesAnt.filter((a) => a.status === "concluido").reduce((s, a) => s + Number(a.valor_final), 0), [atendMesAnt]);
-  const atendDelta   = useMemo(() => pct(atendMes.length, atendMesAnt.length),   [atendMes, atendMesAnt]);
-  const revenueDelta = useMemo(() => pct(revenueMes, revenueMesAnt),              [revenueMes, revenueMesAnt]);
+  const atendDelta    = useMemo(() => pct(atendMes.length, atendMesAnt.length),   [atendMes, atendMesAnt]);
+  const revenueDelta  = useMemo(() => pct(revenueMes, revenueMesAnt),              [revenueMes, revenueMesAnt]);
 
-  // ── Client stats ────────────────────────────────────────────
-  const clientesAtivos = useMemo(() => usuarios.filter((u) => u.tipo_perfil === "cliente" && u.ativo).length, [usuarios]);
-  const newClientesMes = useMemo(
-    () => usuarios.filter((u) => u.tipo_perfil === "cliente" && sameYM(new Date(u.data_cadastro), thisYear, thisMonth)).length,
-    [usuarios],
+  // ── Store-specific client & pet counts ──────────────────────
+  const clientesNaLoja = useMemo(
+    () => new Set(filteredAtend.map((a) => a.cliente_id)).size,
+    [filteredAtend],
   );
+  const petsNaLoja = useMemo(
+    () => new Set(filteredAtend.map((a) => a.pet_id)).size,
+    [filteredAtend],
+  );
+  const clientesNovosMes = useMemo(() => {
+    const anteriores = new Set(
+      filteredAtend
+        .filter((a) => !sameYM(new Date(a.data_atendimento), thisYear, thisMonth))
+        .map((a) => a.cliente_id),
+    );
+    return atendMes.reduce((count, a) => (!anteriores.has(a.cliente_id) ? count + 1 : count), 0);
+  }, [filteredAtend, atendMes]);
 
   // ── Operational alerts ──────────────────────────────────────
   const agendadosAtrasados = useMemo(() => {
     const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
     return filteredAtend.filter((a) => a.status === "agendado" && new Date(a.data_atendimento) < hoje).length;
   }, [filteredAtend]);
-  const lojasSemEquipe   = useMemo(() => lojas.filter((l) => l.funcionarios.length === 0).length, [lojas]);
-  const clientesInativos = useMemo(() => usuarios.filter((u) => u.tipo_perfil === "cliente" && !u.ativo).length, [usuarios]);
-  const hasAlerts = agendadosAtrasados > 0 || lojasSemEquipe > 0 || clientesInativos > 0;
+  const canceladosMes = useMemo(
+    () => atendMes.filter((a) => a.status === "cancelado").length,
+    [atendMes],
+  );
+  const hasAlerts = agendadosAtrasados > 0 || canceladosMes > 0;
 
   // ── Monthly volume chart ────────────────────────────────────
   const monthlyChart = useMemo(() => {
@@ -162,6 +174,7 @@ export default function FuncionarioHome() {
       value: loading ? "—" : String(atendMes.length),
       delta: atendDelta,
       badge: null,
+      badgeCls: "",
       icon: CalendarCheck, bg: "bg-[#1c46f3]/10", iconCls: "text-[#1c46f3]", to: "/atendimentos",
     },
     {
@@ -169,20 +182,22 @@ export default function FuncionarioHome() {
       value: loading ? "—" : formatKPIMoney(revenueMes),
       delta: revenueDelta,
       badge: null,
+      badgeCls: "",
       icon: TrendingUp, bg: "bg-[#00bb69]/10", iconCls: "text-[#00bb69]", to: "/atendimentos",
     },
     {
-      label: "Clientes ativos",
-      value: loading ? "—" : String(clientesAtivos),
+      label: "Clientes na loja",
+      value: loading ? "—" : String(clientesNaLoja),
       delta: null,
-      badge: newClientesMes > 0 ? `+${newClientesMes} este mês` : null,
+      badge: clientesNovosMes > 0 ? `+${clientesNovosMes} este mês` : null,
       badgeCls: "text-[#1c46f3]",
       icon: Users, bg: "bg-violet-100", iconCls: "text-violet-600", to: "/usuarios",
     },
     {
-      label: "Pets cadastrados",
-      value: loading ? "—" : String(totalPets),
+      label: "Pets atendidos",
+      value: loading ? "—" : String(petsNaLoja),
       delta: null,
+      badge: null,
       badgeCls: "text-gray-500",
       icon: PawPrint, bg: "bg-gray-100", iconCls: "text-gray-600", to: "/pets",
     },
@@ -197,9 +212,16 @@ export default function FuncionarioHome() {
           {now.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}
         </p>
         <h1 className="mt-1 text-2xl font-bold text-gray-900">{greeting}, {firstName}!</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 flex flex-wrap items-center gap-x-1 text-sm text-gray-500">
+          {lojaInfo && (
+            <>
+              <Store size={12} className="text-gray-400" />
+              <span className="font-medium text-gray-700">{lojaInfo.nome}</span>
+              <span className="text-gray-300">·</span>
+            </>
+          )}
           {filteredAtend.filter((a) => a.status === "agendado").length > 0
-            ? `${filteredAtend.filter((a) => a.status === "agendado").length} atendimento(s) agendado(s) · ${filteredAtend.filter((a) => a.status === "concluido").length} concluído(s).`
+            ? `${filteredAtend.filter((a) => a.status === "agendado").length} agendado(s) · ${filteredAtend.filter((a) => a.status === "concluido").length} concluído(s).`
             : "Nenhum atendimento agendado no momento."}
         </p>
       </div>
@@ -220,9 +242,7 @@ export default function FuncionarioHome() {
                 <span className="text-2xl font-bold text-gray-800">{k.value}</span>
                 {k.delta !== undefined && <Delta value={k.delta} />}
                 {k.badge && (
-                  <span className={`text-xs font-semibold ${"badgeCls" in k ? k.badgeCls : "text-gray-400"}`}>
-                    {k.badge}
-                  </span>
+                  <span className={`text-xs font-semibold ${k.badgeCls}`}>{k.badge}</span>
                 )}
               </div>
             </div>
@@ -245,7 +265,7 @@ export default function FuncionarioHome() {
         {!hasAlerts ? (
           <p className="text-sm text-emerald-700">Tudo em ordem — nenhuma pendência encontrada.</p>
         ) : (
-          <div className="grid gap-2 sm:grid-cols-3">
+          <div className="grid gap-2 sm:grid-cols-2">
             {agendadosAtrasados > 0 && (
               <Link to="/atendimentos" className="flex items-center gap-3 rounded-xl border border-amber-200 bg-white px-4 py-3 transition hover:border-amber-300 hover:shadow-sm">
                 <Clock size={16} className="shrink-0 text-amber-500" />
@@ -256,22 +276,12 @@ export default function FuncionarioHome() {
                 <ArrowRight size={13} className="shrink-0 text-gray-300" />
               </Link>
             )}
-            {lojasSemEquipe > 0 && (
-              <Link to="/lojas" className="flex items-center gap-3 rounded-xl border border-red-200 bg-white px-4 py-3 transition hover:border-red-300 hover:shadow-sm">
-                <Store size={16} className="shrink-0 text-red-500" />
+            {canceladosMes > 0 && (
+              <Link to="/atendimentos" className="flex items-center gap-3 rounded-xl border border-red-200 bg-white px-4 py-3 transition hover:border-red-300 hover:shadow-sm">
+                <XCircle size={16} className="shrink-0 text-red-500" />
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-gray-800">{lojasSemEquipe} sem equipe</p>
-                  <p className="text-xs text-gray-500">Lojas sem funcionários alocados</p>
-                </div>
-                <ArrowRight size={13} className="shrink-0 text-gray-300" />
-              </Link>
-            )}
-            {clientesInativos > 0 && (
-              <Link to="/usuarios" className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 transition hover:border-gray-300 hover:shadow-sm">
-                <AlertCircle size={16} className="shrink-0 text-gray-400" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-gray-800">{clientesInativos} inativos</p>
-                  <p className="text-xs text-gray-500">Clientes com acesso desativado</p>
+                  <p className="text-sm font-semibold text-gray-800">{canceladosMes} cancelado{canceladosMes > 1 ? "s" : ""} este mês</p>
+                  <p className="text-xs text-gray-500">Cancelamentos na sua loja</p>
                 </div>
                 <ArrowRight size={13} className="shrink-0 text-gray-300" />
               </Link>
@@ -352,7 +362,6 @@ export default function FuncionarioHome() {
                         {petName ? `${petName} · ` : ""}R$ {Number(at.valor_final).toFixed(2)}
                       </p>
                     </div>
-                    {/* Mobile: colored dot only. sm+: full badge */}
                     <span className={`flex h-2 w-2 shrink-0 rounded-full sm:hidden ${cfg.cls.includes("yellow") ? "bg-yellow-400" : cfg.cls.includes("emerald") ? "bg-emerald-400" : "bg-red-400"}`} />
                     <span className={`hidden shrink-0 items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold sm:flex ${cfg.cls}`}>
                       <cfg.icon size={11} /> {cfg.label}
@@ -380,6 +389,16 @@ export default function FuncionarioHome() {
             <p className="px-5 py-6 text-sm text-gray-400">Carregando...</p>
           ) : (
             <div className="space-y-3 p-5">
+              {lojaInfo && (
+                <div className="border-b border-gray-50 pb-3">
+                  <p className="font-semibold text-gray-800">{lojaInfo.nome}</p>
+                  {lojaInfo.city && (
+                    <p className="text-xs text-gray-400">
+                      {lojaInfo.city}{lojaInfo.state ? `, ${lojaInfo.state}` : ""}
+                    </p>
+                  )}
+                </div>
+              )}
               <div className="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3">
                 <span className="text-xs text-gray-500">Atendimentos este mês</span>
                 <span className="text-sm font-bold text-gray-900">{atendMes.length}</span>
