@@ -375,7 +375,7 @@ export default function AdminHome() {
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <PawPrint size={14} className="text-[#F5A800]" />
-              <span className="text-sm font-semibold text-gray-800">Atendimentos por Tipo</span>
+              <span className="text-sm font-semibold text-gray-800">Serviço por Atendimento</span>
             </div>
             <span className="rounded border border-[#1c46f3] px-2 py-0.5 text-[10px] font-semibold capitalize text-[#1c46f3]">
               {now.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "")}

@@ -60,9 +60,7 @@ export default function ClienteLayout({ children }: { children: ReactNode }) {
           <Menu size={20} />
         </button>
         <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-[#1c46f3] to-[#00bb69]">
-            <PawPrint size={13} className="text-white" />
-          </div>
+          <img src="/logo_apex.png" alt="Apex" className="h-7 w-7" />
           <span className="text-sm font-semibold text-gray-900">Apex Petstore</span>
         </div>
       </header>
@@ -87,9 +85,7 @@ export default function ClienteLayout({ children }: { children: ReactNode }) {
         {/* Logo */}
         <div className="flex items-center justify-between border-b border-gray-100 px-5 py-5">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-[#1c46f3] to-[#00bb69]">
-              <PawPrint size={15} className="text-white" />
-            </div>
+            <img src="/logo_apex.png" alt="Apex" className="h-8 w-8" />
             <div>
               <span className="bg-gradient-to-r from-[#1c46f3] to-[#00bb69] bg-clip-text text-sm font-bold text-transparent">
                 Apex
