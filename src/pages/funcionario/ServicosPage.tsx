@@ -7,7 +7,7 @@ import {
 import { createServico, getServicos } from "../../services/servicoService";
 import type { CreateServicoDTO, Servico } from "../../types/servico";
 
-const inputCls = "w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white focus:ring-2 focus:ring-[#1c46f3]/15";
+const inputCls = "w-full rounded border border-gray-200 bg-gray-50 px-3 py-2 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white";
 
 function strip(s: string) {
   return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
@@ -144,26 +144,59 @@ export default function ServicosPage() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+      {/* ── Hero Banner ─────────────────────────────────────── */}
+      <div className="relative mb-8 overflow-hidden rounded-md bg-[#1c46f3] px-8 py-10">
+        <div className="relative z-10 max-w-md">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-[#F5A800]">
+            Catálogo
+          </p>
+          <h1 className="text-3xl font-extrabold leading-tight text-white">
+            Serviços <span className="text-[#F5A800]">disponíveis</span>
+          </h1>
+          <p className="mt-1.5 text-[15px] text-white/75">
+            Confira nossa lista completa de serviços com preços e descrições.
+          </p>
+        </div>
+        {/* decorative shapes */}
+        <div className="absolute right-8 top-1/2 hidden -translate-y-1/2 items-center gap-3 lg:flex" aria-hidden="true">
+          <div className="flex flex-col items-center gap-2">
+            <div className="h-4 w-4 rotate-45 rounded bg-[#F5A800]" />
+            <div className="h-6 w-6 rounded-full border-2 border-[#00A651]" />
+            <div className="h-3 w-3 rounded bg-[#00A651]" />
+          </div>
+          <div className="mt-5 flex flex-col items-center gap-2">
+            <div style={{ width:0, height:0, borderLeft:"12px solid transparent", borderRight:"12px solid transparent", borderBottom:"20px solid #F5A800" }} />
+            <div className="h-8 w-8 rounded bg-white/15" />
+            <div className="h-5 w-5 rounded-full bg-[#00A651]" />
+          </div>
+          <div className="-mt-2 flex flex-col items-center gap-2">
+            <div className="h-5 w-5 rotate-45 rounded border-2 border-[#F5A800]" />
+            <div className="h-10 w-10 rounded-full bg-white/10" />
+            <div style={{ width:0, height:0, borderLeft:"8px solid transparent", borderRight:"8px solid transparent", borderTop:"15px solid rgba(255,255,255,0.35)" }} />
+          </div>
+        </div>
+      </div>
+
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Serviços</h1>
-          <p className="mt-0.5 text-sm text-gray-500">Catálogo de serviços com descrição e preço.</p>
+          <h2 className="text-lg font-semibold text-gray-900">Todos os serviços</h2>
+          <p className="mt-0.5 text-xs text-gray-500">Filtre por categoria para encontrar o que procura.</p>
         </div>
         <button
           onClick={() => { setShowForm((v) => !v); setNome(""); setDescricao(""); setPreco(""); setError(""); }}
-          className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-3 py-2 text-sm font-semibold text-white shadow-sm shadow-[#1c46f3]/20 transition hover:opacity-90 sm:px-4 sm:py-2.5"
+          className="flex items-center gap-2 rounded bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-3 py-2 text-sm font-semibold text-white shadow-sm shadow-[#1c46f3]/20 transition hover:opacity-90 sm:px-4 sm:py-2"
         >
           {showForm ? <X size={15} /> : <Plus size={15} />}
-          <span className="hidden sm:inline">{showForm ? "Cancelar" : "Novo serviço"}</span>
+          <span className="hidden sm:inline">{showForm ? "Cancelar" : "Novo"}</span>
         </button>
       </div>
 
-      {feedback && <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{feedback}</div>}
-      {error && <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>}
+      {feedback && <div className="mb-4 rounded border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{feedback}</div>}
+      {error && <div className="mb-4 rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>}
 
       {showForm && (
-        <form onSubmit={handleCreateSubmit} className="mb-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+        <form onSubmit={handleCreateSubmit} className="mb-6 rounded-md border border-gray-200 bg-white p-5 shadow-sm">
           <h2 className="mb-4 text-sm font-semibold text-gray-700">Novo Serviço</h2>
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="sm:col-span-1">
@@ -189,17 +222,17 @@ export default function ServicosPage() {
             </div>
           </div>
           <div className="mt-4 flex gap-2">
-            <button type="submit" className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90">
+            <button type="submit" className="flex items-center gap-2 rounded bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-5 py-2 text-sm font-semibold text-white transition hover:opacity-90">
               <Plus size={14} /> Cadastrar
             </button>
-            <button type="button" onClick={() => setShowForm(false)} className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm text-gray-500 transition hover:bg-gray-50">Cancelar</button>
+            <button type="button" onClick={() => setShowForm(false)} className="rounded border border-gray-200 px-5 py-2 text-sm text-gray-500 transition hover:bg-gray-50">Cancelar</button>
           </div>
         </form>
       )}
 
       {/* Category filter */}
       {!loading && servicos.length > 0 && (
-        <div className="mb-6 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+        <div className="mb-6 overflow-hidden rounded-md border border-gray-200 bg-white shadow-sm">
           <div className="flex overflow-x-auto">
             {CATS.map((cat) => {
               const count = cat.id === "todos"
@@ -213,7 +246,7 @@ export default function ServicosPage() {
                 <button
                   key={cat.id}
                   onClick={() => setCatFilter(cat.id)}
-                  className={`group relative flex flex-1 shrink-0 flex-col items-center gap-1 px-3 py-3.5 transition sm:flex-row sm:justify-center sm:gap-2 sm:px-5 sm:py-4 ${
+                  className={`group relative flex flex-1 shrink-0 flex-col items-center gap-1 px-3 py-3 transition sm:flex-row sm:justify-center sm:gap-2 sm:px-5 sm:py-3 ${
                     isActive
                       ? `${active} text-white ring-inset ring-1 ${ring}`
                       : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
@@ -237,15 +270,15 @@ export default function ServicosPage() {
       )}
 
       {loading ? (
-        <div className="rounded-2xl border border-gray-100 bg-white p-8 text-center text-sm text-gray-400">Carregando serviços...</div>
+        <div className="rounded-md border border-gray-200 bg-white p-8 text-center text-sm text-gray-400">Carregando serviços...</div>
       ) : servicos.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-12 text-center">
+        <div className="rounded-md border border-dashed border-gray-200 bg-white p-12 text-center">
           <Sparkles size={36} className="mx-auto mb-3 text-gray-200" />
           <p className="text-sm text-gray-400">Nenhum serviço cadastrado.</p>
           <button onClick={() => setShowForm(true)} className="mt-2 text-sm font-semibold text-[#1c46f3] hover:underline">Criar primeiro serviço</button>
         </div>
       ) : servicosFiltrados.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-10 text-center text-sm text-gray-400">
+        <div className="rounded-md border border-dashed border-gray-200 bg-white p-10 text-center text-sm text-gray-400">
           Nenhum serviço nesta categoria.
         </div>
       ) : (
@@ -254,10 +287,10 @@ export default function ServicosPage() {
             const Icon = getIcon(s.nome);
             const col  = getColor(s.nome);
             return (
-              <div key={s.id} className="flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:border-[#1c46f3]/25 hover:shadow-md">
+              <div key={s.id} className="flex flex-col overflow-hidden rounded-md border border-gray-200 bg-white shadow-sm transition hover:border-[#1c46f3]/25 hover:shadow-md">
                 <div className="flex flex-1 flex-col p-5">
                   <div className="flex items-start gap-3">
-                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${col.bg}`}>
+                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${col.bg}`}>
                       <Icon size={16} className={col.icon} />
                     </div>
                     <div className="min-w-0 flex-1">

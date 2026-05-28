@@ -22,8 +22,8 @@ type AppointmentFormProps = {
   fixedLojaId?: number;
 };
 
-const selectCls = "w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white focus:ring-2 focus:ring-[#1c46f3]/15 disabled:opacity-60 appearance-none";
-const inputCls  = "w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white focus:ring-2 focus:ring-[#1c46f3]/15";
+const selectCls = "w-full rounded border border-gray-200 bg-gray-50 px-3 py-2 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white disabled:opacity-60 appearance-none";
+const inputCls  = "w-full rounded border border-gray-200 bg-gray-50 px-3 py-2 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white";
 const labelCls  = "mb-1 block text-xs font-medium text-gray-500";
 
 export default function AppointmentForm({
@@ -220,7 +220,7 @@ export default function AppointmentForm({
     <form
       key={appointmentBeingEdited?.id ?? "new"}
       onSubmit={handleSubmit}
-      className="space-y-5 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm"
+      className="space-y-5 rounded-md border border-gray-200 bg-white p-5 shadow-sm"
     >
       <h2 className="text-sm font-semibold text-gray-700">
         {appointmentBeingEdited ? "Editar Atendimento" : "Novo Atendimento"}
@@ -346,7 +346,7 @@ export default function AppointmentForm({
           />
         </div>
         <div className="flex items-end pb-0.5">
-          <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-600 transition hover:bg-gray-50">
+          <label className="flex cursor-pointer items-center gap-2 rounded border border-gray-200 px-4 py-2 text-sm text-gray-600 transition hover:bg-gray-50">
             <input
               type="checkbox"
               checked={online}
@@ -370,11 +370,11 @@ export default function AppointmentForm({
         </div>
 
         {loadingRelacionamentos ? (
-          <p className="rounded-xl border border-gray-100 bg-gray-50 px-3 py-3 text-sm text-gray-400">
+          <p className="rounded border border-gray-100 bg-gray-50 px-3 py-3 text-sm text-gray-400">
             Carregando serviços...
           </p>
         ) : servicos.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-gray-200 px-3 py-3 text-sm text-gray-400">
+          <p className="rounded border border-dashed border-gray-200 px-3 py-3 text-sm text-gray-400">
             Nenhum serviço cadastrado.
           </p>
         ) : (
@@ -384,7 +384,7 @@ export default function AppointmentForm({
               return (
                 <label
                   key={s.id}
-                  className={`flex cursor-pointer items-center justify-between rounded-xl border px-3 py-2.5 text-sm transition ${
+                  className={`flex cursor-pointer items-center justify-between rounded border px-3 py-2 text-sm transition ${
                     checked
                       ? "border-[#1c46f3] bg-[#1c46f3]/8 text-[#1c46f3]"
                       : "border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300"
@@ -413,7 +413,7 @@ export default function AppointmentForm({
       <div className="flex gap-2 pt-1">
         <button
           type="submit"
-          className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-[#1c46f3]/20 transition hover:opacity-90"
+          className="flex items-center gap-2 rounded bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-5 py-2 text-sm font-semibold text-white shadow-sm shadow-[#1c46f3]/20 transition hover:opacity-90"
         >
           <Plus size={14} />
           {appointmentBeingEdited ? "Salvar alterações" : "Cadastrar"}
@@ -422,7 +422,7 @@ export default function AppointmentForm({
           <button
             type="button"
             onClick={onCancelEdit}
-            className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-medium text-gray-500 transition hover:bg-gray-50"
+            className="rounded border border-gray-200 px-5 py-2 text-sm font-medium text-gray-500 transition hover:bg-gray-50"
           >
             Cancelar
           </button>

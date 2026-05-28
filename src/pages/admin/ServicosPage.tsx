@@ -8,7 +8,7 @@ import EditModal from "../../components/EditModal";
 import { createServico, deleteServico, getServicos, updateServico } from "../../services/servicoService";
 import type { CreateServicoDTO, Servico, UpdateServicoDTO } from "../../types/servico";
 
-const inputCls = "w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white focus:ring-2 focus:ring-[#1c46f3]/15";
+const inputCls = "w-full rounded border border-gray-200 bg-gray-50 px-3 py-2 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white";
 
 function strip(s: string) {
   return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
@@ -180,23 +180,55 @@ export default function ServicosPage() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+      {/* ── Hero Banner ─────────────────────────────────────── */}
+      <div className="relative mb-8 overflow-hidden rounded-md bg-[#1c46f3] px-8 py-10">
+        <div className="relative z-10 max-w-md">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-[#F5A800]">
+            Catálogo
+          </p>
+          <h1 className="text-3xl font-extrabold leading-tight text-white">
+            Serviços <span className="text-[#F5A800]">disponíveis</span>
+          </h1>
+          <p className="mt-1.5 text-[15px] text-white/75">
+            Gerencie o catálogo completo com descrição e preço.
+          </p>
+        </div>
+        {/* decorative shapes */}
+        <div className="absolute right-8 top-1/2 hidden -translate-y-1/2 items-center gap-3 lg:flex" aria-hidden="true">
+          <div className="flex flex-col items-center gap-2">
+            <div className="h-4 w-4 rotate-45 rounded bg-[#F5A800]" />
+            <div className="h-6 w-6 rounded-full border-2 border-[#00A651]" />
+            <div className="h-3 w-3 rounded bg-[#00A651]" />
+          </div>
+          <div className="mt-5 flex flex-col items-center gap-2">
+            <div style={{ width:0, height:0, borderLeft:"12px solid transparent", borderRight:"12px solid transparent", borderBottom:"20px solid #F5A800" }} />
+            <div className="h-8 w-8 rounded bg-white/15" />
+            <div className="h-5 w-5 rounded-full bg-[#00A651]" />
+          </div>
+          <div className="-mt-2 flex flex-col items-center gap-2">
+            <div className="h-5 w-5 rotate-45 rounded border-2 border-[#F5A800]" />
+            <div className="h-10 w-10 rounded-full bg-white/10" />
+            <div style={{ width:0, height:0, borderLeft:"8px solid transparent", borderRight:"8px solid transparent", borderTop:"15px solid rgba(255,255,255,0.35)" }} />
+          </div>
+        </div>
+      </div>
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Serviços</h1>
-          <p className="mt-0.5 text-sm text-gray-500">Gerencie o catálogo com descrição e preço.</p>
+          <h2 className="text-lg font-semibold text-gray-900">Todos os serviços</h2>
+          <p className="mt-0.5 text-xs text-gray-500">Filtre por categoria para encontrar o que procura.</p>
         </div>
         <button
           onClick={() => { setShowForm((v) => !v); setNome(""); setDescricao(""); setPreco(""); setError(""); }}
-          className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-3 py-2 text-sm font-semibold text-white shadow-sm shadow-[#1c46f3]/20 transition hover:opacity-90 sm:px-4 sm:py-2.5"
+          className="flex items-center gap-2 rounded bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-3 py-2 text-sm font-semibold text-white shadow-sm shadow-[#1c46f3]/20 transition hover:opacity-90 sm:px-4 sm:py-2"
         >
           {showForm ? <X size={15} /> : <Plus size={15} />}
-          <span className="hidden sm:inline">{showForm ? "Cancelar" : "Novo serviço"}</span>
+          <span className="hidden sm:inline">{showForm ? "Cancelar" : "Novo"}</span>
         </button>
       </div>
 
-      {feedback && <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{feedback}</div>}
-      {error && <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>}
+      {feedback && <div className="mb-4 rounded border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{feedback}</div>}
+      {error && <div className="mb-4 rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>}
 
       {showForm && (
         <form onSubmit={handleCreateSubmit} className="mb-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
