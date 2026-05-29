@@ -4,10 +4,14 @@ import { getTags } from "../../services/tagService";
 import { getPets } from "../../services/petService";
 import type { Etiqueta } from "../../types/tag";
 
-export default function ClienteTagsPage() {
-  const [tags, setTags] = useState<Etiqueta[]>([]);
+const BLUE  = "#1A3CB8";
+const BORD  = "#E0E0E0";
+const MUTED = "#6B6B6B";
+
+export default function FuncionarioTagsPage() {
+  const [tags, setTags]                   = useState<Etiqueta[]>([]);
   const [petCountByTag, setPetCountByTag] = useState<Record<number, number>>({});
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading]             = useState(true);
 
   useEffect(() => {
     async function load() {
@@ -31,14 +35,24 @@ export default function ClienteTagsPage() {
 
   return (
     <div className="px-4 py-6 sm:px-6 sm:py-8">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Tags</h1>
-          <p className="mt-0.5 text-sm text-gray-500">Classificações utilizadas para organizar os pets do sistema.</p>
+      <div className="mx-auto max-w-6xl space-y-6">
+
+        {/* Header */}
+        <div>
+          <span className="mb-1 inline-block text-xs font-bold uppercase tracking-widest" style={{ color: BLUE }}>
+            Classificações
+          </span>
+          <h1 className="text-2xl font-extrabold" style={{ color: "#1a1a1a" }}>Tags</h1>
+          <p className="mt-0.5 text-sm" style={{ color: MUTED }}>
+            Classificações utilizadas para organizar os pets do sistema.
+          </p>
         </div>
 
         {loading ? (
-          <div className="rounded-2xl border border-gray-100 bg-white p-8 text-center text-sm text-gray-400">
+          <div
+            className="p-8 text-center text-sm"
+            style={{ border: `1px solid ${BORD}`, borderRadius: "8px", background: "#fff", color: MUTED }}
+          >
             Carregando tags...
           </div>
         ) : (
