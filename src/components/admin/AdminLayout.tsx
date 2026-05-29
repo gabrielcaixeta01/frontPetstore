@@ -1,38 +1,41 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
-  PawPrint,
-  CalendarCheck,
-  LayoutGrid,
-  Scissors,
-  Store,
-  Tag,
-  Users,
-  Home,
-  LogOut,
-  Menu,
-  X,
-  ShieldCheck,
+  PawPrint, CalendarCheck, LayoutGrid, Scissors,
+  Store, Tag, Users, Home, LogOut, Menu, X, ShieldCheck,
 } from "lucide-react";
 import type { ReactNode } from "react";
 
-const navItems = [
-  { to: "/", label: "Início", icon: Home, end: true },
-  { to: "/pets", label: "Pets", icon: PawPrint, end: false },
-  { to: "/atendimentos", label: "Atendimentos", icon: CalendarCheck, end: false },
-  { to: "/servicos", label: "Serviços", icon: Scissors, end: false },
-  { to: "/categorias", label: "Categorias", icon: LayoutGrid, end: false },
-  { to: "/lojas", label: "Lojas", icon: Store, end: false },
-  { to: "/usuarios", label: "Usuários", icon: Users, end: false },
-  { to: "/tags", label: "Tags", icon: Tag, end: false },
+const BLUE  = "#1A3CB8";
+const YELL  = "#F5A800";
+const BDARK = "#0D2580";
+const BORD  = "#E0E0E0";
+const MUTED = "#6B6B6B";
+
+const navSections = [
+  {
+    label: "Painel",
+    items: [
+      { to: "/", label: "Início", icon: Home, end: true },
+    ],
+  },
+  {
+    label: "Administração",
+    items: [
+      { to: "/pets",         label: "Pets",         icon: PawPrint,     end: false },
+      { to: "/atendimentos", label: "Atendimentos",  icon: CalendarCheck, end: false },
+      { to: "/servicos",     label: "Serviços",      icon: Scissors,     end: false },
+      { to: "/categorias",   label: "Categorias",    icon: LayoutGrid,   end: false },
+      { to: "/lojas",        label: "Lojas",         icon: Store,        end: false },
+      { to: "/usuarios",     label: "Usuários",      icon: Users,        end: false },
+      { to: "/tags",         label: "Tags",          icon: Tag,          end: false },
+    ],
+  },
 ];
 
 function getStoredUser() {
-  try {
-    return JSON.parse(localStorage.getItem("user") || "{}");
-  } catch {
-    return {};
-  }
+  try { return JSON.parse(localStorage.getItem("user") || "{}"); }
+  catch { return {}; }
 }
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
@@ -49,132 +52,169 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     navigate("/login");
   }
 
-  function closeSidebar() {
-    setSidebarOpen(false);
-  }
+  function closeSidebar() { setSidebarOpen(false); }
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen" style={{ background: "#F4F4F4" }}>
+
       {/* ── Mobile header ── */}
-      <header className="fixed inset-x-0 top-0 z-30 flex h-14 items-center gap-3 border-b border-gray-100 bg-white px-4 md:hidden">
+      <header
+        className="fixed inset-x-0 top-0 z-30 flex h-[52px] items-center gap-3 px-4 md:hidden"
+        style={{ background: BLUE }}
+      >
         <button
           onClick={() => setSidebarOpen(true)}
-          className="flex h-9 w-9 items-center justify-center rounded-xl text-gray-500 hover:bg-gray-100"
+          className="flex h-8 w-8 items-center justify-center text-white/70 transition hover:bg-white/10 hover:text-white"
+          style={{ borderRadius: "6px" }}
           aria-label="Abrir menu"
         >
           <Menu size={20} />
         </button>
-        <div className="flex items-center gap-2">
-          <img src="/logo_apex.png" alt="Apex" className="h-7 w-7" />
-          <span className="text-sm font-semibold text-gray-900">Apex Petstore</span>
-          <span className="rounded-md bg-[#1c46f3]/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#1c46f3]">
-            Admin
-          </span>
-        </div>
+        <img
+          src="/logo_apex.png" alt="Apex Petstore"
+          className="h-7 w-auto"
+          style={{ filter: "brightness(0) invert(1)" }}
+        />
       </header>
 
-      {/* ── Overlay (mobile) ── */}
+      {/* ── Overlay ── */}
       {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/40 md:hidden"
-          onClick={closeSidebar}
-          aria-hidden="true"
-        />
+        <div className="fixed inset-0 z-40 bg-black/40 md:hidden" onClick={closeSidebar} aria-hidden="true" />
       )}
 
       {/* ── Sidebar ── */}
       <aside
         className={[
-          "fixed inset-y-0 left-0 z-50 flex h-full w-64 flex-col border-r border-gray-100 bg-white transition-transform duration-200 ease-in-out",
-          "md:sticky md:top-0 md:h-screen md:w-60 md:translate-x-0 md:flex",
+          "fixed inset-y-0 left-0 z-50 flex h-full w-60 flex-col bg-white transition-transform duration-200 ease-in-out",
+          "md:sticky md:top-0 md:h-screen md:translate-x-0 md:flex",
           sidebarOpen ? "translate-x-0" : "-translate-x-full",
         ].join(" ")}
+        style={{ borderRight: `1px solid ${BORD}` }}
       >
-        {/* Logo */}
-        <div className="flex items-center justify-between border-b border-gray-100 px-5 py-5">
-          <div className="flex items-center gap-2.5">
-            <img src="/logo_apex.png" alt="Apex" className="h-8 w-8" />
-            <div>
-              <span className="bg-gradient-to-r from-[#1c46f3] to-[#00bb69] bg-clip-text text-sm font-bold text-transparent">
-                Apex
-              </span>
-              <span className="text-sm font-light text-gray-900"> Petstore</span>
+        {/* Brand header — blue */}
+        <div className="flex-shrink-0 px-4 py-4" style={{ background: BLUE }}>
+          <div className="flex items-center justify-between">
+            <img
+              src="/logo_apex.png" alt="Apex Petstore"
+              className="h-8 w-auto"
+              style={{ filter: "brightness(0) invert(1)" }}
+            />
+            <button
+              onClick={closeSidebar}
+              className="flex h-7 w-7 items-center justify-center text-white/60 transition hover:text-white md:hidden"
+              style={{ borderRadius: "4px" }}
+              aria-label="Fechar menu"
+            >
+              <X size={16} />
+            </button>
+          </div>
+          {/* Role badge */}
+          <div className="mt-3 inline-flex items-center gap-1.5 px-2 py-1"
+            style={{ background: "rgba(255,255,255,0.12)", borderRadius: "4px" }}>
+            <ShieldCheck size={11} style={{ color: "rgba(255,255,255,0.7)" }} />
+            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.7)" }}>
+              Painel Admin
+            </span>
+          </div>
+        </div>
+
+        {/* Nav */}
+        <nav className="flex-1 overflow-y-auto py-3">
+          {navSections.map((section) => (
+            <div key={section.label} className="mb-3">
+              <p className="mb-1 px-4 text-[9px] font-bold uppercase tracking-widest" style={{ color: MUTED }}>
+                {section.label}
+              </p>
+              <div className="space-y-0.5">
+                {section.items.map((item) => (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    end={item.end}
+                    onClick={closeSidebar}
+                    className="group relative mx-2 block"
+                  >
+                    {({ isActive }) => (
+                      <>
+                        {isActive && (
+                          <div
+                            className="absolute -left-2 bottom-1.5 top-1.5 w-[3px]"
+                            style={{ background: BLUE, borderRadius: "0 2px 2px 0" }}
+                          />
+                        )}
+                        <div
+                          className={`flex items-center gap-2.5 px-2 py-[7px] text-[13px] transition-all ${
+                            isActive
+                              ? "font-bold"
+                              : "font-medium text-gray-600 hover:text-[#1A3CB8]"
+                          }`}
+                          style={{
+                            borderRadius: "6px",
+                            background: isActive ? "rgba(26,60,184,0.08)" : undefined,
+                            color: isActive ? BLUE : undefined,
+                          }}
+                          onMouseEnter={(e) => {
+                            if (!isActive) (e.currentTarget as HTMLElement).style.background = "rgba(26,60,184,0.05)";
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!isActive) (e.currentTarget as HTMLElement).style.background = "";
+                          }}
+                        >
+                          <div
+                            className="flex h-7 w-7 shrink-0 items-center justify-center transition-colors"
+                            style={{
+                              borderRadius: "6px",
+                              background: isActive ? BLUE : "#F4F4F4",
+                            }}
+                          >
+                            <item.icon size={14} color={isActive ? "#ffffff" : MUTED} />
+                          </div>
+                          {item.label}
+                        </div>
+                      </>
+                    )}
+                  </NavLink>
+                ))}
+              </div>
             </div>
-          </div>
-          <button
-            onClick={closeSidebar}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 md:hidden"
-            aria-label="Fechar menu"
-          >
-            <X size={16} />
-          </button>
-        </div>
-
-        {/* Admin badge */}
-        <div className="mx-3 mt-3 flex items-center gap-2 rounded-xl bg-[#1c46f3]/8 px-3 py-2">
-          <ShieldCheck size={14} className="text-[#1c46f3]" />
-          <span className="text-xs font-semibold text-[#1c46f3]">Painel Administrativo</span>
-        </div>
-
-        {/* Nav links */}
-        <nav className="flex-1 overflow-y-auto px-3 py-4">
-          <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-widest text-gray-400">
-            Administração
-          </p>
-          <div className="space-y-0.5">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.end}
-                onClick={closeSidebar}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
-                    isActive
-                      ? "bg-gradient-to-r from-[#1c46f3] to-[#1840e0] text-white shadow-sm shadow-[#1c46f3]/20"
-                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                  }`
-                }
-              >
-                <item.icon size={16} />
-                {item.label}
-              </NavLink>
-            ))}
-          </div>
+          ))}
         </nav>
 
         {/* User footer */}
-        <div className="border-t border-gray-100 p-4">
+        <div className="flex-shrink-0 p-3" style={{ borderTop: `1px solid ${BORD}` }}>
           <NavLink
             to="/perfil"
             onClick={closeSidebar}
-            className="flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-gray-50"
+            className="flex items-center gap-2.5 p-2 transition-colors hover:bg-gray-50"
+            style={{ borderRadius: "6px" }}
           >
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#1c46f3]/15 text-sm font-bold text-[#1c46f3]">
+            <div
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-bold"
+              style={{ background: YELL, color: BDARK, border: `2px solid ${BLUE}` }}
+            >
               {initials}
             </div>
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-1.5">
-                <p className="truncate text-sm font-semibold text-gray-900">
-                  {user.name ?? "Admin"}
-                </p>
-                <ShieldCheck size={11} className="shrink-0 text-[#1c46f3]" />
+              <div className="flex items-center gap-1">
+                <p className="truncate text-[12px] font-bold text-gray-900">{user.name ?? "Admin"}</p>
+                <ShieldCheck size={10} style={{ color: BLUE, flexShrink: 0 }} />
               </div>
-              <p className="truncate text-xs text-gray-400">{user.email ?? ""}</p>
+              <p className="truncate text-[10px]" style={{ color: MUTED }}>{user.email ?? ""}</p>
             </div>
           </NavLink>
           <button
             onClick={logout}
-            className="mt-1 flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-gray-500 transition-colors hover:bg-red-50 hover:text-red-600"
+            className="mt-1 flex w-full items-center gap-2 px-2.5 py-1.5 text-[12px] transition-colors hover:bg-red-50 hover:text-red-600"
+            style={{ borderRadius: "6px", color: MUTED }}
           >
-            <LogOut size={15} />
-            Sair
+            <LogOut size={13} />
+            Sair da conta
           </button>
         </div>
       </aside>
 
       {/* ── Main content ── */}
-      <div className="flex min-h-screen flex-1 flex-col overflow-x-hidden pt-14 md:pt-0">
+      <div className="flex min-h-screen flex-1 flex-col overflow-x-hidden pt-[52px] md:pt-0">
         {children}
       </div>
     </div>
