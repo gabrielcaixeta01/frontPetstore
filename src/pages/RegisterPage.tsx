@@ -164,28 +164,29 @@ export default function RegisterPage() {
       {/* ── Left panel ── */}
       <div
         className="relative hidden lg:flex lg:w-[480px] flex-col justify-between overflow-hidden p-12 text-white lg:pt-20"
-        style={{ background: BLUE }}
+        style={{ background: `url('/apex5.jpg') center/cover no-repeat` }}
       >
+        {/* Blue overlay */}
+        <div className="absolute inset-0" style={{ background: "rgba(10, 28, 110, 0.80)" }} />
+
         <GeometricDecor />
 
-        <div className="relative flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center"
-            style={{ background: "rgba(255,255,255,0.15)", borderRadius: "4px" }}>
-            <PawPrint size={20} style={{ color: YELL }} />
-          </div>
-          <span className="text-xl font-bold tracking-tight">Apex Petstore</span>
+        {/* Logo */}
+        <div className="relative">
+          <img src="/logo_apex.png" alt="Apex Petstore" className="h-10 w-auto"
+            style={{ filter: "brightness(0) invert(1)" }} />
         </div>
 
         <div className="relative space-y-6">
           <div>
-            <span className="inline-block px-3 py-1 text-xs font-bold uppercase tracking-widest text-gray-900"
-              style={{ background: YELL, borderRadius: "20px" }}>
+            <span className="inline-block px-3 py-1 text-xs font-bold uppercase tracking-widest"
+              style={{ background: YELL, color: "#0D2580", borderRadius: "20px" }}>
               Novo por aqui
             </span>
-            <h1 className="mt-5 text-4xl font-bold leading-tight">
+            <h1 className="mt-5 text-4xl font-black leading-tight">
               Comece a cuidar<br />melhor dos pets.
             </h1>
-            <p className="mt-4 text-base" style={{ color: "rgba(255,255,255,0.72)" }}>
+            <p className="mt-4 text-base" style={{ color: "rgba(255,255,255,0.75)" }}>
               Crie sua conta e tenha acesso completo à plataforma em segundos.
             </p>
           </div>
@@ -193,10 +194,10 @@ export default function RegisterPage() {
             {features.map((f) => (
               <li key={f.text} className="flex items-center gap-3">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center"
-                  style={{ background: "rgba(255,255,255,0.15)", borderRadius: "4px" }}>
+                  style={{ background: "rgba(255,255,255,0.15)", borderRadius: "6px" }}>
                   <f.icon size={15} />
                 </div>
-                <span className="text-sm" style={{ color: "rgba(255,255,255,0.85)" }}>{f.text}</span>
+                <span className="text-sm" style={{ color: "rgba(255,255,255,0.88)" }}>{f.text}</span>
               </li>
             ))}
           </ul>
