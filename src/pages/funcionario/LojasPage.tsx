@@ -2,6 +2,9 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useFuncionarioStore } from "../../hooks/useFuncionarioStore";
 
+const BORD  = "#E0E0E0";
+const MUTED = "#6B6B6B";
+
 export default function LojasPage() {
   const { lojaId, loading } = useFuncionarioStore();
   const navigate = useNavigate();
@@ -15,7 +18,10 @@ export default function LojasPage() {
   if (loading) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
-        <p className="text-sm text-gray-400">Carregando sua loja...</p>
+        <div className="p-8 text-center text-sm"
+          style={{ border: `1px solid ${BORD}`, borderRadius: "8px", background: "#fff", color: MUTED }}>
+          Carregando sua loja...
+        </div>
       </div>
     );
   }
@@ -23,7 +29,10 @@ export default function LojasPage() {
   if (!lojaId) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
-        <p className="text-sm text-gray-400">Nenhuma loja associada a este funcionário.</p>
+        <div className="p-8 text-center text-sm"
+          style={{ border: `1px dashed ${BORD}`, borderRadius: "8px", background: "#fff", color: MUTED }}>
+          Nenhuma loja associada a este funcionário.
+        </div>
       </div>
     );
   }

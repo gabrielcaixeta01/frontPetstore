@@ -10,6 +10,11 @@ import { getAppointments } from "../../services/atendimentoService";
 import type { CreateLojaDTO, Loja, UpdateLojaDTO } from "../../types/loja";
 import type { Atendimento } from "../../types/atendimento";
 
+const BLUE  = "#1A3CB8";
+const GREEN = "#00A651";
+const BORD  = "#E0E0E0";
+const MUTED = "#6B6B6B";
+
 function formatMoney(value: number) {
   if (value >= 1000) return `R$ ${(value / 1000).toFixed(1)}k`;
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
@@ -20,17 +25,34 @@ const EMPTY_FORM: CreateLojaDTO = {
   cep: "", city: "", state: "", street: "", neighborhood: "", number: "",
 };
 
+const inputStyle: React.CSSProperties = {
+  display: "block", width: "100%",
+  padding: "10px 12px", fontSize: "14px",
+  border: `1px solid ${BORD}`, borderRadius: "4px",
+  background: "#fff", outline: "none",
+  transition: "border-color 0.15s, box-shadow 0.15s",
+};
+
+function onFocus(e: React.FocusEvent<HTMLInputElement>) {
+  e.target.style.borderColor = BLUE;
+  e.target.style.boxShadow = "0 0 0 3px rgba(26,60,184,0.10)";
+}
+function onBlur(e: React.FocusEvent<HTMLInputElement>) {
+  e.target.style.borderColor = BORD;
+  e.target.style.boxShadow = "none";
+}
+
 export default function LojasPage() {
   const navigate = useNavigate();
-  const [lojas, setLojas] = useState<Loja[]>([]);
-  const [atendimentos, setAtendimentos] = useState<Atendimento[]>([]);
+  const [lojas, setLojas]                   = useState<Loja[]>([]);
+  const [atendimentos, setAtendimentos]     = useState<Atendimento[]>([]);
   const [lojaBeingEdited, setLojaBeingEdited] = useState<Loja | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [feedback, setFeedback] = useState("");
-  const [error, setError] = useState("");
-  const [form, setForm] = useState<CreateLojaDTO>(EMPTY_FORM);
-  const [editForm, setEditForm] = useState<CreateLojaDTO>(EMPTY_FORM);
+  const [loading, setLoading]               = useState(true);
+  const [showForm, setShowForm]             = useState(false);
+  const [feedback, setFeedback]             = useState("");
+  const [error, setError]                   = useState("");
+  const [form, setForm]                     = useState<CreateLojaDTO>(EMPTY_FORM);
+  const [editForm, setEditForm]             = useState<CreateLojaDTO>(EMPTY_FORM);
 
   async function loadAll() {
     try {
@@ -54,16 +76,10 @@ export default function LojasPage() {
   useEffect(() => {
     if (!lojaBeingEdited) { setEditForm(EMPTY_FORM); return; }
     setEditForm({
-      nome: lojaBeingEdited.nome,
-      cnpj: lojaBeingEdited.cnpj,
-      telefone: lojaBeingEdited.telefone,
-      email: lojaBeingEdited.email,
-      cep: lojaBeingEdited.cep,
-      city: lojaBeingEdited.city,
-      state: lojaBeingEdited.state,
-      street: lojaBeingEdited.street,
-      neighborhood: lojaBeingEdited.neighborhood,
-      number: lojaBeingEdited.number,
+      nome: lojaBeingEdited.nome, cnpj: lojaBeingEdited.cnpj,
+      telefone: lojaBeingEdited.telefone, email: lojaBeingEdited.email,
+      cep: lojaBeingEdited.cep, city: lojaBeingEdited.city, state: lojaBeingEdited.state,
+      street: lojaBeingEdited.street, neighborhood: lojaBeingEdited.neighborhood, number: lojaBeingEdited.number,
     });
   }, [lojaBeingEdited]);
 
@@ -78,20 +94,14 @@ export default function LojasPage() {
       if (d.getFullYear() === thisYear && d.getMonth() === thisMonth) {
         if (!map[at.loja_id]) map[at.loja_id] = { atendimentosMes: 0, faturamentoMes: 0 };
         map[at.loja_id].atendimentosMes++;
-        if (at.status === "concluido") map[at.loja_id].faturamentoMes += at.valor_final;
+        if (at.status === "concluido") map[at.loja_id].faturamentoMes += Number(at.valor_final) || 0;
       }
     });
     return map;
   }, [atendimentos, thisYear, thisMonth]);
 
-  const totalFuncionarios = useMemo(
-    () => lojas.reduce((s, l) => s + l.funcionarios.length, 0),
-    [lojas],
-  );
-  const totalAtendMes = useMemo(
-    () => Object.values(perStoreStats).reduce((s, st) => s + st.atendimentosMes, 0),
-    [perStoreStats],
-  );
+  const totalFuncionarios = useMemo(() => lojas.reduce((s, l) => s + l.funcionarios.length, 0), [lojas]);
+  const totalAtendMes     = useMemo(() => Object.values(perStoreStats).reduce((s, st) => s + st.atendimentosMes, 0), [perStoreStats]);
 
   const cityList = useMemo(() => {
     const map: Record<string, { city: string; state: string; count: number }> = {};
@@ -113,14 +123,12 @@ export default function LojasPage() {
   async function handleCreateSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!form.nome.trim() || !form.cnpj.trim() || !form.telefone.trim() || !form.email.trim()) {
-      setError("Preencha os campos obrigatórios da loja.");
-      return;
+      setError("Preencha os campos obrigatórios da loja."); return;
     }
     try {
       await createLoja(form);
       setFeedback("Loja cadastrada com sucesso.");
-      setShowForm(false);
-      setForm(EMPTY_FORM);
+      setShowForm(false); setForm(EMPTY_FORM);
       await loadAll();
     } catch { setError("Erro ao cadastrar loja."); }
   }
@@ -129,8 +137,7 @@ export default function LojasPage() {
     e.preventDefault();
     if (!lojaBeingEdited) return;
     if (!editForm.nome.trim() || !editForm.telefone.trim() || !editForm.email.trim()) {
-      setError("Preencha os campos obrigatórios da loja.");
-      return;
+      setError("Preencha os campos obrigatórios da loja."); return;
     }
     try {
       const payload: UpdateLojaDTO = {
@@ -155,138 +162,174 @@ export default function LojasPage() {
     } catch { setError("Erro ao excluir loja."); }
   }
 
-  const inputClass = "w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white focus:ring-2 focus:ring-[#1c46f3]/15";
+  const formFields = [
+    { label: "Nome *",     field: "nome"         as const, type: "text"  },
+    { label: "CNPJ *",     field: "cnpj"         as const, type: "text"  },
+    { label: "Telefone *", field: "telefone"     as const, type: "tel"   },
+    { label: "E-mail *",   field: "email"        as const, type: "email" },
+    { label: "CEP",        field: "cep"          as const, type: "text"  },
+    { label: "Cidade",     field: "city"         as const, type: "text"  },
+    { label: "Estado",     field: "state"        as const, type: "text"  },
+    { label: "Rua",        field: "street"       as const, type: "text"  },
+    { label: "Bairro",     field: "neighborhood" as const, type: "text"  },
+    { label: "Número",     field: "number"       as const, type: "text"  },
+  ] as const;
 
   return (
     <div className="px-4 py-6 sm:px-6 sm:py-8">
       <div className="mx-auto max-w-6xl space-y-6">
 
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Lojas</h1>
-            <p className="mt-0.5 text-sm text-gray-500">Gerencie unidades da rede.</p>
+            <span className="mb-1 inline-block text-xs font-bold uppercase tracking-widest" style={{ color: BLUE }}>
+              Gerenciamento
+            </span>
+            <h1 className="text-2xl font-extrabold" style={{ color: "#1a1a1a" }}>Lojas</h1>
+            <p className="mt-0.5 text-sm" style={{ color: MUTED }}>Gerencie as unidades da rede.</p>
           </div>
           <button
-            onClick={() => setShowForm((v) => !v)}
-            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-3 py-2 text-sm font-semibold text-white shadow-sm shadow-[#1c46f3]/20 transition hover:opacity-90 sm:px-4 sm:py-2.5"
+            onClick={() => { setShowForm((v) => !v); setError(""); }}
+            className="flex shrink-0 items-center gap-2 px-4 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
+            style={{ background: showForm ? MUTED : BLUE, borderRadius: "4px" }}
           >
             {showForm ? <X size={15} /> : <Plus size={15} />}
             <span className="hidden sm:inline">{showForm ? "Cancelar" : "Nova loja"}</span>
           </button>
         </div>
 
-        {/* Summary bar */}
+        {/* Summary cards */}
         {!loading && lojas.length > 0 && (
           <div className="grid grid-cols-3 gap-3">
-            <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
-                <Store size={13} /> Unidades
+            {[
+              { icon: Store,         label: "Unidades",      value: lojas.length,       accent: BLUE  },
+              { icon: Users,         label: "Funcionários",  value: totalFuncionarios,  accent: "#7C3AED" },
+              { icon: CalendarCheck, label: "Atend. / Mês",  value: totalAtendMes,      accent: GREEN },
+            ].map(({ icon: Icon, label, value, accent }) => (
+              <div key={label} className="relative overflow-hidden bg-white p-4 shadow-sm"
+                style={{ border: `1px solid ${BORD}`, borderRadius: "8px" }}>
+                <div className="absolute left-0 top-0 bottom-0 w-[3px]" style={{ background: accent }} />
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest pl-2" style={{ color: MUTED }}>
+                  <Icon size={13} style={{ color: accent }} /> {label}
+                </div>
+                <p className="mt-2 pl-2 text-3xl font-extrabold" style={{ color: "#1a1a1a" }}>{value}</p>
               </div>
-              <p className="mt-1.5 text-3xl font-bold text-gray-900">{lojas.length}</p>
-            </div>
-            <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
-                <Users size={13} /> Funcionários
-              </div>
-              <p className="mt-1.5 text-3xl font-bold text-gray-900">{totalFuncionarios}</p>
-            </div>
-            <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
-                <CalendarCheck size={13} /> Atend. / Mês
-              </div>
-              <p className="mt-1.5 text-3xl font-bold text-gray-900">{totalAtendMes}</p>
-            </div>
+            ))}
           </div>
         )}
 
+        {/* Feedback */}
         {feedback && (
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{feedback}</div>
+          <div className="px-4 py-3 text-sm font-medium"
+            style={{ borderRadius: "4px", border: "1px solid #A7F3D0", background: "rgba(167,243,208,0.25)", color: "#065F46" }}>
+            {feedback}
+          </div>
         )}
         {error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>
+          <div className="px-4 py-3 text-sm font-medium"
+            style={{ borderRadius: "4px", border: "1px solid #FECACA", background: "rgba(254,202,202,0.25)", color: "#DC2626" }}>
+            {error}
+          </div>
         )}
 
         {/* Create form */}
         {showForm && (
-          <form onSubmit={handleCreateSubmit} className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-            <h2 className="mb-4 text-sm font-semibold text-gray-700">Nova Loja</h2>
+          <form onSubmit={handleCreateSubmit} className="bg-white p-5 shadow-sm"
+            style={{ border: `1px solid ${BORD}`, borderRadius: "8px" }}>
+            <h2 className="mb-4 text-sm font-bold" style={{ color: "#1a1a1a" }}>Nova Loja</h2>
             <div className="grid gap-3 sm:grid-cols-2">
-              {([
-                { label: "Nome *",     value: form.nome,         field: "nome" as const,         type: "text"  },
-                { label: "CNPJ *",     value: form.cnpj,         field: "cnpj" as const,         type: "text"  },
-                { label: "Telefone *", value: form.telefone,     field: "telefone" as const,     type: "tel"   },
-                { label: "E-mail *",   value: form.email,        field: "email" as const,        type: "email" },
-                { label: "CEP *",      value: form.cep,          field: "cep" as const,          type: "text"  },
-                { label: "Cidade *",   value: form.city,         field: "city" as const,         type: "text"  },
-                { label: "Estado *",   value: form.state,        field: "state" as const,        type: "text"  },
-                { label: "Rua *",      value: form.street,       field: "street" as const,       type: "text"  },
-                { label: "Bairro *",   value: form.neighborhood, field: "neighborhood" as const, type: "text"  },
-                { label: "Número *",   value: form.number,       field: "number" as const,       type: "text"  },
-              ] as const).map(({ label, value, field, type }) => (
-                <div key={field} className="space-y-1">
-                  <label className="block text-xs font-medium text-gray-500">{label}</label>
-                  <input type={type} value={value} onChange={(e) => updateField(field, e.target.value)} required className={inputClass} />
+              {formFields.map(({ label, field, type }) => (
+                <div key={field} className="space-y-1.5">
+                  <label className="block text-xs font-medium" style={{ color: MUTED }}>{label}</label>
+                  <input
+                    type={type} value={form[field]}
+                    onChange={(e) => updateField(field, e.target.value)}
+                    required={label.includes("*")}
+                    style={inputStyle} onFocus={onFocus} onBlur={onBlur}
+                  />
                 </div>
               ))}
             </div>
             <div className="mt-4 flex gap-2">
-              <button type="submit" className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-[#1c46f3]/20 transition hover:opacity-90">
+              <button type="submit"
+                className="flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
+                style={{ background: BLUE, borderRadius: "4px" }}>
                 <Plus size={14} /> Cadastrar
               </button>
-              <button type="button" onClick={() => setShowForm(false)} className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-medium text-gray-500 transition hover:bg-gray-50">
+              <button type="button" onClick={() => setShowForm(false)}
+                className="px-5 py-2.5 text-sm font-medium transition hover:bg-gray-50"
+                style={{ border: `1px solid ${BORD}`, borderRadius: "4px", color: MUTED }}>
                 Cancelar
               </button>
             </div>
           </form>
         )}
 
+        {/* Edit modal */}
         <EditModal isOpen={Boolean(lojaBeingEdited)} title="Editar Loja" onClose={() => setLojaBeingEdited(null)}>
           <form onSubmit={handleUpdateSubmit} className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <input placeholder="Nome"     value={editForm.nome}         onChange={(e) => updateEditField("nome", e.target.value)}         required className={inputClass} />
-              <input placeholder="CNPJ"     value={editForm.cnpj}         onChange={(e) => updateEditField("cnpj", e.target.value)}         required className={inputClass} />
-              <input placeholder="Telefone" value={editForm.telefone}     onChange={(e) => updateEditField("telefone", e.target.value)}     required className={inputClass} />
-              <input placeholder="Email" type="email" value={editForm.email} onChange={(e) => updateEditField("email", e.target.value)}    required className={inputClass} />
-              <input placeholder="CEP"      value={editForm.cep}          onChange={(e) => updateEditField("cep", e.target.value)}          required className={inputClass} />
-              <input placeholder="Cidade"   value={editForm.city}         onChange={(e) => updateEditField("city", e.target.value)}         required className={inputClass} />
-              <input placeholder="Estado"   value={editForm.state}        onChange={(e) => updateEditField("state", e.target.value)}        required className={inputClass} />
-              <input placeholder="Rua"      value={editForm.street}       onChange={(e) => updateEditField("street", e.target.value)}       required className={inputClass} />
-              <input placeholder="Bairro"   value={editForm.neighborhood} onChange={(e) => updateEditField("neighborhood", e.target.value)} required className={inputClass} />
-              <input placeholder="Número"   value={editForm.number}       onChange={(e) => updateEditField("number", e.target.value)}       required className={inputClass} />
+            <div className="grid gap-3 md:grid-cols-2">
+              {[
+                { ph: "Nome",     field: "nome"         as const, type: "text"  },
+                { ph: "CNPJ",     field: "cnpj"         as const, type: "text"  },
+                { ph: "Telefone", field: "telefone"     as const, type: "tel"   },
+                { ph: "E-mail",   field: "email"        as const, type: "email" },
+                { ph: "CEP",      field: "cep"          as const, type: "text"  },
+                { ph: "Cidade",   field: "city"         as const, type: "text"  },
+                { ph: "Estado",   field: "state"        as const, type: "text"  },
+                { ph: "Rua",      field: "street"       as const, type: "text"  },
+                { ph: "Bairro",   field: "neighborhood" as const, type: "text"  },
+                { ph: "Número",   field: "number"       as const, type: "text"  },
+              ].map(({ ph, field, type }) => (
+                <input key={field} placeholder={ph} type={type} required
+                  value={editForm[field]} onChange={(e) => updateEditField(field, e.target.value)}
+                  style={inputStyle} onFocus={onFocus} onBlur={onBlur}
+                />
+              ))}
             </div>
-            <div className="flex gap-3">
-              <button type="submit" className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-[#1c46f3]/20 transition hover:opacity-90">
+            <div className="flex gap-2">
+              <button type="submit"
+                className="px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
+                style={{ background: BLUE, borderRadius: "4px" }}>
                 Salvar alterações
               </button>
-              <button type="button" onClick={() => setLojaBeingEdited(null)} className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50">
+              <button type="button" onClick={() => setLojaBeingEdited(null)}
+                className="px-5 py-2.5 text-sm font-medium transition hover:bg-gray-50"
+                style={{ border: `1px solid ${BORD}`, borderRadius: "4px", color: MUTED }}>
                 Cancelar
               </button>
             </div>
           </form>
         </EditModal>
 
-        {/* Store list */}
+        {/* List */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-800">Unidades</h2>
-            <button
-              onClick={loadAll}
-              className="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
-            >
-              <RefreshCw size={14} /> Atualizar
+            <h2 className="text-base font-bold" style={{ color: "#1a1a1a" }}>
+              Unidades
+              {!loading && (
+                <span className="ml-2 text-sm font-normal" style={{ color: MUTED }}>({lojas.length})</span>
+              )}
+            </h2>
+            <button onClick={loadAll}
+              className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium transition hover:bg-gray-50"
+              style={{ border: `1px solid ${BORD}`, borderRadius: "4px", color: MUTED }}>
+              <RefreshCw size={13} /> Atualizar
             </button>
           </div>
 
           {loading ? (
-            <div className="rounded-2xl border border-gray-100 bg-white p-8 text-center text-sm text-gray-400">
+            <div className="p-8 text-center text-sm"
+              style={{ border: `1px solid ${BORD}`, borderRadius: "8px", background: "#fff", color: MUTED }}>
               Carregando lojas...
             </div>
           ) : lojas.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-12 text-center">
-              <Store size={36} className="mx-auto mb-3 text-gray-200" />
-              <p className="text-sm text-gray-400">Nenhuma loja cadastrada.</p>
-              <button onClick={() => setShowForm(true)} className="mt-2 text-sm font-semibold text-[#1c46f3] hover:underline">
+            <div className="p-12 text-center"
+              style={{ border: `1px dashed ${BORD}`, borderRadius: "8px", background: "#fff" }}>
+              <Store size={36} className="mx-auto mb-3" style={{ color: "#D1D5DB" }} />
+              <p className="text-sm" style={{ color: MUTED }}>Nenhuma loja cadastrada.</p>
+              <button onClick={() => setShowForm(true)}
+                className="mt-2 text-sm font-bold transition hover:opacity-70" style={{ color: BLUE }}>
                 Cadastrar primeira loja
               </button>
             </div>
@@ -294,19 +337,22 @@ export default function LojasPage() {
             <>
               {/* Geographic distribution */}
               {cityList.length > 0 && (
-                <div className="rounded-2xl border border-gray-100 bg-white px-5 py-4 shadow-sm">
-                  <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Distribuição geográfica</p>
+                <div className="bg-white px-5 py-4 shadow-sm"
+                  style={{ border: `1px solid ${BORD}`, borderRadius: "8px" }}>
+                  <p className="mb-3 text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>
+                    Distribuição geográfica
+                  </p>
                   <div className="flex flex-wrap gap-2">
                     {cityList.map(({ city, state, count }) => (
-                      <div
-                        key={`${city}-${state}`}
-                        className="flex items-center gap-1.5 rounded-xl border border-gray-100 bg-gray-50 px-3 py-1.5"
-                      >
-                        <MapPin size={12} className="text-[#1c46f3]" />
-                        <span className="text-sm font-medium text-gray-700">{city}</span>
-                        <span className="text-xs text-gray-400">{state}</span>
+                      <div key={`${city}-${state}`}
+                        className="flex items-center gap-1.5 px-3 py-1.5"
+                        style={{ border: `1px solid ${BORD}`, borderRadius: "20px", background: "#F4F4F4" }}>
+                        <MapPin size={12} style={{ color: BLUE }} />
+                        <span className="text-sm font-medium" style={{ color: "#374151" }}>{city}</span>
+                        <span className="text-xs" style={{ color: MUTED }}>{state}</span>
                         {count > 1 && (
-                          <span className="rounded-full bg-[#1c46f3]/10 px-1.5 py-0.5 text-xs font-bold text-[#1c46f3]">
+                          <span className="px-1.5 py-0.5 text-xs font-bold"
+                            style={{ background: "rgba(26,60,184,0.10)", borderRadius: "20px", color: BLUE }}>
                             {count}
                           </span>
                         )}
@@ -316,75 +362,83 @@ export default function LojasPage() {
                 </div>
               )}
 
-              {/* Cards */}
+              {/* Store cards */}
               <div className="grid gap-4 lg:grid-cols-2">
                 {lojas.map((loja) => {
                   const stats = perStoreStats[loja.id] ?? { atendimentosMes: 0, faturamentoMes: 0 };
                   return (
-                    <div
-                      key={loja.id}
-                      className="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:border-[#1c46f3]/20 hover:shadow-md"
-                    >
-                      {/* Clickable area */}
-                      <div onClick={() => navigate(`/lojas/${loja.id}`)} className="cursor-pointer p-5">
+                    <div key={loja.id}
+                      className="group relative overflow-hidden bg-white transition hover:-translate-y-0.5 hover:shadow-md"
+                      style={{ border: `1px solid ${BORD}`, borderRadius: "8px" }}>
+
+                      {/* Top accent bar */}
+                      <div className="absolute inset-x-0 top-0 h-[3px]" style={{ background: BLUE }} />
+
+                      {/* Clickable body */}
+                      <div onClick={() => navigate(`/lojas/${loja.id}`)} className="cursor-pointer p-5 pt-6">
                         <div className="flex items-start gap-4">
-                          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-purple-100">
-                            <Store size={20} className="text-purple-600" />
+                          <div className="flex h-11 w-11 shrink-0 items-center justify-center"
+                            style={{ background: "rgba(26,60,184,0.10)", borderRadius: "8px" }}>
+                            <Store size={20} style={{ color: BLUE }} />
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-1.5">
-                              <h3 className="font-bold text-gray-900 transition-colors group-hover:text-[#1c46f3]">
+                              <h3 className="font-extrabold transition-colors"
+                                style={{ color: "#1a1a1a" }}
+                                onMouseEnter={(e) => (e.currentTarget.style.color = BLUE)}
+                                onMouseLeave={(e) => (e.currentTarget.style.color = "#1a1a1a")}>
                                 {loja.nome}
                               </h3>
-                              <ChevronRight size={14} className="text-gray-300 transition group-hover:translate-x-0.5 group-hover:text-[#1c46f3]" />
+                              <ChevronRight size={14} style={{ color: "#D1D5DB" }} />
                             </div>
-                            <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-400">
+                            <p className="mt-0.5 flex items-center gap-1 text-xs" style={{ color: MUTED }}>
                               <MapPin size={11} className="shrink-0" />
                               {loja.street}, {loja.number} — {loja.neighborhood}, {loja.city}/{loja.state}
                             </p>
-                            <div className="mt-2 flex items-center gap-1 text-xs text-gray-400">
+                            <div className="mt-1.5 flex items-center gap-1 text-xs" style={{ color: MUTED }}>
                               <Phone size={11} /> {loja.telefone}
-                              <span className="mx-1 text-gray-200">·</span>
+                              <span className="mx-1" style={{ color: "#E0E0E0" }}>·</span>
                               <Mail size={11} /> {loja.email}
                             </div>
                           </div>
                         </div>
 
                         {/* Mini stats */}
-                        <div className="mt-4 flex items-center gap-4 border-t border-gray-50 pt-3">
-                          <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                            <Users size={12} className="text-gray-400" />
-                            <span className="font-semibold text-gray-700">{loja.funcionarios.length}</span> func.
+                        <div className="mt-4 flex items-center gap-5 pt-3" style={{ borderTop: `1px solid ${BORD}` }}>
+                          <div className="flex items-center gap-1.5 text-xs" style={{ color: MUTED }}>
+                            <Users size={12} style={{ color: MUTED }} />
+                            <span className="font-bold" style={{ color: "#374151" }}>{loja.funcionarios.length}</span> func.
                           </div>
-                          <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                            <CalendarCheck size={12} className="text-gray-400" />
-                            <span className="font-semibold text-gray-700">{stats.atendimentosMes}</span> atend./mês
+                          <div className="flex items-center gap-1.5 text-xs" style={{ color: MUTED }}>
+                            <CalendarCheck size={12} style={{ color: MUTED }} />
+                            <span className="font-bold" style={{ color: "#374151" }}>{stats.atendimentosMes}</span> atend./mês
                           </div>
                           {stats.faturamentoMes > 0 && (
-                            <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                              <TrendingUp size={12} className="text-[#00bb69]" />
-                              <span className="font-semibold text-gray-700">{formatMoney(stats.faturamentoMes)}</span>
+                            <div className="flex items-center gap-1.5 text-xs" style={{ color: MUTED }}>
+                              <TrendingUp size={12} style={{ color: GREEN }} />
+                              <span className="font-bold" style={{ color: "#374151" }}>{formatMoney(stats.faturamentoMes)}</span>
                             </div>
                           )}
                         </div>
                       </div>
 
-                      {/* Footer */}
-                      <div className="flex items-center justify-between border-t border-gray-50 px-5 py-2.5">
-                        <span className="text-xs text-gray-400">CNPJ: {loja.cnpj}</span>
+                      {/* Card footer */}
+                      <div className="flex items-center justify-between px-5 py-2.5"
+                        style={{ borderTop: `1px solid ${BORD}`, background: "#F4F4F4" }}>
+                        <span className="text-xs" style={{ color: MUTED }}>CNPJ: {loja.cnpj}</span>
                         <div className="flex gap-1.5">
                           <button
                             onClick={(e) => { e.stopPropagation(); setLojaBeingEdited(loja); }}
-                            className="flex h-7 w-7 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:bg-gray-100"
-                            title="Editar"
-                          >
+                            className="flex h-7 w-7 items-center justify-center transition hover:bg-gray-200"
+                            style={{ border: `1px solid ${BORD}`, borderRadius: "4px", color: MUTED }}
+                            title="Editar">
                             <Pencil size={12} />
                           </button>
                           <button
                             onClick={(e) => { e.stopPropagation(); handleDeleteLoja(loja.id); }}
-                            className="flex h-7 w-7 items-center justify-center rounded-lg border border-red-100 text-red-400 transition hover:bg-red-50"
-                            title="Excluir"
-                          >
+                            className="flex h-7 w-7 items-center justify-center transition hover:bg-red-50"
+                            style={{ border: "1px solid #FECACA", borderRadius: "4px", color: "#EF4444" }}
+                            title="Excluir">
                             <Trash2 size={12} />
                           </button>
                         </div>
