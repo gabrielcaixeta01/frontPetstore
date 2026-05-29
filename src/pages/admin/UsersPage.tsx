@@ -12,17 +12,21 @@ import type { CreateUsuarioDTO, UpdateUsuarioDTO, Usuario } from "../../types/us
 import type { Pet } from "../../types/pet";
 import type { Loja } from "../../types/loja";
 
+const BLUE  = "#1A3CB8";
+const BORD  = "#E0E0E0";
+const MUTED = "#6B6B6B";
+
 export default function UsersPage() {
-  const [users, setUsers] = useState<Usuario[]>([]);
-  const [petsByUser, setPetsByUser] = useState<Record<number, Pet[]>>({});
-  const [lojas, setLojas] = useState<Loja[]>([]);
-  const [lojaById, setLojaById] = useState<Record<number, string>>({});
-  const [gastoByUser, setGastoByUser] = useState<Record<number, number>>({});
+  const [users, setUsers]                   = useState<Usuario[]>([]);
+  const [petsByUser, setPetsByUser]         = useState<Record<number, Pet[]>>({});
+  const [lojas, setLojas]                   = useState<Loja[]>([]);
+  const [lojaById, setLojaById]             = useState<Record<number, string>>({});
+  const [gastoByUser, setGastoByUser]       = useState<Record<number, number>>({});
   const [userBeingEdited, setUserBeingEdited] = useState<Usuario | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [feedback, setFeedback] = useState("");
-  const [error, setError] = useState("");
+  const [loading, setLoading]               = useState(true);
+  const [showForm, setShowForm]             = useState(false);
+  const [feedback, setFeedback]             = useState("");
+  const [error, setError]                   = useState("");
 
   async function loadAll() {
     try {
@@ -33,14 +37,10 @@ export default function UsersPage() {
         getLojas().catch(() => []),
         getAppointments().catch(() => []),
       ]);
-
       setUsers(userData);
 
       const petMap: Record<number, Pet[]> = {};
-      petData.forEach((p) => {
-        if (!petMap[p.dono_id]) petMap[p.dono_id] = [];
-        petMap[p.dono_id].push(p);
-      });
+      petData.forEach((p) => { if (!petMap[p.dono_id]) petMap[p.dono_id] = []; petMap[p.dono_id].push(p); });
       setPetsByUser(petMap);
 
       setLojas(lojaData);
@@ -51,11 +51,10 @@ export default function UsersPage() {
       const gastoMap: Record<number, number> = {};
       atendData.forEach((at) => {
         if (at.status === "concluido") {
-          gastoMap[at.cliente_id] = (gastoMap[at.cliente_id] ?? 0) + at.valor_final;
+          gastoMap[at.cliente_id] = (gastoMap[at.cliente_id] ?? 0) + (Number(at.valor_final) || 0);
         }
       });
       setGastoByUser(gastoMap);
-
       setError("");
     } catch {
       setError("Erro ao carregar usuários.");
@@ -110,25 +109,38 @@ export default function UsersPage() {
   return (
     <div className="px-4 py-6 sm:px-6 sm:py-8">
       <div className="mx-auto max-w-6xl space-y-6">
-        <div className="flex items-center justify-between">
+
+        {/* Header */}
+        <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Usuários</h1>
-            <p className="mt-0.5 text-sm text-gray-500">Gerencie clientes e funcionários do sistema.</p>
+            <span className="mb-1 inline-block text-xs font-bold uppercase tracking-widest" style={{ color: BLUE }}>
+              Gerenciamento
+            </span>
+            <h1 className="text-2xl font-extrabold" style={{ color: "#1a1a1a" }}>Usuários</h1>
+            <p className="mt-0.5 text-sm" style={{ color: MUTED }}>Gerencie clientes e funcionários do sistema.</p>
           </div>
           <button
-            onClick={() => setShowForm((v) => !v)}
-            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#1c46f3] to-[#1840e0] px-3 py-2 text-sm font-semibold text-white shadow-sm shadow-[#1c46f3]/20 transition hover:opacity-90 sm:px-4 sm:py-2.5"
+            onClick={() => { setShowForm((v) => !v); setError(""); }}
+            className="flex shrink-0 items-center gap-2 px-4 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
+            style={{ background: showForm ? MUTED : BLUE, borderRadius: "4px" }}
           >
             {showForm ? <X size={15} /> : <Plus size={15} />}
             <span className="hidden sm:inline">{showForm ? "Cancelar" : "Novo usuário"}</span>
           </button>
         </div>
 
+        {/* Feedback */}
         {feedback && (
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{feedback}</div>
+          <div className="px-4 py-3 text-sm font-medium"
+            style={{ borderRadius: "4px", border: "1px solid #A7F3D0", background: "rgba(167,243,208,0.25)", color: "#065F46" }}>
+            {feedback}
+          </div>
         )}
         {error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>
+          <div className="px-4 py-3 text-sm font-medium"
+            style={{ borderRadius: "4px", border: "1px solid #FECACA", background: "rgba(254,202,202,0.25)", color: "#DC2626" }}>
+            {error}
+          </div>
         )}
 
         {showForm && (
@@ -143,27 +155,29 @@ export default function UsersPage() {
 
         <EditModal isOpen={Boolean(userBeingEdited)} title="Editar Usuário" onClose={() => setUserBeingEdited(null)}>
           {userBeingEdited && (
-            <EditUserForm
-              user={userBeingEdited}
-              onUpdate={handleUpdateUser}
-              onCancel={() => setUserBeingEdited(null)}
-            />
+            <EditUserForm user={userBeingEdited} onUpdate={handleUpdateUser} onCancel={() => setUserBeingEdited(null)} />
           )}
         </EditModal>
 
+        {/* List */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-800">Base de usuários</h2>
-            <button
-              onClick={loadAll}
-              className="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
-            >
-              <RefreshCw size={14} /> Atualizar
+            <h2 className="text-base font-bold" style={{ color: "#1a1a1a" }}>
+              Base de usuários
+              {!loading && (
+                <span className="ml-2 text-sm font-normal" style={{ color: MUTED }}>({users.length})</span>
+              )}
+            </h2>
+            <button onClick={loadAll}
+              className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium transition hover:bg-gray-50"
+              style={{ border: `1px solid ${BORD}`, borderRadius: "4px", color: MUTED }}>
+              <RefreshCw size={13} /> Atualizar
             </button>
           </div>
 
           {loading ? (
-            <div className="rounded-2xl border border-gray-100 bg-white p-6 text-sm text-gray-400">
+            <div className="p-6 text-center text-sm"
+              style={{ border: `1px solid ${BORD}`, borderRadius: "8px", background: "#fff", color: MUTED }}>
               Carregando usuários...
             </div>
           ) : (
