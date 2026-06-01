@@ -10,7 +10,7 @@ interface TagFormProps {
   tagBeingEdited: Etiqueta | null;
   onCreate: (data: CreateEtiquetaDTO) => Promise<void>;
   onUpdate: (id: number, data: UpdateEtiquetaDTO) => Promise<void>;
-  onCancelEdit: () => void;
+  onCancelEdit?: () => void;
 }
 
 const MAX_NOME = 25;
@@ -117,7 +117,7 @@ export default function TagForm({ tagBeingEdited, onCreate, onUpdate, onCancelEd
         {(tagBeingEdited || onCancelEdit) && (
           <button
             type="button"
-            onClick={onCancelEdit}
+            onClick={() => onCancelEdit?.()}
             className="px-5 py-2.5 text-sm font-medium transition hover:bg-gray-50"
             style={{ border: `1px solid ${BORD}`, borderRadius: "4px", color: MUTED }}
           >

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Plus, X, Pencil, Trash2,
-  CalendarCheck, Clock, CheckCircle2, XCircle, AlertCircle,
+  CalendarCheck, Clock, CheckCircle2, AlertCircle,
   Store, PawPrint, ChevronDown, ChevronUp,
   Wallet, Scissors, User,
   ChevronLeft, ChevronRight as ChevronRightPage,

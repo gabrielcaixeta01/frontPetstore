@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   PawPrint, CalendarCheck, Wallet, TrendingUp,
-  CheckCircle2, XCircle, Clock, Calendar,
+  CheckCircle2, Clock, Calendar,
   ArrowUp, ArrowDown, Lightbulb, ArrowRight, Scissors,
 } from "lucide-react";
 import { getPets } from "../../services/petService";
@@ -156,7 +156,6 @@ export default function ClienteHome() {
   const visitasDelta = useMemo(() => pct(concMes.length, concMesAnt.length), [concMes, concMesAnt]);
 
   const gastoTotal = useMemo(() => concluidos.reduce((s, a) => s + Number(a.valor_final), 0), [concluidos]);
-  const mediaPorVisita = concluidos.length > 0 ? gastoTotal / concluidos.length : 0;
 
   /* next appointment */
   const nextAgendado = useMemo(() =>

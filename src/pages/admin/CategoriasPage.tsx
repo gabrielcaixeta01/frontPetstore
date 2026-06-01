@@ -183,7 +183,6 @@ export default function CategoriasPage() {
     } catch { setError("Erro ao excluir categoria."); }
   }
 
-  const topColor = topCat ? getCategoryColor(topCat.cat.name, topCat.idx) : COLORS[0];
   const TopIcon  = topCat ? getCategoryIcon(topCat.cat.name) : PawPrint;
 
   return (
