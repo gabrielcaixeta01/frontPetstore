@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   User, Mail, Phone, Lock, Eye, EyeOff,
   ArrowRight, CreditCard, Store, Shield, ShieldOff,
-  LayoutDashboard, Users, Briefcase,
+  LayoutDashboard, Users, Briefcase, Hash, Banknote, Calendar,
 } from "lucide-react";
 import { api } from "../services/api";
 import { getLojas } from "../services/lojaService";
@@ -89,6 +89,10 @@ export default function RegisterFuncionarioPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSuperuser, setIsSuperuser]   = useState(false);
   const [storeId, setStoreId]           = useState<number | "">("");
+  const [employeeCode, setEmployeeCode] = useState("");
+  const [jobTitle, setJobTitle]         = useState("");
+  const [salary, setSalary]             = useState("");
+  const [hiredAt, setHiredAt]           = useState("");
 
   const [lojas, setLojas]           = useState<Loja[]>([]);
   const [loadingLojas, setLoadingLojas] = useState(false);
@@ -121,8 +125,12 @@ export default function RegisterFuncionarioPage() {
         cpf,
         is_superuser: isSuperuser,
       };
-      if (!isSuperuser && storeId) {
-        payload.store_id = storeId;
+      if (!isSuperuser) {
+        payload.store_id      = storeId;
+        payload.employee_code = employeeCode;
+        payload.job_title     = jobTitle;
+        payload.salary        = salary ? Number(salary) : undefined;
+        payload.hired_at      = hiredAt || undefined;
       }
 
       const data = await api.post("/auth/register", payload).then((r) => r.data);
@@ -225,7 +233,7 @@ export default function RegisterFuncionarioPage() {
                   <ShieldOff size={15} /> Funcionário
                 </button>
                 <button type="button" style={roleBtn(isSuperuser)}
-                  onClick={() => { setIsSuperuser(true); setStoreId(""); }}>
+                  onClick={() => { setIsSuperuser(true); setStoreId(""); setEmployeeCode(""); setJobTitle(""); setSalary(""); setHiredAt(""); }}>
                   <Shield size={15} /> Super usuário
                 </button>
               </div>
@@ -316,6 +324,54 @@ export default function RegisterFuncionarioPage() {
                   </p>
                 )}
               </Field>
+
+              {/* Matrícula + Cargo */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Matrícula">
+                  <div className="relative">
+                    <Hash size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: MUTED }} />
+                    <input
+                      type="text" required placeholder="EMP001"
+                      value={employeeCode} onChange={(e) => setEmployeeCode(e.target.value)}
+                      style={inputBase} onFocus={focusStyle} onBlur={blurStyle}
+                    />
+                  </div>
+                </Field>
+                <Field label="Cargo">
+                  <div className="relative">
+                    <Briefcase size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: MUTED }} />
+                    <input
+                      type="text" required placeholder="Veterinário"
+                      value={jobTitle} onChange={(e) => setJobTitle(e.target.value)}
+                      style={inputBase} onFocus={focusStyle} onBlur={blurStyle}
+                    />
+                  </div>
+                </Field>
+              </div>
+
+              {/* Salário + Data de contratação */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Salário (R$)">
+                  <div className="relative">
+                    <Banknote size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: MUTED }} />
+                    <input
+                      type="number" required min="0" step="0.01" placeholder="2500.00"
+                      value={salary} onChange={(e) => setSalary(e.target.value)}
+                      style={inputBase} onFocus={focusStyle} onBlur={blurStyle}
+                    />
+                  </div>
+                </Field>
+                <Field label="Data de contratação">
+                  <div className="relative">
+                    <Calendar size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: MUTED }} />
+                    <input
+                      type="date" required
+                      value={hiredAt} onChange={(e) => setHiredAt(e.target.value)}
+                      style={inputBase} onFocus={focusStyle} onBlur={blurStyle}
+                    />
+                  </div>
+                </Field>
+              </div>
             )}
 
             {/* Senha */}
