@@ -118,8 +118,6 @@ export default function RegisterFuncionarioPage() {
       const payload: Record<string, any> = {
         name, email, phone, password,
         profile_type: "funcionario",
-        client_type: "pessoa_fisica",
-        cpf,
         is_superuser: isSuperuser,
       };
       if (!isSuperuser && storeId) {
