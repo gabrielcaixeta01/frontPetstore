@@ -1,47 +1,48 @@
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 
 // Public shell (unauthenticated)
-import Navbar from "./components/Navbar";
-import PublicHome from "./pages/Home";
-import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
+const Navbar = lazy(() => import("./components/Navbar"));
+const PublicHome = lazy(() => import("./pages/Home"));
+const LoginPage = lazy(() => import("./pages/LoginPage"));
+const RegisterPage = lazy(() => import("./pages/RegisterPage"));
 
 // Admin layout + pages
-import AdminLayout from "./components/admin/AdminLayout";
-import AdminHome from "./pages/admin/Home";
-import AdminAtendimentosPage from "./pages/admin/AtendimentosPage";
-import AdminPetsPage from "./pages/admin/PetsPage";
-import AdminServicosPage from "./pages/admin/ServicosPage";
-import AdminCategoriasPage from "./pages/admin/CategoriasPage";
-import AdminLojasPage from "./pages/admin/LojasPage";
-import AdminLojaPage from "./pages/admin/LojaPage";
-import AdminUsersPage from "./pages/admin/UsersPage";
-import AdminTagsPage from "./pages/admin/TagsPage";
-import AdminProfilePage from "./pages/admin/ProfilePage";
+const AdminLayout = lazy(() => import("./components/admin/AdminLayout"));
+const AdminHome = lazy(() => import("./pages/admin/Home"));
+const AdminAtendimentosPage = lazy(() => import("./pages/admin/AtendimentosPage"));
+const AdminPetsPage = lazy(() => import("./pages/admin/PetsPage"));
+const AdminServicosPage = lazy(() => import("./pages/admin/ServicosPage"));
+const AdminCategoriasPage = lazy(() => import("./pages/admin/CategoriasPage"));
+const AdminLojasPage = lazy(() => import("./pages/admin/LojasPage"));
+const AdminLojaPage = lazy(() => import("./pages/admin/LojaPage"));
+const AdminUsersPage = lazy(() => import("./pages/admin/UsersPage"));
+const AdminTagsPage = lazy(() => import("./pages/admin/TagsPage"));
+const AdminProfilePage = lazy(() => import("./pages/admin/ProfilePage"));
 
 // Funcionario layout + pages
-import FuncionarioLayout from "./components/funcionario/FuncionarioLayout";
-import FuncionarioHome from "./pages/funcionario/Home";
-import CategoriasPage from "./pages/funcionario/CategoriasPage";
-import LojasPage from "./pages/funcionario/LojasPage";
-import LojaPage from "./pages/funcionario/LojaPage";
-import AtendimentosPage from "./pages/funcionario/AtendimentosPage";
-import PetsPage from "./pages/funcionario/PetsPage";
-import ServicosPage from "./pages/funcionario/ServicosPage";
-import TagsPage from "./pages/funcionario/TagsPage";
-import UsersPage from "./pages/funcionario/UsersPage";
-import ProfilePage from "./pages/funcionario/ProfilePage";
+const FuncionarioLayout = lazy(() => import("./components/funcionario/FuncionarioLayout"));
+const FuncionarioHome = lazy(() => import("./pages/funcionario/Home"));
+const CategoriasPage = lazy(() => import("./pages/funcionario/CategoriasPage"));
+const LojasPage = lazy(() => import("./pages/funcionario/LojasPage"));
+const LojaPage = lazy(() => import("./pages/funcionario/LojaPage"));
+const AtendimentosPage = lazy(() => import("./pages/funcionario/AtendimentosPage"));
+const PetsPage = lazy(() => import("./pages/funcionario/PetsPage"));
+const ServicosPage = lazy(() => import("./pages/funcionario/ServicosPage"));
+const TagsPage = lazy(() => import("./pages/funcionario/TagsPage"));
+const UsersPage = lazy(() => import("./pages/funcionario/UsersPage"));
+const ProfilePage = lazy(() => import("./pages/funcionario/ProfilePage"));
 
 // Cliente layout + pages
-import ClienteLayout from "./components/cliente/ClienteLayout";
-import ClienteHome from "./pages/cliente/Home";
-import ClientePetsPage from "./pages/cliente/PetsPage";
-import ClienteServicosPage from "./pages/cliente/ServicosPage";
-import ClienteTagsPage from "./pages/cliente/TagsPage";
-import ClienteLojasPage from "./pages/cliente/LojasPage";
-import ClienteLojaPage from "./pages/cliente/LojaPage";
-import ClienteAtendimentosPage from "./pages/cliente/AtendimentosPage";
-import ClienteProfilePage from "./pages/cliente/ProfilePage";
+const ClienteLayout = lazy(() => import("./components/cliente/ClienteLayout"));
+const ClienteHome = lazy(() => import("./pages/cliente/Home"));
+const ClientePetsPage = lazy(() => import("./pages/cliente/PetsPage"));
+const ClienteServicosPage = lazy(() => import("./pages/cliente/ServicosPage"));
+const ClienteTagsPage = lazy(() => import("./pages/cliente/TagsPage"));
+const ClienteLojasPage = lazy(() => import("./pages/cliente/LojasPage"));
+const ClienteLojaPage = lazy(() => import("./pages/cliente/LojaPage"));
+const ClienteAtendimentosPage = lazy(() => import("./pages/cliente/AtendimentosPage"));
+const ClienteProfilePage = lazy(() => import("./pages/cliente/ProfilePage"));
 
 function getStoredUser() {
   try {
@@ -55,75 +56,83 @@ function getStoredUser() {
 
 function PublicShell() {
   return (
-    <div className="min-h-screen bg-white">
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<PublicHome />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </div>
+    <Suspense fallback={<div className="min-h-screen bg-white" />}>
+      <div className="min-h-screen bg-white">
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<PublicHome />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </div>
+    </Suspense>
   );
 }
 
 function AdminShell() {
   return (
-    <AdminLayout>
-      <Routes>
-        <Route path="/" element={<AdminHome />} />
-        <Route path="/pets" element={<AdminPetsPage />} />
-        <Route path="/atendimentos" element={<AdminAtendimentosPage />} />
-        <Route path="/servicos" element={<AdminServicosPage />} />
-        <Route path="/categorias" element={<AdminCategoriasPage />} />
-        <Route path="/lojas" element={<AdminLojasPage />} />
-        <Route path="/lojas/:id" element={<AdminLojaPage />} />
-        <Route path="/usuarios" element={<AdminUsersPage />} />
-        <Route path="/users" element={<AdminUsersPage />} />
-        <Route path="/tags" element={<AdminTagsPage />} />
-        <Route path="/perfil" element={<AdminProfilePage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </AdminLayout>
+    <Suspense fallback={<div className="min-h-screen bg-white" />}>
+      <AdminLayout>
+        <Routes>
+          <Route path="/" element={<AdminHome />} />
+          <Route path="/pets" element={<AdminPetsPage />} />
+          <Route path="/atendimentos" element={<AdminAtendimentosPage />} />
+          <Route path="/servicos" element={<AdminServicosPage />} />
+          <Route path="/categorias" element={<AdminCategoriasPage />} />
+          <Route path="/lojas" element={<AdminLojasPage />} />
+          <Route path="/lojas/:id" element={<AdminLojaPage />} />
+          <Route path="/usuarios" element={<AdminUsersPage />} />
+          <Route path="/users" element={<AdminUsersPage />} />
+          <Route path="/tags" element={<AdminTagsPage />} />
+          <Route path="/perfil" element={<AdminProfilePage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AdminLayout>
+    </Suspense>
   );
 }
 
 function ClienteShell() {
   return (
-    <ClienteLayout>
-      <Routes>
-        <Route path="/" element={<ClienteHome />} />
-        <Route path="/pets" element={<ClientePetsPage />} />
-        <Route path="/servicos" element={<ClienteServicosPage />} />
-        <Route path="/tags" element={<ClienteTagsPage />} />
-        <Route path="/lojas" element={<ClienteLojasPage />} />
-        <Route path="/lojas/:id" element={<ClienteLojaPage />} />
-        <Route path="/atendimentos" element={<ClienteAtendimentosPage />} />
-        <Route path="/perfil" element={<ClienteProfilePage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </ClienteLayout>
+    <Suspense fallback={<div className="min-h-screen bg-white" />}>
+      <ClienteLayout>
+        <Routes>
+          <Route path="/" element={<ClienteHome />} />
+          <Route path="/pets" element={<ClientePetsPage />} />
+          <Route path="/servicos" element={<ClienteServicosPage />} />
+          <Route path="/tags" element={<ClienteTagsPage />} />
+          <Route path="/lojas" element={<ClienteLojasPage />} />
+          <Route path="/lojas/:id" element={<ClienteLojaPage />} />
+          <Route path="/atendimentos" element={<ClienteAtendimentosPage />} />
+          <Route path="/perfil" element={<ClienteProfilePage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </ClienteLayout>
+    </Suspense>
   );
 }
 
 function FuncionarioShell() {
   return (
-    <FuncionarioLayout>
-      <Routes>
-        <Route path="/" element={<FuncionarioHome />} />
-        <Route path="/pets" element={<PetsPage />} />
-        <Route path="/servicos" element={<ServicosPage />} />
-        <Route path="/lojas" element={<LojasPage />} />
-        <Route path="/lojas/:id" element={<LojaPage />} />
-        <Route path="/categorias" element={<CategoriasPage />} />
-        <Route path="/usuarios" element={<UsersPage />} />
-        <Route path="/users" element={<UsersPage />} />
-        <Route path="/tags" element={<TagsPage />} />
-        <Route path="/atendimentos" element={<AtendimentosPage />} />
-        <Route path="/perfil" element={<ProfilePage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </FuncionarioLayout>
+    <Suspense fallback={<div className="min-h-screen bg-white" />}>
+      <FuncionarioLayout>
+        <Routes>
+          <Route path="/" element={<FuncionarioHome />} />
+          <Route path="/pets" element={<PetsPage />} />
+          <Route path="/servicos" element={<ServicosPage />} />
+          <Route path="/lojas" element={<LojasPage />} />
+          <Route path="/lojas/:id" element={<LojaPage />} />
+          <Route path="/categorias" element={<CategoriasPage />} />
+          <Route path="/usuarios" element={<UsersPage />} />
+          <Route path="/users" element={<UsersPage />} />
+          <Route path="/tags" element={<TagsPage />} />
+          <Route path="/atendimentos" element={<AtendimentosPage />} />
+          <Route path="/perfil" element={<ProfilePage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </FuncionarioLayout>
+    </Suspense>
   );
 }
 
