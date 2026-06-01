@@ -297,6 +297,7 @@ export default function RegisterFuncionarioPage() {
 
             {/* Loja (apenas para não-superuser) */}
             {!isSuperuser && (
+              <>
               <Field label="Loja">
                 <div className="relative">
                   <Store size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: MUTED }} />
@@ -372,6 +373,7 @@ export default function RegisterFuncionarioPage() {
                   </div>
                 </Field>
               </div>
+              </>
             )}
 
             {/* Senha */}
