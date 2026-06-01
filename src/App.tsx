@@ -6,6 +6,7 @@ const Navbar = lazy(() => import("./components/Navbar"));
 const PublicHome = lazy(() => import("./pages/Home"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const RegisterPage = lazy(() => import("./pages/RegisterPage"));
+const RegisterFuncionarioPage = lazy(() => import("./pages/RegisterFuncionarioPage"));
 
 // Admin layout + pages
 const AdminLayout = lazy(() => import("./components/admin/AdminLayout"));
@@ -63,6 +64,7 @@ function PublicShell() {
           <Route path="/" element={<PublicHome />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/register-funcionario" element={<RegisterFuncionarioPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
