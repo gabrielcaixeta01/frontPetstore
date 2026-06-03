@@ -107,7 +107,7 @@ function DonutChart({ slices }: { slices: { label: string; value: number; color:
         />
       ))}
       <text x={cx} y={cy - 5} textAnchor="middle" fontSize="17" fontWeight="700" fill="#111827">{total}</text>
-      <text x={cx} y={cy + 12} textAnchor="middle" fontSize="10" fill="#9CA3AF">serviços</text>
+      <text x={cx} y={cy + 12} textAnchor="middle" fontSize="10" fill="#9CA3AF">atendimentos</text>
     </svg>
   );
 }
@@ -261,7 +261,7 @@ export default function FuncionarioHome() {
   const kpis = [
     { label: "Receita do Mês",     value: loading ? "—" : fmtMoney(revenueMes),    delta: revenueDelta,           badge: null as string | null, iconBg: "bg-[#1c46f3]/10", iconCls: "text-[#1c46f3]", Icon: TrendingUp,    to: "/atendimentos" },
     { label: "Atendimentos / Mês", value: loading ? "—" : String(atendMes.length), delta: atendDelta,             badge: null as string | null, iconBg: "bg-emerald-50",   iconCls: "text-[#00A651]", Icon: CalendarCheck, to: "/atendimentos" },
-    { label: "Clientes na Loja",   value: loading ? "—" : String(clientesNaLoja),  delta: null as number | null,  badge: clientesNovosMes > 0 ? `+${clientesNovosMes} este mês` : null, iconBg: "bg-violet-50", iconCls: "text-violet-600", Icon: Users, to: "/usuarios" },
+    { label: "Clientes na Loja",   value: loading ? "—" : String(clientesNaLoja),  delta: null as number | null,  badge: clientesNovosMes > 0 ? `+${clientesNovosMes} este mês` : null, iconBg: "bg-violet-50", iconCls: "text-violet-600", Icon: Users, to: null },
     { label: "Pets Atendidos",     value: loading ? "—" : String(petsNaLoja),      delta: null as number | null,  badge: null as string | null, iconBg: "bg-amber-50",     iconCls: "text-[#F5A800]", Icon: PawPrint,      to: "/pets"         },
   ];
 
@@ -335,23 +335,25 @@ export default function FuncionarioHome() {
 
       {/* ── KPI Grid ─────────────────────────────────────────── */}
       <div className="mb-7 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {kpis.map((k) => (
-          <Link
-            key={k.label}
-            to={k.to}
-            className="group flex flex-col gap-3 rounded-md border border-gray-200 bg-white p-4 transition hover:shadow-[0_2px_12px_rgba(28,70,243,0.1)]"
-          >
-            <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${k.iconBg}`}>
-              <k.Icon size={17} className={k.iconCls} />
-            </div>
-            <div>
-              <p className="text-xs text-gray-500">{k.label}</p>
-              <p className="mt-0.5 text-2xl font-extrabold leading-none text-gray-900">{k.value}</p>
-              {k.delta !== null && k.delta !== undefined && <Delta value={k.delta} />}
-              {k.badge && <span className="mt-0.5 block text-xs font-medium text-[#1c46f3]">{k.badge}</span>}
-            </div>
-          </Link>
-        ))}
+        {kpis.map((k) => {
+          const cardClass = "group flex flex-col gap-3 rounded-md border border-gray-200 bg-white p-4 transition" + (k.to ? " hover:shadow-[0_2px_12px_rgba(28,70,243,0.1)]" : "");
+          const inner = (
+            <>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${k.iconBg}`}>
+                <k.Icon size={17} className={k.iconCls} />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">{k.label}</p>
+                <p className="mt-0.5 text-2xl font-extrabold leading-none text-gray-900">{k.value}</p>
+                {k.delta !== null && k.delta !== undefined && <Delta value={k.delta} />}
+                {k.badge && <span className="mt-0.5 block text-xs font-medium text-[#1c46f3]">{k.badge}</span>}
+              </div>
+            </>
+          );
+          return k.to
+            ? <Link key={k.label} to={k.to} className={cardClass}>{inner}</Link>
+            : <div key={k.label} className={cardClass}>{inner}</div>;
+        })}
       </div>
 
       {/* ── Charts Row ─────────────────────────────────────── */}
