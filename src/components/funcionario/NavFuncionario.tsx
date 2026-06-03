@@ -6,7 +6,6 @@ import {
 	LayoutGrid,
 	Scissors,
 	Store,
-	Users,
 	Tag,
 	CalendarCheck,
 	User,
@@ -22,7 +21,6 @@ const links: NavItem[] = [
 	{ to: "/categorias", label: "Categorias", icon: LayoutGrid },
 	{ to: "/servicos", label: "Serviços", icon: Scissors },
 	{ to: "/lojas", label: "Lojas", icon: Store },
-	{ to: "/usuarios", label: "Usuários", icon: Users },
 	{ to: "/tags", label: "Tags", icon: Tag },
 	{ to: "/atendimentos", label: "Atendimentos", icon: CalendarCheck },
 ];

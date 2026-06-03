@@ -31,7 +31,6 @@ const AtendimentosPage = lazy(() => import("./pages/funcionario/AtendimentosPage
 const PetsPage = lazy(() => import("./pages/funcionario/PetsPage"));
 const ServicosPage = lazy(() => import("./pages/funcionario/ServicosPage"));
 const TagsPage = lazy(() => import("./pages/funcionario/TagsPage"));
-const UsersPage = lazy(() => import("./pages/funcionario/UsersPage"));
 const ProfilePage = lazy(() => import("./pages/funcionario/ProfilePage"));
 
 // Cliente layout + pages
@@ -126,8 +125,6 @@ function FuncionarioShell() {
           <Route path="/lojas" element={<LojasPage />} />
           <Route path="/lojas/:id" element={<LojaPage />} />
           <Route path="/categorias" element={<CategoriasPage />} />
-          <Route path="/usuarios" element={<UsersPage />} />
-          <Route path="/users" element={<UsersPage />} />
           <Route path="/tags" element={<TagsPage />} />
           <Route path="/atendimentos" element={<AtendimentosPage />} />
           <Route path="/perfil" element={<ProfilePage />} />

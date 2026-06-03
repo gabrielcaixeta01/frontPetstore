@@ -2,7 +2,7 @@ import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   PawPrint, CalendarCheck, LayoutGrid, Scissors,
-  Store, Tag, Users, Home, LogOut, Menu, X,
+  Store, Tag, Home, LogOut, Menu, X,
 } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -27,7 +27,6 @@ const navSections = [
       { to: "/servicos",     label: "Serviços",      icon: Scissors,     end: false },
       { to: "/categorias",   label: "Categorias",    icon: LayoutGrid,   end: false },
       { to: "/lojas",        label: "Minha Loja",    icon: Store,        end: false },
-      { to: "/usuarios",     label: "Usuários",      icon: Users,        end: false },
       { to: "/tags",         label: "Tags",          icon: Tag,          end: false },
     ],
   },
