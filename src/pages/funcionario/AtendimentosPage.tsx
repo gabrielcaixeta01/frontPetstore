@@ -114,7 +114,6 @@ export default function AppointmentsPage() {
         pet_id: at.pet_id,
         data_atendimento: at.data_atendimento,
         forma_pagamento: at.forma_pagamento,
-        valor_final: at.valor_final,
         observacoes: at.observacoes ?? "",
         service_ids: at.items?.map((i) => i.service_id) ?? [],
       });
