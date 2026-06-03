@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  Plus, X, Pencil, Trash2,
+  Plus, X, Pencil, Trash2, XCircle,
   CalendarCheck, Clock, CheckCircle2, AlertCircle,
   Store, PawPrint, ChevronDown, ChevronUp,
   Wallet, Scissors, User,
@@ -103,6 +103,25 @@ export default function AppointmentsPage() {
     if (!window.confirm("Excluir este atendimento?")) return;
     try { await deleteAppointment(id); setFeedback("Atendimento excluído."); if (atendimentoBeingEdited?.id === id) setAtendimentoBeingEdited(null); await loadAtendimentos(); }
     catch { setError("Erro ao excluir atendimento."); }
+  }
+  async function handleQuickStatus(at: Appointment, newStatus: "concluido" | "cancelado") {
+    try {
+      await updateAppointment(at.id, {
+        status: newStatus,
+        loja_id: at.loja_id,
+        cliente_id: at.cliente_id,
+        funcionario_id: at.funcionario_id,
+        pet_id: at.pet_id,
+        data_atendimento: at.data_atendimento,
+        forma_pagamento: at.forma_pagamento,
+        valor_final: at.valor_final,
+        observacoes: at.observacoes ?? "",
+        service_ids: at.items?.map((i) => i.service_id) ?? [],
+      });
+      setFeedback(newStatus === "concluido" ? "Atendimento marcado como concluído!" : "Atendimento cancelado.");
+      setExpandedId(null);
+      await loadAtendimentos();
+    } catch (err) { setError(getApiErrorMessage(err, "Erro ao atualizar status.")); }
   }
 
   const historico = useMemo(
@@ -224,7 +243,19 @@ export default function AppointmentsPage() {
                 </div>
               )}
             </div>
-            <div className="mt-4 flex gap-2 border-t border-gray-200 pt-3">
+            <div className="mt-4 flex flex-wrap gap-2 border-t border-gray-200 pt-3">
+              {(at.status === "agendado" || at.status === "atrasado") && (
+                <>
+                  <button onClick={(e) => { e.stopPropagation(); handleQuickStatus(at, "concluido"); }}
+                    className="flex items-center gap-1.5 rounded border border-emerald-200 bg-emerald-50 px-4 py-1.5 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100">
+                    <CheckCircle2 size={12} /> Atendimento concluído
+                  </button>
+                  <button onClick={(e) => { e.stopPropagation(); handleQuickStatus(at, "cancelado"); }}
+                    className="flex items-center gap-1.5 rounded border border-gray-200 px-4 py-1.5 text-xs font-semibold text-gray-500 transition hover:bg-gray-100">
+                    <XCircle size={12} /> Cancelar atendimento
+                  </button>
+                </>
+              )}
               <button onClick={(e) => { e.stopPropagation(); setAtendimentoBeingEdited(at); }}
                 className="flex items-center gap-1.5 rounded border border-gray-200 px-4 py-1.5 text-xs font-medium text-gray-600 transition hover:bg-[#e8eeff] hover:text-[#1c46f3]">
                 <Pencil size={12} /> Editar
