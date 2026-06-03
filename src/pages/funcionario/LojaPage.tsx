@@ -54,6 +54,32 @@ const AVATAR_COLORS = [
   "bg-cyan-100 text-cyan-700",
 ];
 
+const DEFAULT_SCHEDULE = [
+  { day: "Segunda-feira", open: "08:00", close: "18:00" },
+  { day: "Terça-feira",   open: "08:00", close: "18:00" },
+  { day: "Quarta-feira",  open: "08:00", close: "18:00" },
+  { day: "Quinta-feira",  open: "08:00", close: "18:00" },
+  { day: "Sexta-feira",   open: "08:00", close: "18:00" },
+  { day: "Sábado",        open: "08:00", close: "14:00" },
+  { day: "Domingo",       open: null,    close: null     },
+];
+
+function getTodayIdx() {
+  const d = new Date().getDay();
+  return d === 0 ? 6 : d - 1;
+}
+
+function isOpenNow() {
+  const idx = getTodayIdx();
+  const today = DEFAULT_SCHEDULE[idx];
+  if (!today.open || !today.close) return false;
+  const now = new Date();
+  const mins = now.getHours() * 60 + now.getMinutes();
+  const [oh, om] = today.open.split(":").map(Number);
+  const [ch, cm] = today.close.split(":").map(Number);
+  return mins >= oh * 60 + om && mins < ch * 60 + cm;
+}
+
 function InfoField({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="space-y-0.5">
@@ -214,12 +240,43 @@ export default function LojaPage() {
 
           {/* Horário */}
           <SectionCard>
-            <SectionTitle icon={<Clock size={15} />}>Horário de Funcionamento</SectionTitle>
-            {loja.horario_funcionamento ? (
-              <p className="text-sm" style={{ color: "#374151" }}>{loja.horario_funcionamento}</p>
-            ) : (
-              <p className="text-sm italic" style={{ color: MUTED }}>Não informado.</p>
-            )}
+            <SectionTitle
+              icon={<Clock size={15} />}
+              badge={
+                isOpenNow()
+                  ? <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-600"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />Aberto agora</span>
+                  : <span className="flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] font-bold text-gray-500"><span className="h-1.5 w-1.5 rounded-full bg-gray-400" />Fechado agora</span>
+              }
+            >
+              Horário de Funcionamento
+            </SectionTitle>
+            <div className="overflow-hidden rounded-md border" style={{ borderColor: BORD }}>
+              {DEFAULT_SCHEDULE.map((row, i) => {
+                const isToday = i === getTodayIdx();
+                return (
+                  <div
+                    key={row.day}
+                    className="flex items-center justify-between px-4 py-2.5"
+                    style={{
+                      background: isToday ? "rgba(26,60,184,0.05)" : i % 2 === 0 ? "#FAFAFA" : "#fff",
+                      borderTop: i > 0 ? `1px solid ${BORD}` : undefined,
+                    }}
+                  >
+                    <span className="text-sm font-medium" style={{ color: isToday ? BLUE : "#374151", fontWeight: isToday ? 700 : 500 }}>
+                      {row.day}
+                      {isToday && <span className="ml-2 text-[10px] font-bold uppercase tracking-wide" style={{ color: BLUE }}>(hoje)</span>}
+                    </span>
+                    {row.open && row.close ? (
+                      <span className="text-sm font-semibold tabular-nums" style={{ color: isToday ? BLUE : "#374151" }}>
+                        {row.open} – {row.close}
+                      </span>
+                    ) : (
+                      <span className="rounded-full bg-red-50 px-2.5 py-0.5 text-[11px] font-bold text-red-500">Fechado</span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </SectionCard>
 
           {/* Equipe */}
