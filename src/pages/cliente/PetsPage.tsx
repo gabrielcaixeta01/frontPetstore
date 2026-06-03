@@ -52,6 +52,62 @@ const MAX_OBS = 50;
 type PetFormState = { nome: string; raca: string; sexo: string; porte: string; peso: string; observacoes_saude: string; categoria_id: string };
 const emptyForm: PetFormState = { nome: "", raca: "", sexo: "", porte: "", peso: "", observacoes_saude: "", categoria_id: "" };
 
+/* ─── Pet form fields ──────────────────────────────────── */
+function PetFields({ f, setF, tagIds, setTagIds, categorias, tagsDisponiveis }: {
+  f: PetFormState;
+  setF: (v: PetFormState) => void;
+  tagIds: number[];
+  setTagIds: (fn: (ids: number[]) => number[]) => void;
+  categorias: Categoria[];
+  tagsDisponiveis: Etiqueta[];
+}) {
+  return (
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div><label className="mb-1 block text-xs font-medium text-gray-500">Nome *</label>
+        <input minLength={2} className={inputCls} placeholder="Nome do pet" value={f.nome} onChange={(e) => setF({ ...f, nome: e.target.value })} required /></div>
+      <div><label className="mb-1 block text-xs font-medium text-gray-500">Categoria *</label>
+        <select className={selectCls} value={f.categoria_id} onChange={(e) => setF({ ...f, categoria_id: e.target.value })} required>
+          <option value="">Selecionar...</option>
+          {categorias.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </select></div>
+      <div><label className="mb-1 block text-xs font-medium text-gray-500">Raça *</label>
+        <input className={inputCls} placeholder="Ex: Golden Retriever" value={f.raca} onChange={(e) => setF({ ...f, raca: e.target.value })} required /></div>
+      <div><label className="mb-1 block text-xs font-medium text-gray-500">Sexo *</label>
+        <select className={selectCls} value={f.sexo} onChange={(e) => setF({ ...f, sexo: e.target.value })} required>
+          <option value="">Selecionar...</option>
+          <option value="macho">Macho</option>
+          <option value="femea">Fêmea</option>
+        </select></div>
+      <div><label className="mb-1 block text-xs font-medium text-gray-500">Porte *</label>
+        <select className={selectCls} value={f.porte} onChange={(e) => setF({ ...f, porte: e.target.value })} required>
+          <option value="">Selecionar...</option>
+          <option value="pequeno">Pequeno</option>
+          <option value="medio">Médio</option>
+          <option value="grande">Grande</option>
+        </select></div>
+      <div><label className="mb-1 block text-xs font-medium text-gray-500">Peso (kg)</label>
+        <input type="number" step="0.1" min="0" max="100" className={inputCls} placeholder="Ex: 5.2" value={f.peso} onChange={(e) => setF({ ...f, peso: e.target.value })} /></div>
+      <div className="sm:col-span-2 lg:col-span-3"><label className="mb-1 block text-xs font-medium text-gray-500">Observações de saúde</label>
+        <input maxLength={MAX_OBS} className={inputCls} placeholder="Alergias, medicamentos, etc." value={f.observacoes_saude} onChange={(e) => setF({ ...f, observacoes_saude: e.target.value })} /></div>
+      {tagsDisponiveis.length > 0 && (
+        <div className="sm:col-span-2 lg:col-span-3"><label className="mb-1 block text-xs font-medium text-gray-500">Tags</label>
+          <div className="flex flex-wrap gap-2">
+            {tagsDisponiveis.map((tag) => {
+              const sel = tagIds.includes(tag.id);
+              return (
+                <button key={tag.id} type="button" onClick={() => setTagIds((ids) => sel ? ids.filter((id) => id !== tag.id) : [...ids, tag.id])}
+                  className={`rounded border px-3 py-1 text-xs font-medium transition ${sel ? "border-[#1c46f3] bg-[#1c46f3] text-white" : "border-gray-200 bg-gray-50 text-gray-600 hover:border-[#1c46f3] hover:text-[#1c46f3]"}`}>
+                  {tag.nome}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ─── Component ───────────────────────────────────────────── */
 export default function ClientePetsPage() {
   const userId = getStoredUserId();
@@ -183,55 +239,6 @@ export default function ClientePetsPage() {
     catch { setError("Erro ao excluir pet."); }
   }
 
-  /* ── Pet form fields ──────────────────────────────────── */
-  function PetFields({ f, setF, tagIds, setTagIds }: { f: PetFormState; setF: (v: PetFormState) => void; tagIds: number[]; setTagIds: (fn: (ids: number[]) => number[]) => void }) {
-    return (
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <div><label className="mb-1 block text-xs font-medium text-gray-500">Nome *</label>
-          <input minLength={2} className={inputCls} placeholder="Nome do pet" value={f.nome} onChange={(e) => setF({ ...f, nome: e.target.value })} required /></div>
-        <div><label className="mb-1 block text-xs font-medium text-gray-500">Categoria *</label>
-          <select className={selectCls} value={f.categoria_id} onChange={(e) => setF({ ...f, categoria_id: e.target.value })} required>
-            <option value="">Selecionar...</option>
-            {categorias.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select></div>
-        <div><label className="mb-1 block text-xs font-medium text-gray-500">Raça *</label>
-          <input className={inputCls} placeholder="Ex: Golden Retriever" value={f.raca} onChange={(e) => setF({ ...f, raca: e.target.value })} required /></div>
-        <div><label className="mb-1 block text-xs font-medium text-gray-500">Sexo *</label>
-          <select className={selectCls} value={f.sexo} onChange={(e) => setF({ ...f, sexo: e.target.value })} required>
-            <option value="">Selecionar...</option>
-            <option value="macho">Macho</option>
-            <option value="femea">Fêmea</option>
-          </select></div>
-        <div><label className="mb-1 block text-xs font-medium text-gray-500">Porte *</label>
-          <select className={selectCls} value={f.porte} onChange={(e) => setF({ ...f, porte: e.target.value })} required>
-            <option value="">Selecionar...</option>
-            <option value="pequeno">Pequeno</option>
-            <option value="medio">Médio</option>
-            <option value="grande">Grande</option>
-          </select></div>
-        <div><label className="mb-1 block text-xs font-medium text-gray-500">Peso (kg)</label>
-          <input type="number" step="0.1" min="0" max="100" className={inputCls} placeholder="Ex: 5.2" value={f.peso} onChange={(e) => setF({ ...f, peso: e.target.value })} /></div>
-        <div className="sm:col-span-2 lg:col-span-3"><label className="mb-1 block text-xs font-medium text-gray-500">Observações de saúde</label>
-          <input maxLength={MAX_OBS} className={inputCls} placeholder="Alergias, medicamentos, etc." value={f.observacoes_saude} onChange={(e) => setF({ ...f, observacoes_saude: e.target.value })} /></div>
-        {tagsDisponiveis.length > 0 && (
-          <div className="sm:col-span-2 lg:col-span-3"><label className="mb-1 block text-xs font-medium text-gray-500">Tags</label>
-            <div className="flex flex-wrap gap-2">
-              {tagsDisponiveis.map((tag) => {
-                const sel = tagIds.includes(tag.id);
-                return (
-                  <button key={tag.id} type="button" onClick={() => setTagIds((ids) => sel ? ids.filter((id) => id !== tag.id) : [...ids, tag.id])}
-                    className={`rounded border px-3 py-1 text-xs font-medium transition ${sel ? "border-[#1c46f3] bg-[#1c46f3] text-white" : "border-gray-200 bg-gray-50 text-gray-600 hover:border-[#1c46f3] hover:text-[#1c46f3]"}`}>
-                    {tag.nome}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
 
@@ -301,7 +308,7 @@ export default function ClientePetsPage() {
       {showForm && (
         <form onSubmit={handleCreate} className="mb-5 rounded border border-gray-200 bg-white p-5">
           <h2 className="mb-4 text-sm font-semibold text-gray-800">Novo Pet</h2>
-          <PetFields f={form} setF={setForm} tagIds={tagIdsCriacao} setTagIds={setTagIdsCriacao} />
+          <PetFields f={form} setF={setForm} tagIds={tagIdsCriacao} setTagIds={setTagIdsCriacao} categorias={categorias} tagsDisponiveis={tagsDisponiveis} />
           <div className="mt-4 flex gap-2">
             <button type="submit" className="flex items-center gap-2 rounded bg-[#1c46f3] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#1840e0]"><Plus size={14} /> Cadastrar</button>
             <button type="button" onClick={() => setShowForm(false)} className="rounded border border-gray-200 px-5 py-2 text-sm text-gray-500 transition hover:bg-gray-50">Cancelar</button>
@@ -313,7 +320,7 @@ export default function ClientePetsPage() {
       <EditModal isOpen={Boolean(editingPet)} title="Editar Pet" onClose={() => setEditingPet(null)}>
         {editingPet && (
           <form onSubmit={handleUpdate} className="space-y-4">
-            <PetFields f={editForm} setF={setEditForm} tagIds={tagIdsEdicao} setTagIds={setTagIdsEdicao} />
+            <PetFields f={editForm} setF={setEditForm} tagIds={tagIdsEdicao} setTagIds={setTagIdsEdicao} categorias={categorias} tagsDisponiveis={tagsDisponiveis} />
             <div className="flex gap-2 pt-1">
               <button type="submit" className="flex items-center gap-2 rounded bg-[#1c46f3] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#1840e0]"><Check size={14} /> Salvar</button>
               <button type="button" onClick={() => setEditingPet(null)} className="rounded border border-gray-200 px-5 py-2 text-sm text-gray-500 transition hover:bg-gray-50">Cancelar</button>
