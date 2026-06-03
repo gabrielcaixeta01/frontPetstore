@@ -193,7 +193,7 @@ export default function AppointmentForm({
         observacoes: observacoes.trim(),
         loja_id: Number(lojaId), cliente_id: Number(clienteId),
         funcionario_id: Number(funcionarioId), pet_id: Number(petId),
-        data_atendimento: data && hora ? `${data}T${hora}:00` : undefined,
+        data_atendimento: data && hora ? new Date(`${data}T${hora}:00`).toISOString() : undefined,
       };
       await onUpdate(appointmentBeingEdited.id, payload, servicoIdsSelecionados);
       return;
@@ -204,7 +204,7 @@ export default function AppointmentForm({
       observacoes: observacoes.trim() || undefined,
       loja_id: Number(lojaId), cliente_id: Number(clienteId),
       funcionario_id: Number(funcionarioId), pet_id: Number(petId),
-      data_atendimento: `${data}T${hora}:00`,
+      data_atendimento: new Date(`${data}T${hora}:00`).toISOString(),
     };
     await onCreate(payload, servicoIdsSelecionados);
     setFormaPagamento("pix"); setStatus("agendado"); setOnline(false); setObservacoes("");
