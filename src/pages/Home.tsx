@@ -98,7 +98,7 @@ export default function Home() {
                 }}
               >
                 <PawPrint size={13} style={{ color: YELL }} />
-                <span className="text-xs font-semibold uppercase tracking-widest">Apex Petstore</span>
+                <span className="text-xs font-semibold uppercase tracking-widest">Jon Petstore</span>
               </div>
 
               <h1 className="text-4xl font-black leading-tight sm:text-5xl" style={{ letterSpacing: "-0.02em" }}>
@@ -146,7 +146,7 @@ export default function Home() {
               <div className="relative">
                 <img
                   src="/apex1.png"
-                  alt="Apex Petstore em ação"
+                  alt="Jon Petstore em ação"
                   className="w-full shadow-2xl"
                   style={{ borderRadius: "10px", border: "2px solid rgba(255,255,255,0.18)" }}
                 />
@@ -207,7 +207,7 @@ export default function Home() {
               Nossa plataforma
             </span>
             <h2 className="text-2xl font-extrabold" style={{ color: "#1a1a1a" }}>Veja na prática</h2>
-            <p className="mt-2 text-sm" style={{ color: MUTED }}>Mais de 500 petshops já confiam na Apex para gerenciar seu negócio.</p>
+            <p className="mt-2 text-sm" style={{ color: MUTED }}>Mais de 500 petshops já confiam na Jon para gerenciar seu negócio.</p>
           </div>
 
           {/* Asymmetric gallery: apex1 large left, apex2 + apex3 stacked right */}
@@ -217,7 +217,7 @@ export default function Home() {
               style={{ borderRadius: "10px", border: `1px solid ${BORD}` }}>
               <img
                 src="/apex2.png"
-                alt="Equipe Apex"
+                alt="Equipe Jon"
                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 style={{ minHeight: "260px", maxHeight: "420px" }}
               />
@@ -229,7 +229,7 @@ export default function Home() {
                 style={{ borderRadius: "10px", border: `1px solid ${BORD}` }}>
                 <img
                   src="/apex3.png"
-                  alt="Apex Petstore"
+                  alt="Jon Petstore"
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   style={{ minHeight: "120px" }}
                 />
@@ -238,7 +238,7 @@ export default function Home() {
                 style={{ borderRadius: "10px", border: `1px solid ${BORD}` }}>
                 <img
                   src="/apex1.png"
-                  alt="Apex Petstore"
+                  alt="Jon Petstore"
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   style={{ minHeight: "120px" }}
                 />
@@ -420,10 +420,10 @@ export default function Home() {
       <footer className="flex flex-wrap items-center justify-between gap-4 px-6 py-5"
         style={{ background: BDARK }}>
         <div className="flex items-center gap-2">
-          <img src="/logo_apex.png" alt="Apex Petstore" className="h-7 w-auto" style={{ filter: "brightness(0) invert(1)" }} />
+          <img src="/logo_apex.png" alt="Jon Petstore" className="h-7 w-auto" style={{ filter: "brightness(0) invert(1)" }} />
         </div>
         <span className="text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>
-          © {new Date().getFullYear()} ApexBrasil. Todos os direitos reservados.
+          © {new Date().getFullYear()} Jon. Todos os direitos reservados.
         </span>
         <div className="flex gap-5">
           {["Suporte", "Privacidade", "Termos"].map((l) => (
