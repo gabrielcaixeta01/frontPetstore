@@ -116,7 +116,7 @@ export default function NavFuncionario() {
 					className="relative flex items-center gap-0.5 rounded-full border border-gray-200 bg-white/90 p-1 shadow-sm sm:gap-1"
 				>
 					<div
-						className="pointer-events-none absolute top-1 bottom-1 rounded-full bg-linear-to-r from-[#1c46f3] to-[#00bb69] shadow-[0_10px_26px_rgba(28,70,243,0.28)] transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+						className="pointer-events-none absolute top-1 bottom-1 rounded-full bg-linear-to-r from-[#0D7377] to-[#085C60] shadow-[0_10px_26px_rgba(13,115,119,0.30)] transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
 						style={{
 							left: pill.left,
 							width: pill.width,
@@ -147,8 +147,8 @@ export default function NavFuncionario() {
 										isPillHere
 											? "text-white"
 											: isActive
-												? "text-[#1c46f3]"
-												: "text-gray-700 hover:text-[#1c46f3]"
+												? "text-[#0D7377]"
+												: "text-gray-700 hover:text-[#0D7377]"
 									}
 								`}
 							>
