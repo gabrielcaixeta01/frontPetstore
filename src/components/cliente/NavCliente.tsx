@@ -102,7 +102,7 @@ export default function NavCliente() {
 		<header className="sticky top-0 z-50 border-b border-gray-200 bg-white/85 shadow-sm backdrop-blur-xl">
 			<div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2.5 sm:px-6 sm:py-3">
 				<NavLink to="/" className="flex items-center">
-					<img src="/logo_apex.png" alt="Jon Petstore" className="h-8 w-auto sm:h-9" />
+					<img src="/logo_apex.png" alt="Pet Club" className="h-8 w-auto sm:h-9" />
 				</NavLink>
 
 				<nav

@@ -106,7 +106,7 @@ export default function LoginPage() {
 
         {/* Logo */}
         <div className="relative">
-          <img src="/logo_apex.png" alt="Jon Petstore" className="h-10 w-auto"
+          <img src="/logo_apex.png" alt="Pet Club" className="h-10 w-auto"
             style={{ filter: "brightness(0) invert(1)" }} />
         </div>
 

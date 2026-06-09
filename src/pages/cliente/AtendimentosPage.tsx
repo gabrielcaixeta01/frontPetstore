@@ -248,7 +248,7 @@ export default function ClienteAtendimentosPage() {
                 <CalendarCheck size={20} className="text-[#F5A800]" />
                 <h1 className="text-2xl font-extrabold text-white">Meus Atendimentos</h1>
               </div>
-              <p className="mt-0.5 text-[13px] text-white/65">Histórico e agendamentos no Jon Petstore</p>
+              <p className="mt-0.5 text-[13px] text-white/65">Histórico e agendamentos no Pet Club</p>
             </div>
             <button onClick={() => { setShowForm((v) => !v); setForm(emptyForm()); }}
               className="flex items-center gap-2 rounded bg-[#F5A800] px-4 py-2 text-sm font-bold text-[#0D2580] transition hover:bg-[#e09600]">

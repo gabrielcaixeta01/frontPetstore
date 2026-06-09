@@ -71,7 +71,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           <Menu size={20} />
         </button>
         <img
-          src="/logo_apex.png" alt="Jon Petstore"
+          src="/logo_apex.png" alt="Pet Club"
           className="h-7 w-auto"
           style={{ filter: "brightness(0) invert(1)" }}
         />
@@ -95,7 +95,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         <div className="flex-shrink-0 px-4 py-4" style={{ background: BLUE }}>
           <div className="flex items-center justify-between">
             <img
-              src="/logo_apex.png" alt="Jon Petstore"
+              src="/logo_apex.png" alt="Pet Club"
               className="h-8 w-auto"
               style={{ filter: "brightness(0) invert(1)" }}
             />
