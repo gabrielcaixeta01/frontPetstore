@@ -8,9 +8,10 @@ import { createTag, deleteTag, getTags, updateTag } from "../../services/tagServ
 import { getPets } from "../../services/petService";
 import type { CreateEtiquetaDTO, Etiqueta, UpdateEtiquetaDTO } from "../../types/tag";
 
-const BLUE  = "#1A3CB8";
-const BORD  = "#E0E0E0";
-const MUTED = "#6B6B6B";
+const TEAL  = "#0D7377";
+const BORD  = "#E2E8F0";
+const MUTED = "#64748B";
+const COAL  = "#1E293B";
 
 function getApiErrorMessage(error: unknown, fallback: string) {
   if (typeof error !== "object" || error === null) return fallback;
@@ -100,10 +101,10 @@ export default function TagsPage() {
         {/* Header */}
         <div className="flex items-start justify-between gap-4">
           <div>
-            <span className="mb-1 inline-block text-xs font-bold uppercase tracking-widest" style={{ color: BLUE }}>
+            <span className="mb-1 inline-block text-xs font-bold uppercase tracking-widest" style={{ color: TEAL }}>
               Gerenciamento
             </span>
-            <h1 className="text-2xl font-extrabold" style={{ color: "#1a1a1a" }}>Tags</h1>
+            <h1 className="text-2xl font-extrabold" style={{ color: COAL }}>Tags</h1>
             <p className="mt-0.5 text-sm" style={{ color: MUTED }}>
               Organize e classifique entidades com tags reutilizáveis.
             </p>
@@ -111,7 +112,7 @@ export default function TagsPage() {
           <button
             onClick={() => { setShowForm((v) => !v); setFeedback(""); setError(""); }}
             className="flex shrink-0 items-center gap-2 px-4 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
-            style={{ background: showForm ? MUTED : BLUE, borderRadius: "4px" }}
+            style={{ background: showForm ? MUTED : TEAL, borderRadius: "4px" }}
           >
             {showForm ? <X size={15} /> : <Plus size={15} />}
             <span className="hidden sm:inline">{showForm ? "Cancelar" : "Nova tag"}</span>
@@ -164,7 +165,7 @@ export default function TagsPage() {
         {/* List */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold" style={{ color: "#1a1a1a" }}>
+            <h2 className="text-base font-bold" style={{ color: COAL }}>
               Lista de tags
               {!loading && (
                 <span className="ml-2 text-sm font-normal" style={{ color: MUTED }}>

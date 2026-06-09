@@ -4,9 +4,10 @@ import { getTags } from "../../services/tagService";
 import { getPets } from "../../services/petService";
 import type { Etiqueta } from "../../types/tag";
 
-const BLUE  = "#1A3CB8";
-const BORD  = "#E0E0E0";
-const MUTED = "#6B6B6B";
+const TEAL  = "#0D7377";
+const COAL  = "#1E293B";
+const BORD  = "#E2E8F0";
+const MUTED = "#64748B";
 
 export default function ClienteTagsPage() {
   const [tags, setTags]                   = useState<Etiqueta[]>([]);
@@ -39,10 +40,10 @@ export default function ClienteTagsPage() {
 
         {/* Header */}
         <div>
-          <span className="mb-1 inline-block text-xs font-bold uppercase tracking-widest" style={{ color: BLUE }}>
+          <span className="mb-1 inline-block text-xs font-bold uppercase tracking-widest" style={{ color: TEAL }}>
             Classificações
           </span>
-          <h1 className="text-2xl font-extrabold" style={{ color: "#1a1a1a" }}>Tags</h1>
+          <h1 className="text-2xl font-extrabold" style={{ color: COAL }}>Tags</h1>
           <p className="mt-0.5 text-sm" style={{ color: MUTED }}>
             Classificações utilizadas para organizar os pets do sistema.
           </p>
