@@ -10,6 +10,13 @@ import { getAppointments } from "../../services/atendimentoService";
 import type { Pet } from "../../types/pet";
 import type { Appointment } from "../../types/atendimento";
 
+const TEAL  = "#0D7377";
+const TDARK = "#085C60";
+const AMBER = "#F59E0B";
+const COAL  = "#1E293B";
+const MUTED = "#64748B";
+const BORD  = "#E2E8F0";
+
 /* ─── helpers ─────────────────────────────────────────────── */
 function getStoredUser() { try { return JSON.parse(localStorage.getItem("user") || "{}"); } catch { return {}; } }
 
@@ -56,8 +63,8 @@ function LineChart({ data }: { data: { label: string; value: number }[] }) {
     <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: "180px" }}>
       <defs>
         <linearGradient id="cliGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"   stopColor="#1c46f3" stopOpacity="0.13" />
-          <stop offset="100%" stopColor="#1c46f3" stopOpacity="0.01" />
+          <stop offset="0%"   stopColor={TEAL} stopOpacity="0.13" />
+          <stop offset="100%" stopColor={TEAL} stopOpacity="0.01" />
         </linearGradient>
       </defs>
       {ticks.map((t, i) => (
@@ -67,10 +74,10 @@ function LineChart({ data }: { data: { label: string; value: number }[] }) {
         </g>
       ))}
       <path d={area} fill="url(#cliGrad)" />
-      <path d={line} fill="none" stroke="#1c46f3" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+      <path d={line} fill="none" stroke={TEAL} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
       {pts.map((p, i) => (
         <g key={i}>
-          <circle cx={p.x} cy={p.y} r="4.5" fill="#1c46f3" stroke="white" strokeWidth="2" />
+          <circle cx={p.x} cy={p.y} r="4.5" fill={TEAL} stroke="white" strokeWidth="2" />
           <text x={p.x} y={H - 5} textAnchor="middle" fontSize="11" fill="#6B7280" style={{ textTransform: "capitalize" }}>{p.label}</text>
         </g>
       ))}
@@ -83,7 +90,7 @@ function Delta({ value }: { value: number | null }) {
   if (value === null) return <span className="text-xs text-gray-300">—</span>;
   const pos = value >= 0;
   return (
-    <span className={`mt-0.5 flex items-center gap-0.5 text-[11px] font-medium ${pos ? "text-[#00A651]" : "text-red-500"}`}>
+    <span className={`mt-0.5 flex items-center gap-0.5 text-[11px] font-medium ${pos ? "text-[#10B981]" : "text-red-500"}`}>
       {pos ? <ArrowUp size={10} /> : <ArrowDown size={10} />}
       {pos ? "+" : ""}{Math.abs(value).toFixed(0)}% vs mês ant.
     </span>
@@ -93,9 +100,9 @@ function Delta({ value }: { value: number | null }) {
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
     agendado:  "bg-amber-50 text-amber-700",
-    concluido: "bg-blue-50 text-blue-700",
-    cancelado: "bg-red-50 text-red-600",
-    atrasado:  "bg-red-50 text-red-600",
+    concluido: "bg-teal-50  text-teal-700",
+    cancelado: "bg-red-50   text-red-600",
+    atrasado:  "bg-red-50   text-red-600",
   };
   const labels: Record<string, string> = {
     agendado: "Agendado", concluido: "Concluído", cancelado: "Cancelado", atrasado: "Atrasado",
@@ -104,6 +111,21 @@ function StatusBadge({ status }: { status: string }) {
     <span className={`whitespace-nowrap rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${map[status] ?? map.agendado}`}>
       {labels[status] ?? status}
     </span>
+  );
+}
+
+function HeroDecor() {
+  return (
+    <div className="pointer-events-none absolute inset-0 select-none overflow-hidden" aria-hidden="true">
+      <div className="absolute right-8 top-8 h-48 w-48 rounded-full"
+        style={{ border: "1.5px solid rgba(255,255,255,0.10)" }} />
+      <div className="absolute right-24 top-20 h-72 w-72 rounded-full"
+        style={{ border: "1px solid rgba(255,255,255,0.06)" }} />
+      <div className="absolute -right-16 -top-16 h-80 w-80 rounded-full"
+        style={{ background: "rgba(255,255,255,0.04)" }} />
+      <div className="absolute bottom-8 left-8 h-24 w-24 rounded-full"
+        style={{ border: "1.5px solid rgba(255,255,255,0.08)" }} />
+    </div>
   );
 }
 
@@ -143,11 +165,9 @@ export default function ClienteHome() {
 
   const petsById = useMemo(() => Object.fromEntries(pets.map((p) => [p.id, p])), [pets]);
 
-  /* status splits */
   const agendados  = useMemo(() => atendimentos.filter((a) => a.status === "agendado"),  [atendimentos]);
   const concluidos = useMemo(() => atendimentos.filter((a) => a.status === "concluido"), [atendimentos]);
 
-  /* monthly splits */
   const concMes    = useMemo(() => concluidos.filter((a) => sameYM(new Date(a.data_atendimento), thisYear, thisMonth)),      [concluidos]);
   const concMesAnt = useMemo(() => concluidos.filter((a) => sameYM(new Date(a.data_atendimento), lastMonthYear, lastMonth)), [concluidos]);
   const gastoMes    = useMemo(() => concMes.reduce((s, a) => s + Number(a.valor_final), 0),    [concMes]);
@@ -157,7 +177,6 @@ export default function ClienteHome() {
 
   const gastoTotal = useMemo(() => concluidos.reduce((s, a) => s + Number(a.valor_final), 0), [concluidos]);
 
-  /* next appointment */
   const nextAgendado = useMemo(() =>
     [...agendados]
       .filter((a) => new Date(a.data_atendimento) >= now)
@@ -165,13 +184,11 @@ export default function ClienteHome() {
     [agendados],
   );
 
-  /* past-due appointments */
   const atrasados = useMemo(() => {
     const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
     return agendados.filter((a) => new Date(a.data_atendimento) < hoje).length;
   }, [agendados]);
 
-  /* monthly spending chart */
   const monthlySpending = useMemo(() => {
     const map: Record<string, number> = {};
     concluidos.forEach((a) => {
@@ -191,23 +208,24 @@ export default function ClienteHome() {
   const tip = TIPS[now.getDay()];
 
   const kpis = [
-    { label: "Gasto este mês",    value: loading ? "—" : fmtMoney(gastoMes),         delta: gastoDelta,   badge: null as string | null, iconBg: "bg-[#1c46f3]/10", iconCls: "text-[#1c46f3]", Icon: Wallet,       to: "/atendimentos" },
-    { label: "Visitas este mês",  value: loading ? "—" : String(concMes.length),      delta: visitasDelta, badge: null as string | null, iconBg: "bg-emerald-50",   iconCls: "text-[#00A651]", Icon: CheckCircle2, to: "/atendimentos" },
-    { label: "Gasto total",       value: loading ? "—" : fmtMoney(gastoTotal),        delta: null as number | null, badge: concluidos.length > 0 ? `${concluidos.length} visitas` : null, iconBg: "bg-violet-50", iconCls: "text-violet-600", Icon: TrendingUp, to: "/atendimentos" },
-    { label: "Meus pets",         value: loading ? "—" : String(pets.length),         delta: null as number | null, badge: null as string | null, iconBg: "bg-amber-50",   iconCls: "text-[#F5A800]", Icon: PawPrint,     to: "/pets"         },
+    { label: "Gasto este mês",   value: loading ? "—" : fmtMoney(gastoMes),        delta: gastoDelta,            badge: null as string | null,                                                            iconBg: "bg-[#e6f5f5]",  iconCls: "text-[#0D7377]", Icon: Wallet,       to: "/atendimentos" },
+    { label: "Visitas este mês", value: loading ? "—" : String(concMes.length),     delta: visitasDelta,          badge: null as string | null,                                                            iconBg: "bg-emerald-50", iconCls: "text-[#10B981]", Icon: CheckCircle2, to: "/atendimentos" },
+    { label: "Gasto total",      value: loading ? "—" : fmtMoney(gastoTotal),       delta: null as number | null, badge: concluidos.length > 0 ? `${concluidos.length} visitas` : null, iconBg: "bg-violet-50", iconCls: "text-violet-600", Icon: TrendingUp, to: "/atendimentos" },
+    { label: "Meus pets",        value: loading ? "—" : String(pets.length),        delta: null as number | null, badge: null as string | null,                                                            iconBg: "bg-amber-50",   iconCls: "text-[#F59E0B]", Icon: PawPrint,     to: "/pets"         },
   ];
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
 
       {/* ── Hero Banner ─────────────────────────────────────── */}
-      <div className="relative mb-6 overflow-hidden rounded-md bg-[#1c46f3] px-8 py-10">
+      <div className="relative mb-6 overflow-hidden rounded-md px-8 py-10" style={{ background: TEAL }}>
+        <HeroDecor />
         <div className="relative z-10 max-w-md">
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-[#F5A800]">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest" style={{ color: AMBER }}>
             Portal do Cliente
           </p>
           <h1 className="text-3xl font-extrabold leading-tight text-white">
-            {greeting}, <span className="text-[#F5A800]">{firstName}</span>!
+            {greeting}, <span style={{ color: AMBER }}>{firstName}</span>!
           </h1>
           <p className="mt-1.5 text-[15px] text-white/75">
             {agendados.length > 0
@@ -218,24 +236,6 @@ export default function ClienteHome() {
             <Calendar size={13} />
             {dateLabel}
           </p>
-        </div>
-        {/* decorative shapes */}
-        <div className="absolute right-8 top-1/2 hidden -translate-y-1/2 items-center gap-3 lg:flex" aria-hidden="true">
-          <div className="flex flex-col items-center gap-2">
-            <div className="h-4 w-4 rotate-45 rounded bg-[#F5A800]" />
-            <div className="h-6 w-6 rounded-full border-2 border-[#00A651]" />
-            <div className="h-3 w-3 rounded bg-[#00A651]" />
-          </div>
-          <div className="mt-5 flex flex-col items-center gap-2">
-            <div style={{ width:0, height:0, borderLeft:"12px solid transparent", borderRight:"12px solid transparent", borderBottom:"20px solid #F5A800" }} />
-            <div className="h-8 w-8 rounded bg-white/15" />
-            <div className="h-5 w-5 rounded-full bg-[#00A651]" />
-          </div>
-          <div className="-mt-2 flex flex-col items-center gap-2">
-            <div className="h-5 w-5 rotate-45 rounded border-2 border-[#F5A800]" />
-            <div className="h-10 w-10 rounded-full bg-white/10" />
-            <div style={{ width:0, height:0, borderLeft:"8px solid transparent", borderRight:"8px solid transparent", borderTop:"15px solid rgba(255,255,255,0.35)" }} />
-          </div>
         </div>
       </div>
 
@@ -253,9 +253,9 @@ export default function ClienteHome() {
 
       {/* ── Section title ─────────────────────────────────────── */}
       <div className="mb-4 flex items-center gap-2">
-        <TrendingUp size={16} className="text-[#1c46f3]" />
-        <h2 className="text-[15px] font-semibold text-gray-800">Resumo do Mês</h2>
-        <span className="text-xs capitalize text-gray-400">{monthLabel}</span>
+        <TrendingUp size={16} style={{ color: TEAL }} />
+        <h2 className="text-[15px] font-semibold" style={{ color: COAL }}>Resumo do Mês</h2>
+        <span className="text-xs capitalize" style={{ color: MUTED }}>{monthLabel}</span>
       </div>
 
       {/* ── KPI Grid ─────────────────────────────────────────── */}
@@ -264,16 +264,16 @@ export default function ClienteHome() {
           <Link
             key={k.label}
             to={k.to}
-            className="group flex flex-col gap-3 rounded-md border border-gray-200 bg-white p-4 transition hover:shadow-[0_2px_12px_rgba(28,70,243,0.10)]"
+            className="group flex flex-col gap-3 rounded-md border border-gray-200 bg-white p-4 transition hover:shadow-[0_2px_12px_rgba(13,115,119,0.10)]"
           >
             <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${k.iconBg}`}>
               <k.Icon size={17} className={k.iconCls} />
             </div>
             <div>
-              <p className="text-xs text-gray-500">{k.label}</p>
-              <p className="mt-0.5 text-2xl font-extrabold leading-none text-gray-900">{k.value}</p>
+              <p className="text-xs" style={{ color: MUTED }}>{k.label}</p>
+              <p className="mt-0.5 text-2xl font-extrabold leading-none" style={{ color: COAL }}>{k.value}</p>
               {k.delta !== null && k.delta !== undefined && <Delta value={k.delta} />}
-              {k.badge && <span className="mt-0.5 block text-xs font-medium text-[#1c46f3]">{k.badge}</span>}
+              {k.badge && <span className="mt-0.5 block text-xs font-medium" style={{ color: TEAL }}>{k.badge}</span>}
             </div>
           </Link>
         ))}
@@ -281,14 +281,13 @@ export default function ClienteHome() {
 
       {/* ── Charts Row ─────────────────────────────────────── */}
       <div className="mb-7 grid gap-4 lg:grid-cols-[2fr_1fr]">
-        {/* Line chart — spending */}
         <div className="rounded-md border border-gray-200 bg-white p-5">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Wallet size={14} className="text-[#1c46f3]" />
-              <span className="text-sm font-semibold text-gray-800">Meus Gastos — Últimos 6 Meses</span>
+              <Wallet size={14} style={{ color: TEAL }} />
+              <span className="text-sm font-semibold" style={{ color: COAL }}>Meus Gastos — Últimos 6 Meses</span>
             </div>
-            <span className="rounded bg-[#1c46f3] px-2 py-0.5 text-[10px] font-bold text-white">{now.getFullYear()}</span>
+            <span className="rounded px-2 py-0.5 text-[10px] font-bold text-white" style={{ background: TEAL }}>{now.getFullYear()}</span>
           </div>
           {loading
             ? <div className="flex h-[180px] items-center justify-center text-sm text-gray-300">Carregando...</div>
@@ -296,20 +295,23 @@ export default function ClienteHome() {
           }
         </div>
 
-        {/* Right panel: próximo agendamento + tip */}
         <div className="flex flex-col gap-4">
           {/* Próximo agendamento */}
           <div className="rounded-md border border-gray-200 bg-white p-5">
             <div className="mb-3 flex items-center gap-2">
-              <CalendarCheck size={14} className="text-[#1c46f3]" />
-              <span className="text-sm font-semibold text-gray-800">Próximo Agendamento</span>
+              <CalendarCheck size={14} style={{ color: TEAL }} />
+              <span className="text-sm font-semibold" style={{ color: COAL }}>Próximo Agendamento</span>
             </div>
             {loading ? (
               <p className="text-sm text-gray-400">Carregando...</p>
             ) : nextAgendado ? (
               <Link to="/atendimentos" className="group block">
-                <div className="flex items-center gap-3 rounded-md border border-[#1c46f3]/20 bg-[#e8eeff] px-4 py-3 transition group-hover:border-[#1c46f3]/40">
-                  <div className="flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded bg-[#1c46f3] text-white">
+                <div className="flex items-center gap-3 rounded-md border px-4 py-3 transition"
+                  style={{ borderColor: `${TEAL}33`, background: "#e6f5f5" }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.borderColor = `${TEAL}66`; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.borderColor = `${TEAL}33`; }}>
+                  <div className="flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded text-white"
+                    style={{ background: TEAL }}>
                     <span className="text-sm font-extrabold leading-none">
                       {new Date(nextAgendado.data_atendimento).getDate().toString().padStart(2, "0")}
                     </span>
@@ -318,21 +320,21 @@ export default function ClienteHome() {
                     </span>
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-bold text-[#1c46f3]">
+                    <p className="text-sm font-bold" style={{ color: TEAL }}>
                       {new Date(nextAgendado.data_atendimento).toLocaleDateString("pt-BR", { weekday: "short", day: "numeric", month: "short" })}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs" style={{ color: MUTED }}>
                       {petsById[nextAgendado.pet_id]?.nome ?? "—"} · R$ {Number(nextAgendado.valor_final).toFixed(2)}
                     </p>
                   </div>
-                  <ArrowRight size={14} className="shrink-0 text-[#1c46f3]/50 transition group-hover:translate-x-0.5 group-hover:text-[#1c46f3]" />
+                  <ArrowRight size={14} className="shrink-0 transition group-hover:translate-x-0.5" style={{ color: `${TEAL}80` }} />
                 </div>
               </Link>
             ) : (
               <div className="flex flex-col items-center py-4 text-center">
                 <CalendarCheck size={28} className="mb-1.5 text-gray-200" />
                 <p className="text-xs text-gray-400">Nenhum agendamento futuro.</p>
-                <Link to="/atendimentos" className="mt-1 text-xs font-semibold text-[#1c46f3] hover:underline">Agendar serviço</Link>
+                <Link to="/atendimentos" className="mt-1 text-xs font-semibold hover:underline" style={{ color: TEAL }}>Agendar serviço</Link>
               </div>
             )}
           </div>
@@ -348,14 +350,17 @@ export default function ClienteHome() {
 
           {/* Serviços link */}
           <Link to="/servicos"
-            className="group flex items-center justify-between rounded-md border border-gray-200 bg-white px-4 py-3 transition hover:border-[#1c46f3]/30 hover:bg-[#e8eeff]">
+            className="group flex items-center justify-between rounded-md border px-4 py-3 transition bg-white"
+            style={{ borderColor: BORD }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = `${TEAL}4D`; (e.currentTarget as HTMLAnchorElement).style.background = "#e6f5f5"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = BORD; (e.currentTarget as HTMLAnchorElement).style.background = "white"; }}>
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#e8eeff]">
-                <Scissors size={14} className="text-[#1c46f3]" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#e6f5f5]">
+                <Scissors size={14} style={{ color: TEAL }} />
               </div>
-              <span className="text-sm font-semibold text-gray-700">Ver serviços disponíveis</span>
+              <span className="text-sm font-semibold" style={{ color: COAL }}>Ver serviços disponíveis</span>
             </div>
-            <ArrowRight size={14} className="text-gray-400 transition group-hover:translate-x-0.5 group-hover:text-[#1c46f3]" />
+            <ArrowRight size={14} className="transition group-hover:translate-x-0.5" style={{ color: MUTED }} />
           </Link>
         </div>
       </div>
@@ -363,14 +368,17 @@ export default function ClienteHome() {
       {/* ── Bottom Row ─────────────────────────────────────── */}
       <div className="grid gap-4 lg:grid-cols-2">
 
-        {/* Histórico de atendimentos */}
         <div className="overflow-hidden rounded-md border border-gray-200 bg-white">
           <div className="flex items-center justify-between border-b border-gray-100 px-5 py-3.5">
             <div className="flex items-center gap-2">
-              <CalendarCheck size={14} className="text-[#1c46f3]" />
-              <span className="text-sm font-semibold text-gray-800">Histórico Recente</span>
+              <CalendarCheck size={14} style={{ color: TEAL }} />
+              <span className="text-sm font-semibold" style={{ color: COAL }}>Histórico Recente</span>
             </div>
-            <Link to="/atendimentos" className="rounded border border-gray-200 px-2.5 py-1 text-xs font-medium text-gray-500 transition hover:border-[#1c46f3] hover:text-[#1c46f3]">
+            <Link to="/atendimentos"
+              className="rounded border border-gray-200 px-2.5 py-1 text-xs font-medium transition"
+              style={{ color: MUTED }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = TEAL; (e.currentTarget as HTMLAnchorElement).style.borderColor = TEAL; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = MUTED; (e.currentTarget as HTMLAnchorElement).style.borderColor = "#E5E7EB"; }}>
               Ver todos
             </Link>
           </div>
@@ -397,11 +405,11 @@ export default function ClienteHome() {
                     return (
                       <tr key={at.id} className="transition hover:bg-gray-50/60">
                         <td className="px-4 py-3">
-                          <p className="font-semibold text-gray-800">{new Date(at.data_atendimento).toLocaleDateString("pt-BR")}</p>
+                          <p className="font-semibold" style={{ color: COAL }}>{new Date(at.data_atendimento).toLocaleDateString("pt-BR")}</p>
                           {petName && <p className="text-xs text-gray-400">{petName}</p>}
                         </td>
                         <td className="px-4 py-3">
-                          <p className="text-sm font-bold text-gray-900">R$ {Number(at.valor_final).toFixed(2)}</p>
+                          <p className="text-sm font-bold" style={{ color: COAL }}>R$ {Number(at.valor_final).toFixed(2)}</p>
                           <p className="text-xs text-gray-400">{pgmtLabel[at.forma_pagamento] ?? at.forma_pagamento}</p>
                         </td>
                         <td className="px-4 py-3"><StatusBadge status={at.status} /></td>
@@ -414,14 +422,17 @@ export default function ClienteHome() {
           )}
         </div>
 
-        {/* Meus Pets */}
         <div className="overflow-hidden rounded-md border border-gray-200 bg-white">
           <div className="flex items-center justify-between border-b border-gray-100 px-5 py-3.5">
             <div className="flex items-center gap-2">
-              <PawPrint size={14} className="text-[#1c46f3]" />
-              <span className="text-sm font-semibold text-gray-800">Meus Pets</span>
+              <PawPrint size={14} style={{ color: TEAL }} />
+              <span className="text-sm font-semibold" style={{ color: COAL }}>Meus Pets</span>
             </div>
-            <Link to="/pets" className="rounded border border-gray-200 px-2.5 py-1 text-xs font-medium text-gray-500 transition hover:border-[#1c46f3] hover:text-[#1c46f3]">
+            <Link to="/pets"
+              className="rounded border border-gray-200 px-2.5 py-1 text-xs font-medium transition"
+              style={{ color: MUTED }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = TEAL; (e.currentTarget as HTMLAnchorElement).style.borderColor = TEAL; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = MUTED; (e.currentTarget as HTMLAnchorElement).style.borderColor = "#E5E7EB"; }}>
               Ver todos
             </Link>
           </div>
@@ -431,7 +442,7 @@ export default function ClienteHome() {
             <div className="flex flex-col items-center py-10">
               <PawPrint size={32} className="mb-2 text-gray-200" />
               <p className="text-sm text-gray-300">Nenhum pet cadastrado ainda.</p>
-              <Link to="/pets" className="mt-1.5 text-xs font-semibold text-[#1c46f3] hover:underline">Cadastrar pet</Link>
+              <Link to="/pets" className="mt-1.5 text-xs font-semibold hover:underline" style={{ color: TEAL }}>Cadastrar pet</Link>
             </div>
           ) : (
             <div className="divide-y divide-gray-50">
@@ -440,11 +451,12 @@ export default function ClienteHome() {
                 const lastAt = petAts[0];
                 return (
                   <div key={pet.id} className="flex items-center gap-3 px-5 py-3 transition hover:bg-gray-50/60">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#e8eeff] text-sm font-extrabold text-[#1c46f3]">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#e6f5f5] text-sm font-extrabold"
+                      style={{ color: TEAL }}>
                       {pet.nome[0]?.toUpperCase()}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-gray-800">{pet.nome}</p>
+                      <p className="text-sm font-semibold" style={{ color: COAL }}>{pet.nome}</p>
                       <p className="truncate text-xs text-gray-400">
                         {[pet.raca, pet.porte].filter(Boolean).join(" · ") || "Sem detalhes"}
                       </p>
@@ -452,7 +464,7 @@ export default function ClienteHome() {
                     <div className="shrink-0 text-right">
                       {lastAt ? (
                         <>
-                          <p className="text-xs font-medium text-gray-600">{new Date(lastAt.data_atendimento).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}</p>
+                          <p className="text-xs font-medium" style={{ color: TDARK }}>{new Date(lastAt.data_atendimento).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}</p>
                           <p className="text-[10px] text-gray-400">última visita</p>
                         </>
                       ) : (

@@ -15,6 +15,12 @@ import type { Atendimento } from "../../types/atendimento";
 import type { Loja } from "../../types/loja";
 import type { Usuario } from "../../types/usuario";
 
+const TEAL  = "#0D7377";
+const AMBER = "#F59E0B";
+const MINT  = "#10B981";
+const COAL  = "#1E293B";
+const MUTED = "#64748B";
+
 /* ─── helpers ─────────────────────────────────────────────── */
 function getStoredUser() {
   try { return JSON.parse(localStorage.getItem("user") || "{}"); } catch { return {}; }
@@ -36,11 +42,11 @@ function getServCat(nome: string) {
 }
 function getServIcon(nome: string) {
   const cat = getServCat(nome);
-  if (cat === "tosa")         return { Icon: Scissors,    bg: "bg-blue-50",    cls: "text-[#1c46f3]" };
-  if (cat === "saude")        return { Icon: Stethoscope, bg: "bg-emerald-50", cls: "text-[#00A651]" };
-  if (cat === "comportamento")return { Icon: PawPrint,    bg: "bg-amber-50",   cls: "text-[#F5A800]" };
+  if (cat === "tosa")         return { Icon: Scissors,    bg: "bg-[#e6f5f5]", cls: "text-[#0D7377]" };
+  if (cat === "saude")        return { Icon: Stethoscope, bg: "bg-emerald-50", cls: "text-[#10B981]" };
+  if (cat === "comportamento")return { Icon: PawPrint,    bg: "bg-amber-50",   cls: "text-[#F59E0B]" };
   if (cat === "hospedagem")   return { Icon: Store,       bg: "bg-red-50",     cls: "text-red-500"   };
-  return { Icon: CalendarCheck, bg: "bg-[#1c46f3]/10", cls: "text-[#1c46f3]" };
+  return { Icon: CalendarCheck, bg: "bg-[#e6f5f5]", cls: "text-[#0D7377]" };
 }
 
 /* ─── SVG Line Chart ─────────────────────────────────────── */
@@ -65,9 +71,9 @@ function LineChart({ data }: { data: { label: string; value: number }[] }) {
   return (
     <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: "180px" }}>
       <defs>
-        <linearGradient id="lg1" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"   stopColor="#1c46f3" stopOpacity="0.13" />
-          <stop offset="100%" stopColor="#1c46f3" stopOpacity="0.01" />
+        <linearGradient id="adminLg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stopColor={TEAL} stopOpacity="0.13" />
+          <stop offset="100%" stopColor={TEAL} stopOpacity="0.01" />
         </linearGradient>
       </defs>
       {ticks.map((t, i) => (
@@ -76,11 +82,11 @@ function LineChart({ data }: { data: { label: string; value: number }[] }) {
           <text x={pL - 5} y={t.y + 3.5} textAnchor="end" fontSize="10" fill="#9CA3AF">{t.label}</text>
         </g>
       ))}
-      <path d={area} fill="url(#lg1)" />
-      <path d={line} fill="none" stroke="#1c46f3" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+      <path d={area} fill="url(#adminLg)" />
+      <path d={line} fill="none" stroke={TEAL} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
       {pts.map((p, i) => (
         <g key={i}>
-          <circle cx={p.x} cy={p.y} r="4.5" fill="#1c46f3" stroke="white" strokeWidth="2" />
+          <circle cx={p.x} cy={p.y} r="4.5" fill={TEAL} stroke="white" strokeWidth="2" />
           <text x={p.x} y={H - 5} textAnchor="middle" fontSize="11" fill="#6B7280" style={{ textTransform: "capitalize" }}>{p.label}</text>
         </g>
       ))}
@@ -120,7 +126,7 @@ function Delta({ value }: { value: number | null }) {
   if (value === null) return <span className="text-xs text-gray-300">—</span>;
   const pos = value >= 0;
   return (
-    <span className={`mt-0.5 flex items-center gap-0.5 text-[11px] font-medium ${pos ? "text-[#00A651]" : "text-red-500"}`}>
+    <span className={`mt-0.5 flex items-center gap-0.5 text-[11px] font-medium ${pos ? "text-[#10B981]" : "text-red-500"}`}>
       {pos ? <ArrowUp size={10} /> : <ArrowDown size={10} />}
       {pos ? "+" : ""}{Math.abs(value).toFixed(0)}% vs mês ant.
     </span>
@@ -130,7 +136,7 @@ function Delta({ value }: { value: number | null }) {
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
     agendado:  "bg-amber-50  text-amber-700",
-    concluido: "bg-blue-50   text-blue-700",
+    concluido: "bg-teal-50   text-teal-700",
     cancelado: "bg-red-50    text-red-600",
     atrasado:  "bg-red-50    text-red-600",
   };
@@ -141,6 +147,21 @@ function StatusBadge({ status }: { status: string }) {
     <span className={`whitespace-nowrap rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${map[status] ?? map.agendado}`}>
       {labels[status] ?? status}
     </span>
+  );
+}
+
+function HeroDecor() {
+  return (
+    <div className="pointer-events-none absolute inset-0 select-none overflow-hidden" aria-hidden="true">
+      <div className="absolute right-8 top-8 h-48 w-48 rounded-full"
+        style={{ border: "1.5px solid rgba(255,255,255,0.10)" }} />
+      <div className="absolute right-24 top-20 h-72 w-72 rounded-full"
+        style={{ border: "1px solid rgba(255,255,255,0.06)" }} />
+      <div className="absolute -right-16 -top-16 h-80 w-80 rounded-full"
+        style={{ background: "rgba(255,255,255,0.04)" }} />
+      <div className="absolute bottom-8 left-8 h-24 w-24 rounded-full"
+        style={{ border: "1.5px solid rgba(255,255,255,0.08)" }} />
+    </div>
   );
 }
 
@@ -195,23 +216,21 @@ export default function AdminHome() {
   const atendDelta   = useMemo(() => pct(atendMes.length, atendMesAnt.length),  [atendMes, atendMesAnt]);
   const revenueDelta = useMemo(() => pct(revenueMes, revenueMesAnt),             [revenueMes, revenueMesAnt]);
 
-  const clientesAtivos  = useMemo(() => usuarios.filter((u) => u.tipo_perfil === "cliente" && u.ativo).length,                                                             [usuarios]);
-  const newClientesMes  = useMemo(() => usuarios.filter((u) => u.tipo_perfil === "cliente" && sameYM(new Date(u.data_cadastro), thisYear, thisMonth)).length,              [usuarios]);
-  const lojasAtivas     = useMemo(() => lojas.filter((l) => l.ativo).length,                                                                                               [lojas]);
-  const servicosConcluidos = useMemo(() => atendMes.filter((a) => a.status === "concluido").length,                                                                        [atendMes]);
+  const clientesAtivos     = useMemo(() => usuarios.filter((u) => u.tipo_perfil === "cliente" && u.ativo).length,                                                   [usuarios]);
+  const newClientesMes     = useMemo(() => usuarios.filter((u) => u.tipo_perfil === "cliente" && sameYM(new Date(u.data_cadastro), thisYear, thisMonth)).length,    [usuarios]);
+  const lojasAtivas        = useMemo(() => lojas.filter((l) => l.ativo).length,                                                                                     [lojas]);
+  const servicosConcluidos = useMemo(() => atendMes.filter((a) => a.status === "concluido").length,                                                                 [atendMes]);
 
   const atendHoje = useMemo(() => atendimentos.filter((a) => {
     const d = new Date(a.data_atendimento);
     return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
   }).sort((a, b) => new Date(a.data_atendimento).getTime() - new Date(b.data_atendimento).getTime()), [atendimentos]);
 
-  /* alerts */
   const agendadosAtrasados = useMemo(() => { const h = new Date(); h.setHours(0,0,0,0); return atendimentos.filter((a) => a.status === "agendado" && new Date(a.data_atendimento) < h).length; }, [atendimentos]);
-  const lojasSemEquipe     = useMemo(() => lojas.filter((l) => l.funcionarios.length === 0).length,                       [lojas]);
-  const clientesInativos   = useMemo(() => usuarios.filter((u) => u.tipo_perfil === "cliente" && !u.ativo).length,        [usuarios]);
+  const lojasSemEquipe     = useMemo(() => lojas.filter((l) => l.funcionarios.length === 0).length,                [lojas]);
+  const clientesInativos   = useMemo(() => usuarios.filter((u) => u.tipo_perfil === "cliente" && !u.ativo).length, [usuarios]);
   const hasAlerts = agendadosAtrasados > 0 || lojasSemEquipe > 0 || clientesInativos > 0;
 
-  /* monthly revenue chart */
   const monthlyRevenue = useMemo(() => {
     const map: Record<string, number> = {};
     atendimentos.forEach((a) => {
@@ -227,16 +246,15 @@ export default function AdminHome() {
     });
   }, [atendimentos]);
 
-  /* service distribution donut */
   const serviceDistribution = useMemo(() => {
     const cats: Record<string, number> = { tosa: 0, saude: 0, comportamento: 0, hospedagem: 0, outros: 0 };
     atendimentos.forEach((a) => (a.items ?? []).forEach((item) => { cats[getServCat(servicosById[item.service_id] ?? "")]++; }));
     const total = Object.values(cats).reduce((s, v) => s + v, 0);
     if (total === 0) return [];
     return [
-      { label: "Banho/Tosa",    value: cats.tosa,          color: "#1c46f3" },
-      { label: "Saúde",         value: cats.saude,         color: "#F5A800" },
-      { label: "Comportamento", value: cats.comportamento, color: "#00A651" },
+      { label: "Banho/Tosa",    value: cats.tosa,          color: TEAL    },
+      { label: "Saúde",         value: cats.saude,         color: AMBER   },
+      { label: "Comportamento", value: cats.comportamento, color: MINT    },
       { label: "Hospedagem",    value: cats.hospedagem,    color: "#7c3aed" },
       { label: "Outros",        value: cats.outros,        color: "#6B7280" },
     ].filter((s) => s.value > 0);
@@ -251,25 +269,26 @@ export default function AdminHome() {
   const dateLabel  = now.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
   const kpis = [
-    { label: "Receita do Mês",        value: loading ? "—" : fmtMoney(revenueMes),       delta: revenueDelta,     badge: null as string | null,                              iconBg: "bg-[#1c46f3]/10",  iconCls: "text-[#1c46f3]", Icon: TrendingUp,    to: "/atendimentos" },
-    { label: "Clientes Ativos",        value: loading ? "—" : String(clientesAtivos),      delta: null as number | null, badge: newClientesMes > 0 ? `+${newClientesMes} este mês` : null, iconBg: "bg-emerald-50",    iconCls: "text-[#00A651]", Icon: Users,         to: "/usuarios"     },
-    { label: "Pets Cadastrados",       value: loading ? "—" : String(totalPets),           delta: null as number | null, badge: null as string | null,                              iconBg: "bg-amber-50",      iconCls: "text-[#F5A800]", Icon: PawPrint,      to: "/pets"         },
-    { label: "Atendimentos Hoje",      value: loading ? "—" : String(atendHoje.length),    delta: null as number | null, badge: null as string | null,                              iconBg: "bg-red-50",        iconCls: "text-red-500",   Icon: CalendarCheck, to: "/atendimentos" },
-    { label: "Atendimentos Concluídos",    value: loading ? "—" : String(servicosConcluidos),  delta: atendDelta,       badge: null as string | null,                              iconBg: "bg-emerald-50",    iconCls: "text-[#00A651]", Icon: Scissors,      to: "/atendimentos" },
-    { label: "Lojas Ativas",           value: loading ? "—" : String(lojasAtivas),         delta: null as number | null, badge: null as string | null,                              iconBg: "bg-[#1c46f3]/10",  iconCls: "text-[#1c46f3]", Icon: Store,         to: "/lojas"        },
+    { label: "Receita do Mês",           value: loading ? "—" : fmtMoney(revenueMes),      delta: revenueDelta, badge: null as string | null,                              iconBg: "bg-[#e6f5f5]",  iconCls: "text-[#0D7377]", Icon: TrendingUp,    to: "/atendimentos" },
+    { label: "Clientes Ativos",          value: loading ? "—" : String(clientesAtivos),    delta: null as number | null, badge: newClientesMes > 0 ? `+${newClientesMes} este mês` : null, iconBg: "bg-emerald-50", iconCls: "text-[#10B981]", Icon: Users,         to: "/usuarios"     },
+    { label: "Pets Cadastrados",         value: loading ? "—" : String(totalPets),         delta: null as number | null, badge: null as string | null,                              iconBg: "bg-amber-50",   iconCls: "text-[#F59E0B]", Icon: PawPrint,      to: "/pets"         },
+    { label: "Atendimentos Hoje",        value: loading ? "—" : String(atendHoje.length),  delta: null as number | null, badge: null as string | null,                              iconBg: "bg-red-50",     iconCls: "text-red-500",   Icon: CalendarCheck, to: "/atendimentos" },
+    { label: "Atendimentos Concluídos",  value: loading ? "—" : String(servicosConcluidos),delta: atendDelta,   badge: null as string | null,                              iconBg: "bg-emerald-50", iconCls: "text-[#10B981]", Icon: Scissors,      to: "/atendimentos" },
+    { label: "Lojas Ativas",             value: loading ? "—" : String(lojasAtivas),       delta: null as number | null, badge: null as string | null,                              iconBg: "bg-[#e6f5f5]",  iconCls: "text-[#0D7377]", Icon: Store,         to: "/lojas"        },
   ];
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
 
       {/* ── Hero Banner ─────────────────────────────────────── */}
-      <div className="relative mb-6 overflow-hidden rounded-md bg-[#1c46f3] px-8 py-10">
+      <div className="relative mb-6 overflow-hidden rounded-md px-8 py-10" style={{ background: TEAL }}>
+        <HeroDecor />
         <div className="relative z-10 max-w-md">
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-[#F5A800]">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest" style={{ color: AMBER }}>
             Visão Geral do Negócio
           </p>
           <h1 className="text-3xl font-extrabold leading-tight text-white">
-            {greeting}, <span className="text-[#F5A800]">{firstName}</span>!
+            {greeting}, <span style={{ color: AMBER }}>{firstName}</span>!
           </h1>
           <p className="mt-1.5 text-[15px] text-white/75">
             Bem-vindo ao painel de gestão
@@ -279,27 +298,9 @@ export default function AdminHome() {
             {dateLabel} — Dados em tempo real
           </p>
         </div>
-        {/* decorative shapes */}
-        <div className="absolute right-8 top-1/2 hidden -translate-y-1/2 items-center gap-3 lg:flex" aria-hidden="true">
-          <div className="flex flex-col items-center gap-2">
-            <div className="h-4 w-4 rotate-45 rounded bg-[#F5A800]" />
-            <div className="h-6 w-6 rounded-full border-2 border-[#00A651]" />
-            <div className="h-3 w-3 rounded bg-[#00A651]" />
-          </div>
-          <div className="mt-5 flex flex-col items-center gap-2">
-            <div style={{ width: 0, height: 0, borderLeft: "12px solid transparent", borderRight: "12px solid transparent", borderBottom: "20px solid #F5A800" }} />
-            <div className="h-8 w-8 rounded bg-white/15" />
-            <div className="h-5 w-5 rounded-full bg-[#00A651]" />
-          </div>
-          <div className="-mt-2 flex flex-col items-center gap-2">
-            <div className="h-5 w-5 rotate-45 rounded border-2 border-[#F5A800]" />
-            <div className="h-10 w-10 rounded-full bg-white/10" />
-            <div style={{ width: 0, height: 0, borderLeft: "8px solid transparent", borderRight: "8px solid transparent", borderTop: "15px solid rgba(255,255,255,0.35)" }} />
-          </div>
-        </div>
       </div>
 
-      {/* ── Alerts (compact strip) ───────────────────────────── */}
+      {/* ── Alerts strip ─────────────────────────────────────── */}
       {!loading && hasAlerts && (
         <div className="mb-5 flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-md border border-amber-200 bg-amber-50 px-4 py-2.5">
           <span className="flex items-center gap-1.5 text-xs font-semibold text-amber-600">
@@ -325,9 +326,9 @@ export default function AdminHome() {
 
       {/* ── Section title ─────────────────────────────────────── */}
       <div className="mb-4 flex items-center gap-2">
-        <TrendingUp size={16} className="text-[#1c46f3]" />
-        <h2 className="text-[15px] font-semibold text-gray-800">Resumo do Mês</h2>
-        <span className="text-xs capitalize text-gray-400">{monthLabel}</span>
+        <TrendingUp size={16} style={{ color: TEAL }} />
+        <h2 className="text-[15px] font-semibold" style={{ color: COAL }}>Resumo do Mês</h2>
+        <span className="text-xs capitalize" style={{ color: MUTED }}>{monthLabel}</span>
       </div>
 
       {/* ── KPI Grid ─────────────────────────────────────────── */}
@@ -336,16 +337,16 @@ export default function AdminHome() {
           <Link
             key={k.label}
             to={k.to}
-            className="group flex flex-col gap-3 rounded-md border border-gray-200 bg-white p-4 transition hover:shadow-[0_2px_12px_rgba(28,70,243,0.1)]"
+            className="group flex flex-col gap-3 rounded-md border border-gray-200 bg-white p-4 transition hover:shadow-[0_2px_12px_rgba(13,115,119,0.10)]"
           >
             <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${k.iconBg}`}>
               <k.Icon size={17} className={k.iconCls} />
             </div>
             <div>
-              <p className="text-xs text-gray-500">{k.label}</p>
-              <p className="mt-0.5 text-2xl font-extrabold leading-none text-gray-900">{k.value}</p>
+              <p className="text-xs" style={{ color: MUTED }}>{k.label}</p>
+              <p className="mt-0.5 text-2xl font-extrabold leading-none" style={{ color: COAL }}>{k.value}</p>
               {k.delta !== null && k.delta !== undefined && <Delta value={k.delta} />}
-              {k.badge && <span className="mt-0.5 block text-xs font-medium text-[#1c46f3]">{k.badge}</span>}
+              {k.badge && <span className="mt-0.5 block text-xs font-medium" style={{ color: TEAL }}>{k.badge}</span>}
             </div>
           </Link>
         ))}
@@ -353,14 +354,13 @@ export default function AdminHome() {
 
       {/* ── Charts Row ─────────────────────────────────────── */}
       <div className="mb-7 grid gap-4 lg:grid-cols-[2fr_1fr]">
-        {/* Line chart — revenue */}
         <div className="rounded-md border border-gray-200 bg-white p-5">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <TrendingUp size={14} className="text-[#1c46f3]" />
-              <span className="text-sm font-semibold text-gray-800">Faturamento — Últimos 6 Meses</span>
+              <TrendingUp size={14} style={{ color: TEAL }} />
+              <span className="text-sm font-semibold" style={{ color: COAL }}>Faturamento — Últimos 6 Meses</span>
             </div>
-            <span className="rounded bg-[#1c46f3] px-2 py-0.5 text-[10px] font-bold text-white">
+            <span className="rounded px-2 py-0.5 text-[10px] font-bold text-white" style={{ background: TEAL }}>
               {now.getFullYear()}
             </span>
           </div>
@@ -370,14 +370,14 @@ export default function AdminHome() {
           }
         </div>
 
-        {/* Donut chart — service distribution */}
         <div className="rounded-md border border-gray-200 bg-white p-5">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <PawPrint size={14} className="text-[#F5A800]" />
-              <span className="text-sm font-semibold text-gray-800">Serviço por Atendimento</span>
+              <PawPrint size={14} style={{ color: AMBER }} />
+              <span className="text-sm font-semibold" style={{ color: COAL }}>Serviço por Atendimento</span>
             </div>
-            <span className="rounded border border-[#1c46f3] px-2 py-0.5 text-[10px] font-semibold capitalize text-[#1c46f3]">
+            <span className="rounded border px-2 py-0.5 text-[10px] font-semibold capitalize"
+              style={{ borderColor: TEAL, color: TEAL }}>
               {now.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "")}
             </span>
           </div>
@@ -407,14 +407,17 @@ export default function AdminHome() {
       {/* ── Bottom Row ─────────────────────────────────────── */}
       <div className="grid gap-4 lg:grid-cols-2">
 
-        {/* Recent atendimentos table */}
         <div className="overflow-hidden rounded-md border border-gray-200 bg-white">
           <div className="flex items-center justify-between border-b border-gray-100 px-5 py-3.5">
             <div className="flex items-center gap-2">
-              <Users size={14} className="text-[#1c46f3]" />
-              <span className="text-sm font-semibold text-gray-800">Atendimentos Recentes</span>
+              <Users size={14} style={{ color: TEAL }} />
+              <span className="text-sm font-semibold" style={{ color: COAL }}>Atendimentos Recentes</span>
             </div>
-            <Link to="/atendimentos" className="rounded border border-gray-200 px-2.5 py-1 text-xs font-medium text-gray-500 transition hover:border-[#1c46f3] hover:text-[#1c46f3]">
+            <Link to="/atendimentos"
+              className="rounded border border-gray-200 px-2.5 py-1 text-xs font-medium transition"
+              style={{ color: MUTED }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = TEAL; (e.currentTarget as HTMLAnchorElement).style.borderColor = TEAL; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = MUTED; (e.currentTarget as HTMLAnchorElement).style.borderColor = "#E5E7EB"; }}>
               Ver todos
             </Link>
           </div>
@@ -439,10 +442,10 @@ export default function AdminHome() {
                   {atendimentos.slice(0, 6).map((at) => (
                     <tr key={at.id} className="transition hover:bg-gray-50/60">
                       <td className="px-4 py-3">
-                        <p className="font-semibold text-gray-800">{petsById[at.pet_id] ?? `Pet #${at.pet_id}`}</p>
+                        <p className="font-semibold" style={{ color: COAL }}>{petsById[at.pet_id] ?? `Pet #${at.pet_id}`}</p>
                         <p className="text-xs text-gray-400">{serviceNames(at)}</p>
                       </td>
-                      <td className="px-4 py-3 text-xs text-gray-500">
+                      <td className="px-4 py-3 text-xs" style={{ color: MUTED }}>
                         {new Date(at.data_atendimento).toLocaleDateString("pt-BR")}
                       </td>
                       <td className="px-4 py-3">
@@ -456,14 +459,13 @@ export default function AdminHome() {
           )}
         </div>
 
-        {/* Today's agenda */}
         <div className="overflow-hidden rounded-md border border-gray-200 bg-white">
           <div className="flex items-center justify-between border-b border-gray-100 px-5 py-3.5">
             <div className="flex items-center gap-2">
-              <Calendar size={14} className="text-[#1c46f3]" />
-              <span className="text-sm font-semibold text-gray-800">Agenda de Hoje</span>
+              <Calendar size={14} style={{ color: TEAL }} />
+              <span className="text-sm font-semibold" style={{ color: COAL }}>Agenda de Hoje</span>
             </div>
-            <span className="rounded bg-[#00A651] px-2 py-0.5 text-[10px] font-bold capitalize text-white">
+            <span className="rounded px-2 py-0.5 text-[10px] font-bold capitalize text-white" style={{ background: MINT }}>
               {now.toLocaleDateString("pt-BR", { day: "numeric", month: "short" }).replace(".", "")}
             </span>
           </div>
@@ -482,12 +484,12 @@ export default function AdminHome() {
                 const time = new Date(at.data_atendimento).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
                 return (
                   <div key={at.id} className="flex items-center gap-3 px-5 py-3">
-                    <span className="min-w-[40px] text-xs font-bold text-[#1c46f3]">{time}</span>
+                    <span className="min-w-[40px] text-xs font-bold" style={{ color: TEAL }}>{time}</span>
                     <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${sBg}`}>
                       <SIcon size={14} className={sCls} />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-gray-800">{firstNome || "Atendimento"}</p>
+                      <p className="truncate text-sm font-semibold" style={{ color: COAL }}>{firstNome || "Atendimento"}</p>
                       <p className="truncate text-xs text-gray-400">{petsById[at.pet_id] ?? `Pet #${at.pet_id}`}</p>
                     </div>
                     <StatusBadge status={at.status} />
