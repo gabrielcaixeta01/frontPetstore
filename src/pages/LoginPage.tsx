@@ -218,12 +218,6 @@ export default function LoginPage() {
               Criar cadastro
             </Link>
           </p>
-          <p className="mt-2 text-center text-sm" style={{ color: MUTED }}>
-            É funcionário?{" "}
-            <Link to="/register-funcionario" className="font-semibold hover:underline" style={{ color: TEAL }}>
-              Cadastro de funcionário
-            </Link>
-          </p>
         </div>
       </div>
     </main>

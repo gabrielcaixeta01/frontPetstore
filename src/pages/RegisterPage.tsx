@@ -4,6 +4,7 @@ import {
   User, Mail, Phone, Lock, Eye, EyeOff,
   PawPrint, ShieldCheck, Zap, ArrowRight,
   Building2, CreditCard, MapPin, Map,
+  Briefcase, ChevronLeft,
 } from "lucide-react";
 import { api } from "../services/api";
 
@@ -15,7 +16,7 @@ const BG    = "#F8FAFC";
 const BORD  = "#E2E8F0";
 const MUTED = "#64748B";
 
-const features = [
+const clientFeatures = [
   { icon: PawPrint,    text: "Cadastre e acompanhe seus pets" },
   { icon: ShieldCheck, text: "Dados seguros e sempre acessíveis" },
   { icon: Zap,         text: "Acesso imediato após o cadastro" },
@@ -32,7 +33,6 @@ function maskCPF(v: string) {
     .replace(/(\d{3})(\d)/, "$1.$2")
     .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
 }
-
 function maskCNPJ(v: string) {
   return v.replace(/\D/g, "").slice(0, 14)
     .replace(/(\d{2})(\d)/, "$1.$2")
@@ -40,7 +40,6 @@ function maskCNPJ(v: string) {
     .replace(/(\d{3})(\d)/, "$1/$2")
     .replace(/(\d{4})(\d{1,2})$/, "$1-$2");
 }
-
 function maskCEP(v: string) {
   return v.replace(/\D/g, "").slice(0, 8)
     .replace(/(\d{5})(\d{1,3})/, "$1-$2");
@@ -93,21 +92,25 @@ function PanelDecor() {
   );
 }
 
+type AccountType = null | "cliente" | "funcionario";
+
 export default function RegisterPage() {
   const navigate = useNavigate();
-  const [clientType, setClientType] = useState<"pessoa_fisica" | "pessoa_juridica">("pessoa_fisica");
-  const [name, setName]             = useState("");
-  const [email, setEmail]           = useState("");
-  const [phone, setPhone]           = useState("");
-  const [cpf, setCpf]               = useState("");
-  const [cnpj, setCnpj]             = useState("");
-  const [cep, setCep]               = useState("");
-  const [state, setState]           = useState("");
-  const [city, setCity]             = useState("");
-  const [password, setPassword]     = useState("");
+
+  const [accountType, setAccountType] = useState<AccountType>(null);
+  const [clientType, setClientType]   = useState<"pessoa_fisica" | "pessoa_juridica">("pessoa_fisica");
+  const [name, setName]               = useState("");
+  const [email, setEmail]             = useState("");
+  const [phone, setPhone]             = useState("");
+  const [cpf, setCpf]                 = useState("");
+  const [cnpj, setCnpj]               = useState("");
+  const [cep, setCep]                 = useState("");
+  const [state, setState]             = useState("");
+  const [city, setCity]               = useState("");
+  const [password, setPassword]       = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading]       = useState(false);
-  const [error, setError]           = useState("");
+  const [loading, setLoading]         = useState(false);
+  const [error, setError]             = useState("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -167,7 +170,6 @@ export default function RegisterPage() {
       >
         <PanelDecor />
 
-        {/* Logo */}
         <div className="relative flex items-center gap-2">
           <PawPrint size={22} style={{ color: AMBER }} />
           <span className="text-xl font-black tracking-tight">Pet Club</span>
@@ -177,17 +179,21 @@ export default function RegisterPage() {
           <div>
             <span className="inline-block px-3 py-1 text-xs font-bold uppercase tracking-widest"
               style={{ background: AMBER, color: TDARK, borderRadius: "999px" }}>
-              Novo por aqui
+              {accountType === "funcionario" ? "Acesso interno" : "Novo por aqui"}
             </span>
             <h1 className="mt-5 text-4xl font-black leading-tight">
-              Comece a cuidar<br />melhor dos pets.
+              {accountType === "funcionario"
+                ? <>Área de<br />funcionários.</>
+                : <>Comece a cuidar<br />melhor dos pets.</>}
             </h1>
             <p className="mt-4 text-base" style={{ color: "rgba(255,255,255,0.75)" }}>
-              Crie sua conta e tenha acesso completo à plataforma em segundos.
+              {accountType === "funcionario"
+                ? "Crie sua conta e acesse as ferramentas de gestão do petshop."
+                : "Crie sua conta e tenha acesso completo à plataforma em segundos."}
             </p>
           </div>
           <ul className="space-y-4">
-            {features.map((f) => (
+            {clientFeatures.map((f) => (
               <li key={f.text} className="flex items-center gap-3">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center"
                   style={{ background: "rgba(255,255,255,0.15)", borderRadius: "8px" }}>
@@ -207,174 +213,269 @@ export default function RegisterPage() {
         </div>
       </div>
 
-      {/* ── Right panel (form) ── */}
+      {/* ── Right panel ── */}
       <div className="flex flex-1 flex-col items-center justify-center px-6 py-12" style={{ background: BG }}>
         <div className="w-full max-w-md">
+
           {/* Mobile logo */}
           <div className="mb-8 flex items-center gap-2 lg:hidden">
             <PawPrint size={20} style={{ color: TEAL }} />
             <span className="text-lg font-black tracking-tight" style={{ color: COAL }}>Pet Club</span>
           </div>
 
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold" style={{ color: COAL }}>Criar conta</h2>
-            <p className="mt-1 text-sm" style={{ color: MUTED }}>Preencha os dados abaixo para começar.</p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Tipo */}
-            <Field label="Tipo de cadastro">
-              <div className="grid grid-cols-2 gap-2">
-                <button type="button" style={typeBtn(clientType === "pessoa_fisica")}
-                  onClick={() => { setClientType("pessoa_fisica"); setCnpj(""); }}>
-                  <User size={15} /> Pessoa Física
-                </button>
-                <button type="button" style={typeBtn(clientType === "pessoa_juridica")}
-                  onClick={() => { setClientType("pessoa_juridica"); setCpf(""); }}>
-                  <Building2 size={15} /> Pessoa Jurídica
-                </button>
+          {/* ── Step 1: tipo de conta ── */}
+          {accountType === null && (
+            <>
+              <div className="mb-8">
+                <h2 className="text-2xl font-bold" style={{ color: COAL }}>Criar conta</h2>
+                <p className="mt-1 text-sm" style={{ color: MUTED }}>Como você vai usar o Pet Club?</p>
               </div>
-            </Field>
 
-            {/* Nome */}
-            <Field label={clientType === "pessoa_fisica" ? "Nome completo" : "Razão social"}>
-              <div className="relative">
-                <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: MUTED }} />
-                <input
-                  type="text" required autoComplete="name"
-                  placeholder={clientType === "pessoa_fisica" ? "Seu nome completo" : "Nome da empresa"}
-                  value={name} onChange={(e) => setName(e.target.value)}
-                  style={inputBase} onFocus={focusStyle} onBlur={blurStyle}
-                />
-              </div>
-            </Field>
-
-            {/* E-mail + Telefone */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="E-mail">
-                <div className="relative">
-                  <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: MUTED }} />
-                  <input
-                    type="email" required autoComplete="email"
-                    placeholder="seuemail@exemplo.com"
-                    value={email} onChange={(e) => setEmail(e.target.value)}
-                    style={inputBase} onFocus={focusStyle} onBlur={blurStyle}
-                  />
-                </div>
-              </Field>
-              <Field label="Telefone">
-                <div className="relative">
-                  <Phone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: MUTED }} />
-                  <input
-                    type="tel" required autoComplete="tel"
-                    placeholder="(61) 99999-9999"
-                    value={phone} onChange={(e) => setPhone(e.target.value)}
-                    style={inputBase} onFocus={focusStyle} onBlur={blurStyle}
-                  />
-                </div>
-              </Field>
-            </div>
-
-            {/* CPF ou CNPJ */}
-            <Field label={clientType === "pessoa_fisica" ? "CPF" : "CNPJ"}>
-              <div className="relative">
-                <CreditCard size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: MUTED }} />
-                {clientType === "pessoa_fisica" ? (
-                  <input type="text" required placeholder="000.000.000-00"
-                    value={cpf} onChange={(e) => setCpf(maskCPF(e.target.value))}
-                    style={inputBase} onFocus={focusStyle} onBlur={blurStyle}
-                  />
-                ) : (
-                  <input type="text" required placeholder="00.000.000/0000-00"
-                    value={cnpj} onChange={(e) => setCnpj(maskCNPJ(e.target.value))}
-                    style={inputBase} onFocus={focusStyle} onBlur={blurStyle}
-                  />
-                )}
-              </div>
-            </Field>
-
-            {/* Endereço */}
-            <div className="grid gap-4 sm:grid-cols-3">
-              <Field label="CEP">
-                <div className="relative">
-                  <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: MUTED }} />
-                  <input type="text" placeholder="00000-000"
-                    value={cep} onChange={(e) => setCep(maskCEP(e.target.value))}
-                    style={inputBase} onFocus={focusStyle} onBlur={blurStyle}
-                  />
-                </div>
-              </Field>
-              <Field label="Estado">
-                <div className="relative">
-                  <Map size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: MUTED }} />
-                  <select
-                    value={state} onChange={(e) => setState(e.target.value)}
-                    style={{ ...inputBase, appearance: "none" as const }}
-                    onFocus={focusStyle as any} onBlur={blurStyle as any}
-                  >
-                    <option value="">UF</option>
-                    {BR_STATES.map((uf) => <option key={uf} value={uf}>{uf}</option>)}
-                  </select>
-                </div>
-              </Field>
-              <Field label="Cidade">
-                <div className="relative">
-                  <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: MUTED }} />
-                  <input type="text" placeholder="São Paulo"
-                    value={city} onChange={(e) => setCity(e.target.value)}
-                    style={inputBase} onFocus={focusStyle} onBlur={blurStyle}
-                  />
-                </div>
-              </Field>
-            </div>
-
-            {/* Senha */}
-            <Field label="Senha">
-              <div className="relative">
-                <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: MUTED }} />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  required minLength={6} autoComplete="new-password"
-                  placeholder="Mínimo 6 caracteres"
-                  value={password} onChange={(e) => setPassword(e.target.value)}
-                  style={{ ...inputBase, paddingRight: "44px" }}
-                  onFocus={focusStyle} onBlur={blurStyle}
-                />
+              <div className="grid grid-cols-2 gap-4">
+                {/* Opção Cliente */}
                 <button
                   type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 transition hover:opacity-70"
-                  style={{ color: MUTED }} tabIndex={-1}
+                  onClick={() => setAccountType("cliente")}
+                  className="group flex flex-col items-center gap-3 p-6 text-center transition hover:-translate-y-0.5"
+                  style={{
+                    border: `1.5px solid ${BORD}`,
+                    borderRadius: "12px",
+                    background: "#FFFFFF",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+                    cursor: "pointer",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLButtonElement).style.borderColor = TEAL;
+                    (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 4px 16px rgba(13,115,119,0.12)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLButtonElement).style.borderColor = BORD;
+                    (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 1px 3px rgba(0,0,0,0.06)";
+                  }}
                 >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full"
+                    style={{ background: "#D4F0F0" }}>
+                    <User size={26} style={{ color: TEAL }} />
+                  </div>
+                  <div>
+                    <p className="font-bold" style={{ color: COAL }}>Cliente</p>
+                    <p className="mt-0.5 text-xs" style={{ color: MUTED }}>Agende serviços e acompanhe seus pets</p>
+                  </div>
+                  <div className="flex items-center gap-1 text-xs font-semibold" style={{ color: TEAL }}>
+                    Continuar <ArrowRight size={13} />
+                  </div>
+                </button>
+
+                {/* Opção Funcionário */}
+                <button
+                  type="button"
+                  onClick={() => navigate("/register-funcionario")}
+                  className="group flex flex-col items-center gap-3 p-6 text-center transition hover:-translate-y-0.5"
+                  style={{
+                    border: `1.5px solid ${BORD}`,
+                    borderRadius: "12px",
+                    background: "#FFFFFF",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+                    cursor: "pointer",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLButtonElement).style.borderColor = TEAL;
+                    (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 4px 16px rgba(13,115,119,0.12)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLButtonElement).style.borderColor = BORD;
+                    (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 1px 3px rgba(0,0,0,0.06)";
+                  }}
+                >
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full"
+                    style={{ background: "#FEE2CC" }}>
+                    <Briefcase size={26} style={{ color: "#F97316" }} />
+                  </div>
+                  <div>
+                    <p className="font-bold" style={{ color: COAL }}>Funcionário</p>
+                    <p className="mt-0.5 text-xs" style={{ color: MUTED }}>Acesse as ferramentas de gestão do petshop</p>
+                  </div>
+                  <div className="flex items-center gap-1 text-xs font-semibold" style={{ color: "#F97316" }}>
+                    Continuar <ArrowRight size={13} />
+                  </div>
                 </button>
               </div>
-            </Field>
 
-            {error && (
-              <div className="px-4 py-3 text-sm"
-                style={{ borderRadius: "6px", border: "1px solid #FECACA", background: "rgba(254,202,202,0.3)", color: "#DC2626" }}>
-                {error}
+              <p className="mt-8 text-center text-sm" style={{ color: MUTED }}>
+                Já tem conta?{" "}
+                <Link to="/login" className="font-semibold hover:underline" style={{ color: TEAL }}>
+                  Entrar
+                </Link>
+              </p>
+            </>
+          )}
+
+          {/* ── Step 2: formulário de cliente ── */}
+          {accountType === "cliente" && (
+            <>
+              <div className="mb-6">
+                <button
+                  type="button"
+                  onClick={() => setAccountType(null)}
+                  className="mb-4 flex items-center gap-1.5 text-sm transition hover:opacity-70"
+                  style={{ color: MUTED }}
+                >
+                  <ChevronLeft size={15} /> Voltar
+                </button>
+                <h2 className="text-2xl font-bold" style={{ color: COAL }}>Cadastro de cliente</h2>
+                <p className="mt-1 text-sm" style={{ color: MUTED }}>Preencha os dados abaixo para começar.</p>
               </div>
-            )}
 
-            <button
-              type="submit" disabled={loading}
-              className="flex w-full items-center justify-center gap-2 py-2.5 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-60"
-              style={{ background: TEAL, borderRadius: "6px" }}
-              onMouseEnter={(e) => { if (!loading) (e.currentTarget as HTMLButtonElement).style.background = TDARK; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = TEAL; }}
-            >
-              {loading ? "Criando conta..." : <><span>Criar conta</span><ArrowRight size={15} /></>}
-            </button>
-          </form>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <Field label="Tipo de cadastro">
+                  <div className="grid grid-cols-2 gap-2">
+                    <button type="button" style={typeBtn(clientType === "pessoa_fisica")}
+                      onClick={() => { setClientType("pessoa_fisica"); setCnpj(""); }}>
+                      <User size={15} /> Pessoa Física
+                    </button>
+                    <button type="button" style={typeBtn(clientType === "pessoa_juridica")}
+                      onClick={() => { setClientType("pessoa_juridica"); setCpf(""); }}>
+                      <Building2 size={15} /> Pessoa Jurídica
+                    </button>
+                  </div>
+                </Field>
 
-          <p className="mt-6 text-center text-sm lg:hidden" style={{ color: MUTED }}>
-            Já tem conta?{" "}
-            <Link to="/login" className="font-semibold hover:underline" style={{ color: TEAL }}>
-              Entrar
-            </Link>
-          </p>
+                <Field label={clientType === "pessoa_fisica" ? "Nome completo" : "Razão social"}>
+                  <div className="relative">
+                    <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: MUTED }} />
+                    <input
+                      type="text" required autoComplete="name"
+                      placeholder={clientType === "pessoa_fisica" ? "Seu nome completo" : "Nome da empresa"}
+                      value={name} onChange={(e) => setName(e.target.value)}
+                      style={inputBase} onFocus={focusStyle} onBlur={blurStyle}
+                    />
+                  </div>
+                </Field>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field label="E-mail">
+                    <div className="relative">
+                      <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: MUTED }} />
+                      <input
+                        type="email" required autoComplete="email"
+                        placeholder="seuemail@exemplo.com"
+                        value={email} onChange={(e) => setEmail(e.target.value)}
+                        style={inputBase} onFocus={focusStyle} onBlur={blurStyle}
+                      />
+                    </div>
+                  </Field>
+                  <Field label="Telefone">
+                    <div className="relative">
+                      <Phone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: MUTED }} />
+                      <input
+                        type="tel" required autoComplete="tel"
+                        placeholder="(61) 99999-9999"
+                        value={phone} onChange={(e) => setPhone(e.target.value)}
+                        style={inputBase} onFocus={focusStyle} onBlur={blurStyle}
+                      />
+                    </div>
+                  </Field>
+                </div>
+
+                <Field label={clientType === "pessoa_fisica" ? "CPF" : "CNPJ"}>
+                  <div className="relative">
+                    <CreditCard size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: MUTED }} />
+                    {clientType === "pessoa_fisica" ? (
+                      <input type="text" required placeholder="000.000.000-00"
+                        value={cpf} onChange={(e) => setCpf(maskCPF(e.target.value))}
+                        style={inputBase} onFocus={focusStyle} onBlur={blurStyle}
+                      />
+                    ) : (
+                      <input type="text" required placeholder="00.000.000/0000-00"
+                        value={cnpj} onChange={(e) => setCnpj(maskCNPJ(e.target.value))}
+                        style={inputBase} onFocus={focusStyle} onBlur={blurStyle}
+                      />
+                    )}
+                  </div>
+                </Field>
+
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <Field label="CEP">
+                    <div className="relative">
+                      <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: MUTED }} />
+                      <input type="text" placeholder="00000-000"
+                        value={cep} onChange={(e) => setCep(maskCEP(e.target.value))}
+                        style={inputBase} onFocus={focusStyle} onBlur={blurStyle}
+                      />
+                    </div>
+                  </Field>
+                  <Field label="Estado">
+                    <div className="relative">
+                      <Map size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: MUTED }} />
+                      <select
+                        value={state} onChange={(e) => setState(e.target.value)}
+                        style={{ ...inputBase, appearance: "none" as const }}
+                        onFocus={focusStyle as any} onBlur={blurStyle as any}
+                      >
+                        <option value="">UF</option>
+                        {BR_STATES.map((uf) => <option key={uf} value={uf}>{uf}</option>)}
+                      </select>
+                    </div>
+                  </Field>
+                  <Field label="Cidade">
+                    <div className="relative">
+                      <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: MUTED }} />
+                      <input type="text" placeholder="São Paulo"
+                        value={city} onChange={(e) => setCity(e.target.value)}
+                        style={inputBase} onFocus={focusStyle} onBlur={blurStyle}
+                      />
+                    </div>
+                  </Field>
+                </div>
+
+                <Field label="Senha">
+                  <div className="relative">
+                    <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: MUTED }} />
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      required minLength={6} autoComplete="new-password"
+                      placeholder="Mínimo 6 caracteres"
+                      value={password} onChange={(e) => setPassword(e.target.value)}
+                      style={{ ...inputBase, paddingRight: "44px" }}
+                      onFocus={focusStyle} onBlur={blurStyle}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 transition hover:opacity-70"
+                      style={{ color: MUTED }} tabIndex={-1}
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </Field>
+
+                {error && (
+                  <div className="px-4 py-3 text-sm"
+                    style={{ borderRadius: "6px", border: "1px solid #FECACA", background: "rgba(254,202,202,0.3)", color: "#DC2626" }}>
+                    {error}
+                  </div>
+                )}
+
+                <button
+                  type="submit" disabled={loading}
+                  className="flex w-full items-center justify-center gap-2 py-2.5 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-60"
+                  style={{ background: TEAL, borderRadius: "6px" }}
+                  onMouseEnter={(e) => { if (!loading) (e.currentTarget as HTMLButtonElement).style.background = TDARK; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = TEAL; }}
+                >
+                  {loading ? "Criando conta..." : <><span>Criar conta</span><ArrowRight size={15} /></>}
+                </button>
+              </form>
+
+              <p className="mt-6 text-center text-sm lg:hidden" style={{ color: MUTED }}>
+                Já tem conta?{" "}
+                <Link to="/login" className="font-semibold hover:underline" style={{ color: TEAL }}>
+                  Entrar
+                </Link>
+              </p>
+            </>
+          )}
         </div>
       </div>
     </main>
