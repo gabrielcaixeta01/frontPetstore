@@ -6,29 +6,30 @@ import {
 } from "lucide-react";
 import type { ReactNode } from "react";
 
-const BLUE  = "#1A3CB8";
-const YELL  = "#F5A800";
-const BDARK = "#0D2580";
-const BORD  = "#E0E0E0";
-const MUTED = "#6B6B6B";
+const TEAL  = "#0D7377";
+const AMBER = "#F59E0B";
+const COAL  = "#1E293B";
+const BG    = "#F8FAFC";
+const BORD  = "#E2E8F0";
+const MUTED = "#64748B";
 
 const navSections = [
   {
     label: "Painel",
     items: [
-      { to: "/", label: "Início", icon: Home, end: true },
+      { to: "/",             label: "Início",       icon: Home,          end: true  },
     ],
   },
   {
     label: "Administração",
     items: [
-      { to: "/pets",         label: "Pets",         icon: PawPrint,     end: false },
-      { to: "/atendimentos", label: "Atendimentos",  icon: CalendarCheck, end: false },
-      { to: "/servicos",     label: "Serviços",      icon: Scissors,     end: false },
-      { to: "/categorias",   label: "Categorias",    icon: LayoutGrid,   end: false },
-      { to: "/lojas",        label: "Lojas",         icon: Store,        end: false },
-      { to: "/usuarios",     label: "Usuários",      icon: Users,        end: false },
-      { to: "/tags",         label: "Tags",          icon: Tag,          end: false },
+      { to: "/pets",         label: "Pets",         icon: PawPrint,      end: false },
+      { to: "/atendimentos", label: "Atendimentos", icon: CalendarCheck, end: false },
+      { to: "/servicos",     label: "Serviços",     icon: Scissors,      end: false },
+      { to: "/categorias",   label: "Categorias",   icon: LayoutGrid,    end: false },
+      { to: "/lojas",        label: "Lojas",        icon: Store,         end: false },
+      { to: "/usuarios",     label: "Usuários",     icon: Users,         end: false },
+      { to: "/tags",         label: "Tags",         icon: Tag,           end: false },
     ],
   },
 ];
@@ -55,115 +56,112 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   function closeSidebar() { setSidebarOpen(false); }
 
   return (
-    <div className="flex min-h-screen" style={{ background: "#F4F4F4" }}>
+    <div className="flex min-h-screen" style={{ background: BG }}>
 
       {/* ── Mobile header ── */}
       <header
         className="fixed inset-x-0 top-0 z-30 flex h-[52px] items-center gap-3 px-4 md:hidden"
-        style={{ background: BLUE }}
+        style={{ background: COAL, borderBottom: "1px solid rgba(255,255,255,0.06)" }}
       >
         <button
           onClick={() => setSidebarOpen(true)}
-          className="flex h-8 w-8 items-center justify-center text-white/70 transition hover:bg-white/10 hover:text-white"
+          className="flex h-8 w-8 items-center justify-center text-white/60 transition hover:bg-white/10 hover:text-white"
           style={{ borderRadius: "6px" }}
           aria-label="Abrir menu"
         >
           <Menu size={20} />
         </button>
-        <span className="text-base font-black tracking-tight text-white">Pet Club</span>
+        <div className="flex items-center gap-1.5">
+          <PawPrint size={16} style={{ color: TEAL }} />
+          <span className="text-base font-black tracking-tight text-white">Pet Club</span>
+        </div>
       </header>
 
       {/* ── Overlay ── */}
       {sidebarOpen && (
-        <div className="fixed inset-0 z-40 bg-black/40 md:hidden" onClick={closeSidebar} aria-hidden="true" />
+        <div className="fixed inset-0 z-40 bg-black/50 md:hidden" onClick={closeSidebar} aria-hidden="true" />
       )}
 
       {/* ── Sidebar ── */}
       <aside
         className={[
-          "fixed inset-y-0 left-0 z-50 flex h-full w-60 flex-col bg-white transition-transform duration-200 ease-in-out",
+          "fixed inset-y-0 left-0 z-50 flex h-full w-60 flex-col transition-transform duration-200 ease-in-out",
           "md:sticky md:top-0 md:h-screen md:translate-x-0 md:flex",
           sidebarOpen ? "translate-x-0" : "-translate-x-full",
         ].join(" ")}
-        style={{ borderRight: `1px solid ${BORD}` }}
+        style={{ background: COAL }}
       >
-        {/* Brand header — blue */}
-        <div className="flex-shrink-0 px-4 py-4" style={{ background: BLUE }}>
+        {/* Brand */}
+        <div className="flex-shrink-0 px-4 py-5" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
           <div className="flex items-center justify-between">
-            <span className="text-lg font-black tracking-tight text-white">Pet Club</span>
+            <div className="flex items-center gap-2">
+              <PawPrint size={18} style={{ color: TEAL }} />
+              <span className="text-base font-black tracking-tight text-white">Pet Club</span>
+            </div>
             <button
               onClick={closeSidebar}
-              className="flex h-7 w-7 items-center justify-center text-white/60 transition hover:text-white md:hidden"
+              className="flex h-7 w-7 items-center justify-center text-white/40 transition hover:text-white md:hidden"
               style={{ borderRadius: "4px" }}
               aria-label="Fechar menu"
             >
               <X size={16} />
             </button>
           </div>
-          {/* Role badge */}
-          <div className="mt-3 inline-flex items-center gap-1.5 px-2 py-1"
-            style={{ background: "rgba(255,255,255,0.12)", borderRadius: "4px" }}>
-            <ShieldCheck size={11} style={{ color: "rgba(255,255,255,0.7)" }} />
-            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.7)" }}>
+          <div className="mt-3 inline-flex items-center gap-1.5 px-2 py-0.5"
+            style={{ background: "rgba(13,115,119,0.25)", borderRadius: "999px" }}>
+            <ShieldCheck size={10} style={{ color: TEAL }} />
+            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: TEAL }}>
               Painel Admin
             </span>
           </div>
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 overflow-y-auto py-3">
+        <nav className="flex-1 overflow-y-auto py-4">
           {navSections.map((section) => (
-            <div key={section.label} className="mb-3">
-              <p className="mb-1 px-4 text-[9px] font-bold uppercase tracking-widest" style={{ color: MUTED }}>
+            <div key={section.label} className="mb-4">
+              <p className="mb-1.5 px-4 text-[9px] font-bold uppercase tracking-widest"
+                style={{ color: "rgba(255,255,255,0.30)" }}>
                 {section.label}
               </p>
-              <div className="space-y-0.5">
+              <div className="space-y-0.5 px-2">
                 {section.items.map((item) => (
                   <NavLink
                     key={item.to}
                     to={item.to}
                     end={item.end}
                     onClick={closeSidebar}
-                    className="group relative mx-2 block"
+                    className="block"
                   >
                     {({ isActive }) => (
-                      <>
-                        {isActive && (
-                          <div
-                            className="absolute -left-2 bottom-1.5 top-1.5 w-[3px]"
-                            style={{ background: BLUE, borderRadius: "0 2px 2px 0" }}
-                          />
-                        )}
+                      <div
+                        className="flex items-center gap-2.5 px-2 py-[7px] text-[13px] transition-all"
+                        style={{
+                          borderRadius: "6px",
+                          background: isActive ? TEAL : "transparent",
+                          color: isActive ? "#ffffff" : "rgba(255,255,255,0.62)",
+                          fontWeight: isActive ? 600 : 500,
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isActive) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)";
+                          if (!isActive) (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.90)";
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isActive) (e.currentTarget as HTMLElement).style.background = "transparent";
+                          if (!isActive) (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.62)";
+                        }}
+                      >
                         <div
-                          className={`flex items-center gap-2.5 px-2 py-[7px] text-[13px] transition-all ${
-                            isActive
-                              ? "font-bold"
-                              : "font-medium text-gray-600 hover:text-[#1A3CB8]"
-                          }`}
+                          className="flex h-7 w-7 shrink-0 items-center justify-center"
                           style={{
                             borderRadius: "6px",
-                            background: isActive ? "rgba(26,60,184,0.08)" : undefined,
-                            color: isActive ? BLUE : undefined,
-                          }}
-                          onMouseEnter={(e) => {
-                            if (!isActive) (e.currentTarget as HTMLElement).style.background = "rgba(26,60,184,0.05)";
-                          }}
-                          onMouseLeave={(e) => {
-                            if (!isActive) (e.currentTarget as HTMLElement).style.background = "";
+                            background: isActive ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.07)",
                           }}
                         >
-                          <div
-                            className="flex h-7 w-7 shrink-0 items-center justify-center transition-colors"
-                            style={{
-                              borderRadius: "6px",
-                              background: isActive ? BLUE : "#F4F4F4",
-                            }}
-                          >
-                            <item.icon size={14} color={isActive ? "#ffffff" : MUTED} />
-                          </div>
-                          {item.label}
+                          <item.icon size={14} color={isActive ? "#ffffff" : "rgba(255,255,255,0.45)"} />
                         </div>
-                      </>
+                        {item.label}
+                      </div>
                     )}
                   </NavLink>
                 ))}
@@ -173,31 +171,33 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         </nav>
 
         {/* User footer */}
-        <div className="flex-shrink-0 p-3" style={{ borderTop: `1px solid ${BORD}` }}>
+        <div className="flex-shrink-0 p-3" style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}>
           <NavLink
             to="/perfil"
             onClick={closeSidebar}
-            className="flex items-center gap-2.5 p-2 transition-colors hover:bg-gray-50"
+            className="flex items-center gap-2.5 p-2 transition-colors"
             style={{ borderRadius: "6px" }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
           >
             <div
               className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-bold"
-              style={{ background: YELL, color: BDARK, border: `2px solid ${BLUE}` }}
+              style={{ background: AMBER, color: COAL }}
             >
               {initials}
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1">
-                <p className="truncate text-[12px] font-bold text-gray-900">{user.name ?? "Admin"}</p>
-                <ShieldCheck size={10} style={{ color: BLUE, flexShrink: 0 }} />
+                <p className="truncate text-[12px] font-bold text-white">{user.name ?? "Admin"}</p>
+                <ShieldCheck size={10} style={{ color: TEAL, flexShrink: 0 }} />
               </div>
-              <p className="truncate text-[10px]" style={{ color: MUTED }}>{user.email ?? ""}</p>
+              <p className="truncate text-[10px]" style={{ color: "rgba(255,255,255,0.45)" }}>{user.email ?? ""}</p>
             </div>
           </NavLink>
           <button
             onClick={logout}
-            className="mt-1 flex w-full items-center gap-2 px-2.5 py-1.5 text-[12px] transition-colors hover:bg-red-50 hover:text-red-600"
-            style={{ borderRadius: "6px", color: MUTED }}
+            className="mt-1 flex w-full items-center gap-2 px-2.5 py-1.5 text-[12px] transition-colors hover:bg-red-500/10 hover:text-red-400"
+            style={{ borderRadius: "6px", color: "rgba(255,255,255,0.40)" }}
           >
             <LogOut size={13} />
             Sair da conta
