@@ -70,11 +70,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         >
           <Menu size={20} />
         </button>
-        <img
-          src="/logo_apex.png" alt="Pet Club"
-          className="h-7 w-auto"
-          style={{ filter: "brightness(0) invert(1)" }}
-        />
+        <span className="text-base font-black tracking-tight text-white">Pet Club</span>
       </header>
 
       {/* ── Overlay ── */}
@@ -94,11 +90,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         {/* Brand header — blue */}
         <div className="flex-shrink-0 px-4 py-4" style={{ background: BLUE }}>
           <div className="flex items-center justify-between">
-            <img
-              src="/logo_apex.png" alt="Pet Club"
-              className="h-8 w-auto"
-              style={{ filter: "brightness(0) invert(1)" }}
-            />
+            <span className="text-lg font-black tracking-tight text-white">Pet Club</span>
             <button
               onClick={closeSidebar}
               className="flex h-7 w-7 items-center justify-center text-white/60 transition hover:text-white md:hidden"
