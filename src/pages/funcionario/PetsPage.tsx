@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  Plus, X, Check, Pencil, Trash2, PawPrint, Users,
-  ChevronRight, Search,
+  Plus, X, Check, Pencil, Trash2, PawPrint, Users, Search,
 } from "lucide-react";
 import EditModal from "../../components/EditModal";
 import EditPetForm from "../../components/pet/EditPetForm";
@@ -14,6 +13,13 @@ import type { CreatePetDTO, Pet, UpdatePetDTO } from "../../types/pet";
 import type { Appointment } from "../../types/atendimento";
 import { useFuncionarioStore } from "../../hooks/useFuncionarioStore";
 
+const TEAL  = "#0D7377";
+const TDARK = "#085C60";
+const AMBER = "#F59E0B";
+const BORD  = "#E2E8F0";
+const MUTED = "#64748B";
+const COAL  = "#1E293B";
+
 function getSpeciesKey(catName: string): string {
   const n = catName.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
   if (/cao|canis|canin|cachorro/.test(n)) return "Canino";
@@ -23,22 +29,22 @@ function getSpeciesKey(catName: string): string {
   return "Outros";
 }
 
-function getSpeciesStyle(key: string) {
-  switch (key) {
-    case "Canino": return { avatarBg: "bg-[#e8eeff]", avatarText: "text-[#1c46f3]", badgeCls: "bg-[#e8eeff] text-[#1c46f3]" };
-    case "Felino": return { avatarBg: "bg-[#e6f4ed]", avatarText: "text-[#00A651]", badgeCls: "bg-[#e6f4ed] text-[#00A651]" };
-    case "Ave":    return { avatarBg: "bg-[#fff8e6]", avatarText: "text-[#b07800]", badgeCls: "bg-[#fff8e6] text-[#b07800]" };
-    case "Roedor": return { avatarBg: "bg-[#fde8e8]", avatarText: "text-[#8b1a1a]", badgeCls: "bg-[#fde8e8] text-[#8b1a1a]" };
-    default:       return { avatarBg: "bg-[#e8eeff]", avatarText: "text-[#1c46f3]", badgeCls: "bg-[#e8eeff] text-[#1c46f3]" };
-  }
+function getSpeciesStyle(_key: string) {
+  return { avatarBg: "bg-[#e6f5f5]", avatarText: "text-[#085C60]", badgeCls: "bg-[#e6f5f5] text-[#085C60]" };
 }
 
-function tagColor(nome: string): string {
-  const n = nome.toLowerCase();
-  if (/alergi|intoler/.test(n))                        return "bg-red-50 text-red-700";
-  if (/alert|atenção|atencao|cuid|medo|ansio/.test(n)) return "bg-amber-50 text-amber-700";
-  if (/vacin|castrad|microchip|vermif/.test(n))        return "bg-emerald-50 text-emerald-700";
-  return "bg-[#e8eeff] text-[#1c46f3]";
+function tagColor(_nome: string): string {
+  return "bg-teal-50 text-teal-700";
+}
+
+function HeroDecor() {
+  return (
+    <>
+      <div className="absolute -right-8 -top-8 h-44 w-44 rounded-full bg-white/10" />
+      <div className="absolute -bottom-6 right-28 h-28 w-28 rounded-full bg-white/10" />
+      <div className="absolute right-16 top-6 h-16 w-16 rounded-full bg-white/10" />
+    </>
+  );
 }
 
 export default function PetsPage() {
@@ -134,101 +140,116 @@ export default function PetsPage() {
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
 
-      {/* ── Hero Banner ────────────────────────────────────── */}
-      <div className="relative mb-5 overflow-hidden rounded-md bg-[#1c46f3] px-6 py-7 sm:px-8">
-        <div className="mb-2 flex items-center gap-1.5 text-[11px] text-white/60">
-          <span>Painel</span><ChevronRight size={10} />
-          <span className="font-medium text-white/90">Pets</span>
-        </div>
-        <div className="mb-1 flex items-center gap-2">
-          <PawPrint size={20} className="text-[#F5A800]" />
-          <h1 className="text-2xl font-extrabold leading-tight text-white">
-            Pets <span className="text-[#F5A800]">da Loja</span>
-          </h1>
-        </div>
-        <p className="mb-4 text-[13px] text-white/70">Gerencie todos os pets atendidos na sua loja</p>
-        {!loading && (
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-1.5">
-              <span className="text-lg font-extrabold text-[#F5A800]">{visiblePets.length}</span>
-              <span className="text-[11px] text-white/65">Total de pets</span>
-            </div>
-            {Object.entries(speciesCounts).map(([key, count], i) => (
-              <div key={key} className="flex items-center gap-3">
-                <div className="h-6 w-px bg-white/20" />
-                <div className="flex items-center gap-1.5">
-                  <span className="text-lg font-extrabold" style={{ color: i === 0 ? "#7fffb5" : i === 1 ? "#ffe066" : "#ffa07a" }}>{count}</span>
-                  <span className="text-[11px] text-white/65">{key}s</span>
-                </div>
+      {/* Hero */}
+      <div className="relative mb-6 overflow-hidden px-8 py-9" style={{ background: TEAL, borderRadius: "10px" }}>
+        <HeroDecor />
+        <div className="relative z-10">
+          <p className="mb-1.5 text-xs font-bold uppercase tracking-widest" style={{ color: AMBER }}>Loja</p>
+          <div className="flex items-center gap-2">
+            <PawPrint size={22} className="text-white/80" />
+            <h1 className="text-2xl font-extrabold text-white">
+              Pets <span style={{ color: AMBER }}>da Loja</span>
+            </h1>
+          </div>
+          <p className="mt-1 text-sm text-white/70">Gerencie todos os pets atendidos na sua loja</p>
+          {!loading && (
+            <div className="mt-4 flex flex-wrap items-center gap-5">
+              <div className="flex items-center gap-1.5">
+                <span className="text-xl font-extrabold" style={{ color: AMBER }}>{visiblePets.length}</span>
+                <span className="text-xs text-white/65">total de pets</span>
               </div>
-            ))}
-          </div>
-        )}
-        <div className="absolute right-6 top-1/2 hidden -translate-y-1/2 items-center gap-2.5 lg:flex" aria-hidden="true">
-          <div className="flex flex-col items-center gap-2">
-            <div className="h-3.5 w-3.5 rotate-45 rounded bg-[#F5A800]" />
-            <div className="h-6 w-6 rounded-full border-2 border-[#00A651]" />
-            <div className="h-2.5 w-2.5 rounded bg-[#00A651]" />
-          </div>
-          <div className="mt-4 flex flex-col items-center gap-2">
-            <div style={{ width:0, height:0, borderLeft:"11px solid transparent", borderRight:"11px solid transparent", borderBottom:"19px solid #F5A800" }} />
-            <div className="h-7 w-7 rounded bg-white/10" />
-            <div className="h-4 w-4 rounded-full bg-[#00A651]" />
-          </div>
-          <div className="-mt-2 flex flex-col items-center gap-2">
-            <div className="h-4 w-4 rotate-45 rounded border-2 border-[#F5A800]" />
-            <div className="h-9 w-9 rounded-full bg-white/10" />
-            <div style={{ width:0, height:0, borderLeft:"7px solid transparent", borderRight:"7px solid transparent", borderTop:"13px solid rgba(255,255,255,0.35)" }} />
-          </div>
+              {Object.entries(speciesCounts).map(([key, count]) => (
+                <div key={key} className="flex items-center gap-3">
+                  <div className="h-5 w-px bg-white/20" />
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-base font-extrabold text-white/90">{count}</span>
+                    <span className="text-xs text-white/55">{key}s</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* ── Toolbar ────────────────────────────────────────── */}
-      <div className="mb-5 flex flex-wrap items-center gap-2 rounded-md border border-gray-200 bg-white px-4 py-2.5">
-        <div className="flex items-center gap-1.5 rounded border border-gray-200 bg-gray-50 px-2.5 py-1.5 text-xs focus-within:border-[#1c46f3] focus-within:bg-white">
-          <Search size={13} className="shrink-0 text-gray-400" />
-          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar pet, tutor, raça..."
-            className="w-36 bg-transparent outline-none placeholder:text-gray-400 sm:w-52" />
+      {/* Toolbar */}
+      <div className="mb-5 flex flex-wrap items-center gap-2 bg-white px-4 py-2.5"
+        style={{ border: `1px solid ${BORD}`, borderRadius: "10px" }}>
+        <div className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs"
+          style={{ border: `1px solid ${BORD}`, borderRadius: "6px", background: "#F8FAFC" }}>
+          <Search size={13} className="shrink-0" style={{ color: MUTED }} />
+          <input value={search} onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar pet, tutor, raça..."
+            className="w-36 bg-transparent outline-none placeholder:text-gray-400 sm:w-52"
+            style={{ color: COAL }}
+            onFocus={(e) => { (e.currentTarget.parentElement as HTMLElement).style.borderColor = TEAL; }}
+            onBlur={(e) => { (e.currentTarget.parentElement as HTMLElement).style.borderColor = BORD; }} />
         </div>
         <div className="flex gap-1">
-          {["todos", ...filterOptions].map((key) => (
-            <button key={key} onClick={() => setSpeciesFilter(key)}
-              className={`rounded border px-2.5 py-1.5 text-[11px] font-medium transition ${
-                speciesFilter === key
-                  ? "border-[#1c46f3] bg-[#1c46f3] text-white"
-                  : "border-gray-200 bg-white text-gray-500 hover:border-[#1c46f3] hover:text-[#1c46f3]"
-              }`}>
-              {key === "todos" ? "Todos" : key}
-            </button>
-          ))}
+          {["todos", ...filterOptions].map((key) => {
+            const isActive = speciesFilter === key;
+            return (
+              <button key={key} onClick={() => setSpeciesFilter(key)}
+                className="px-2.5 py-1.5 text-[11px] font-medium transition"
+                style={{
+                  borderRadius: "6px",
+                  border: `1px solid ${isActive ? "transparent" : BORD}`,
+                  background: isActive ? TEAL : "#fff",
+                  color: isActive ? "#fff" : MUTED,
+                }}>
+                {key === "todos" ? "Todos" : key}
+              </button>
+            );
+          })}
         </div>
         <div className="ml-auto flex items-center gap-2">
-          {!loading && <span className="text-xs text-gray-400">{filteredPets.length} {filteredPets.length === 1 ? "pet" : "pets"}</span>}
+          {!loading && <span className="text-xs" style={{ color: MUTED }}>{filteredPets.length} {filteredPets.length === 1 ? "pet" : "pets"}</span>}
           <button onClick={() => { setShowForm((v) => !v); setError(""); }}
-            className="flex items-center gap-1.5 rounded bg-[#1c46f3] px-3 py-1.5 text-[12px] font-semibold text-white transition hover:bg-[#1840e0]">
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white transition"
+            style={{ background: showForm ? MUTED : TEAL, borderRadius: "6px" }}
+            onMouseEnter={(e) => { if (!showForm) (e.currentTarget as HTMLButtonElement).style.background = TDARK; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = showForm ? MUTED : TEAL; }}>
             {showForm ? <X size={13} /> : <Plus size={13} />}
             {showForm ? "Cancelar" : "Novo pet"}
           </button>
         </div>
       </div>
 
-      {feedback && <div className="mb-4 flex items-center gap-2 rounded border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm text-emerald-700"><Check size={14} /> {feedback}</div>}
-      {error   && <div className="mb-4 rounded border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-600">{error}</div>}
+      {feedback && (
+        <div className="mb-4 flex items-center gap-2 px-4 py-2.5 text-sm"
+          style={{ borderRadius: "6px", border: "1px solid #A7F3D0", background: "rgba(167,243,208,0.25)", color: "#065F46" }}>
+          <Check size={14} /> {feedback}
+        </div>
+      )}
+      {error && (
+        <div className="mb-4 px-4 py-2.5 text-sm"
+          style={{ borderRadius: "6px", border: "1px solid #FECACA", background: "rgba(254,202,202,0.25)", color: "#DC2626" }}>
+          {error}
+        </div>
+      )}
 
-      {showForm && <div className="mb-5"><PetForm petBeingEdited={null} onCreate={handleCreatePet} onUpdate={handleUpdatePet} onCancelEdit={() => setShowForm(false)} /></div>}
+      {showForm && (
+        <div className="mb-5"><PetForm petBeingEdited={null} onCreate={handleCreatePet} onUpdate={handleUpdatePet} onCancelEdit={() => setShowForm(false)} /></div>
+      )}
 
       <EditModal isOpen={Boolean(petBeingEdited)} title="Editar Pet" onClose={() => setPetBeingEdited(null)}>
         {petBeingEdited && <EditPetForm pet={petBeingEdited} onUpdate={handleUpdatePet} onCancel={() => setPetBeingEdited(null)} />}
       </EditModal>
 
-      {/* ── Grid ───────────────────────────────────────────── */}
+      {/* Grid */}
       {loading ? (
-        <div className="rounded border border-gray-200 bg-white p-10 text-center text-sm text-gray-400">Carregando pets...</div>
+        <div className="p-10 text-center text-sm" style={{ border: `1px solid ${BORD}`, borderRadius: "10px", background: "#fff", color: MUTED }}>
+          Carregando pets...
+        </div>
       ) : filteredPets.length === 0 ? (
-        <div className="rounded border border-dashed border-gray-200 bg-white p-14 text-center">
-          <PawPrint size={38} className="mx-auto mb-3 text-gray-200" />
-          <p className="text-sm text-gray-400">{visiblePets.length === 0 ? "Nenhum pet cadastrado nesta loja." : "Nenhum pet encontrado."}</p>
-          {visiblePets.length === 0 && <button onClick={() => setShowForm(true)} className="mt-2 text-sm font-semibold text-[#1c46f3] hover:underline">Cadastrar primeiro pet</button>}
+        <div className="p-14 text-center" style={{ border: `1px dashed ${BORD}`, borderRadius: "10px", background: "#fff" }}>
+          <PawPrint size={38} className="mx-auto mb-3" style={{ color: "#D1D5DB" }} />
+          <p className="text-sm" style={{ color: MUTED }}>{visiblePets.length === 0 ? "Nenhum pet cadastrado nesta loja." : "Nenhum pet encontrado."}</p>
+          {visiblePets.length === 0 && (
+            <button onClick={() => setShowForm(true)} className="mt-2 text-sm font-semibold transition hover:opacity-70" style={{ color: TEAL }}>
+              Cadastrar primeiro pet
+            </button>
+          )}
         </div>
       ) : (
         <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
@@ -239,57 +260,73 @@ export default function PetsPage() {
             const catName = categoriasById[pet.categoria_id] ?? "";
             const { avatarBg, avatarText, badgeCls } = getSpeciesStyle(getSpeciesKey(catName));
             return (
-              <article key={pet.id} className="flex flex-col rounded border border-gray-200 bg-white transition hover:border-[#1c46f3]/40 hover:shadow-[0_3px_16px_rgba(28,70,243,0.08)]">
+              <article key={pet.id}
+                className="flex flex-col bg-white transition hover:shadow-md"
+                style={{ border: `1px solid ${BORD}`, borderRadius: "10px", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
                 <div className="flex flex-1 flex-col p-4">
                   <div className="mb-3 flex items-start gap-3">
-                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-base font-extrabold ${avatarBg} ${avatarText}`}>
+                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-extrabold ${avatarBg} ${avatarText}`}>
                       {pet.nome[0]?.toUpperCase()}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h3 className="font-bold leading-snug text-gray-900">{pet.nome}</h3>
+                      <h3 className="font-bold leading-snug" style={{ color: COAL }}>{pet.nome}</h3>
                       <span className={`mt-0.5 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold ${badgeCls}`}>{catName || "—"}</span>
                     </div>
                   </div>
-                  <p className="mb-0.5 truncate text-[11px] text-gray-500">
+                  <p className="mb-0.5 truncate text-[11px]" style={{ color: MUTED }}>
                     {[pet.raca, pet.sexo && pet.sexo.charAt(0).toUpperCase() + pet.sexo.slice(1), pet.porte && pet.porte.charAt(0).toUpperCase() + pet.porte.slice(1), pet.peso != null && `${pet.peso} kg`].filter(Boolean).join(" · ") || "Sem detalhes"}
                   </p>
                   {donosById[pet.dono_id] && (
-                    <p className="mb-2 flex items-center gap-1 text-[11px] text-gray-400"><Users size={10} className="shrink-0" /> {donosById[pet.dono_id]}</p>
+                    <p className="mb-2 flex items-center gap-1 text-[11px]" style={{ color: MUTED }}>
+                      <Users size={10} className="shrink-0" /> {donosById[pet.dono_id]}
+                    </p>
                   )}
                   {pet.observacoes_saude ? (
-                    <div className="mb-2.5 rounded-r border-l-[3px] border-l-[#1c46f3] bg-gray-50 px-2.5 py-2 text-[11px] italic leading-relaxed text-gray-600">
+                    <div className="mb-2.5 rounded-r bg-[#F8FAFC] px-2.5 py-2 text-[11px] italic leading-relaxed"
+                      style={{ borderLeft: `3px solid ${TEAL}`, color: MUTED }}>
                       <p className="line-clamp-2">{pet.observacoes_saude}</p>
                     </div>
                   ) : (
-                    <div className="mb-2.5 h-8 rounded-r border-l-[3px] border-l-gray-200 bg-gray-50 px-2.5 py-2 text-[11px] italic text-gray-300">Sem observações</div>
+                    <div className="mb-2.5 h-8 rounded-r bg-[#F8FAFC] px-2.5 py-2 text-[11px] italic"
+                      style={{ borderLeft: `3px solid ${BORD}`, color: "#CBD5E1" }}>
+                      Sem observações
+                    </div>
                   )}
                   {pet.tags && pet.tags.length > 0 && (
                     <div className="mb-2.5 flex flex-wrap gap-1">
-                      {pet.tags.map((tag) => <span key={tag.id} className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${tagColor(tag.nome)}`}>{tag.nome}</span>)}
+                      {pet.tags.map((tag) => (
+                        <span key={tag.id} className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${tagColor(tag.nome)}`}>{tag.nome}</span>
+                      ))}
                     </div>
                   )}
-                  <div className="mt-auto flex divide-x divide-gray-200 rounded border border-gray-200 bg-gray-50">
+                  <div className="mt-auto flex divide-x rounded" style={{ border: `1px solid ${BORD}`, background: "#F8FAFC", borderColor: BORD }}>
                     <div className="flex flex-1 flex-col items-center py-2">
-                      <span className="text-[13px] font-bold text-gray-900">{ats.length}</span>
-                      <span className="text-[9px] uppercase tracking-wide text-gray-500">visitas</span>
+                      <span className="text-[13px] font-bold" style={{ color: COAL }}>{ats.length}</span>
+                      <span className="text-[9px] uppercase tracking-wide" style={{ color: MUTED }}>visitas</span>
                     </div>
                     <div className="flex flex-1 flex-col items-center py-2">
-                      <span className="text-[13px] font-bold text-[#1c46f3]">R${Math.round(gasto)}</span>
-                      <span className="text-[9px] uppercase tracking-wide text-gray-500">gasto</span>
+                      <span className="text-[13px] font-bold" style={{ color: TEAL }}>R${Math.round(gasto)}</span>
+                      <span className="text-[9px] uppercase tracking-wide" style={{ color: MUTED }}>gasto</span>
                     </div>
                     <div className="flex flex-1 flex-col items-center py-2">
-                      <span className="text-[11px] font-semibold text-gray-900">
+                      <span className="text-[11px] font-semibold" style={{ color: COAL }}>
                         {ultimo ? new Date(ultimo.data_atendimento).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }) : "—"}
                       </span>
-                      <span className="text-[9px] uppercase tracking-wide text-gray-500">última visita</span>
+                      <span className="text-[9px] uppercase tracking-wide" style={{ color: MUTED }}>última visita</span>
                     </div>
                   </div>
                 </div>
-                <div className="flex divide-x divide-gray-200 border-t border-gray-200">
-                  <button onClick={() => setPetBeingEdited(pet)} className="flex flex-1 items-center justify-center gap-1.5 py-2.5 text-[11px] font-medium text-gray-600 transition hover:bg-[#e8eeff] hover:text-[#1c46f3]">
+                <div className="flex divide-x" style={{ borderTop: `1px solid ${BORD}`, borderColor: BORD }}>
+                  <button onClick={() => setPetBeingEdited(pet)}
+                    className="flex flex-1 items-center justify-center gap-1.5 py-2.5 text-[11px] font-medium transition hover:bg-[#e6f5f5]"
+                    style={{ color: MUTED, borderBottomLeftRadius: "10px" }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = TEAL; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = MUTED; }}>
                     <Pencil size={12} /> Editar
                   </button>
-                  <button onClick={() => handleDeletePet(pet.id)} className="flex flex-1 items-center justify-center gap-1.5 py-2.5 text-[11px] font-medium text-gray-500 transition hover:bg-red-50 hover:text-red-600">
+                  <button onClick={() => handleDeletePet(pet.id)}
+                    className="flex flex-1 items-center justify-center gap-1.5 py-2.5 text-[11px] font-medium text-gray-400 transition hover:bg-red-50 hover:text-red-600"
+                    style={{ borderBottomRightRadius: "10px" }}>
                     <Trash2 size={12} /> Excluir
                   </button>
                 </div>
