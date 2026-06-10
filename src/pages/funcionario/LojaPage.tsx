@@ -32,17 +32,9 @@ function formatDate(dateStr?: string) {
 function getInitials(name: string) {
   return name.split(" ").slice(0, 2).map((n) => n[0]).join("").toUpperCase();
 }
-function strip(s: string) {
-  return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
-}
 
-function getCargoBadge(cargo: string): string {
-  const n = strip(cargo);
-  if (/gerente|gestor|diretor|coordenador/.test(n))    return "border-purple-200 bg-purple-50 text-purple-700";
-  if (/veterinario|vet|medico|doutor/.test(n))         return "border-emerald-200 bg-emerald-50 text-emerald-700";
-  if (/tosador|groomer|esteticista|banho/.test(n))     return "border-amber-200 bg-amber-50 text-amber-700";
-  if (/atendente|recepcionist|vendedor|caixa/.test(n)) return "border-blue-200 bg-blue-50 text-blue-700";
-  return "border-slate-200 bg-slate-50 text-slate-600";
+function getCargoBadge(_cargo: string): string {
+  return "border-teal-200 bg-teal-50 text-teal-700";
 }
 
 const AVATAR_COLORS = [
@@ -309,7 +301,7 @@ export default function FuncionarioLojaPage() {
                             <p className="truncate text-sm font-bold" style={{ color: COAL }}>{func.nome}</p>
                             <span className={`inline-flex sm:hidden items-center border px-2 py-0.5 text-xs font-semibold capitalize ${getCargoBadge(func.cargo)}`}
                               style={{ borderRadius: "20px" }}>
-                              {func.cargo}
+                              {func.cargo.trim()}
                             </span>
                           </div>
                           <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs" style={{ color: MUTED }}>
@@ -319,9 +311,9 @@ export default function FuncionarioLojaPage() {
                           </p>
                         </div>
                       </div>
-                      <span className={`hidden sm:inline-flex items-center border px-2.5 py-0.5 text-xs font-semibold capitalize ${getCargoBadge(func.cargo)}`}
+                      <span className={`hidden sm:inline-flex items-center border px-2 py-0.5 text-xs font-semibold capitalize ${getCargoBadge(func.cargo)}`}
                         style={{ borderRadius: "20px" }}>
-                        {func.cargo}
+                        {func.cargo.trim()}
                       </span>
                       <span className="hidden sm:flex items-center gap-1 text-xs" style={{ color: "#374151" }}>
                         <Banknote size={11} style={{ color: MUTED }} /> {formatMoney(func.salario)}

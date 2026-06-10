@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Plus, X, RefreshCw } from "lucide-react";
+import { Plus, X, RefreshCw, Users } from "lucide-react";
 import EditModal from "../../components/EditModal";
 import EditUserForm from "../../components/user/EditUserForm";
 import UserForm from "../../components/user/UserForm";
@@ -12,21 +12,33 @@ import type { CreateUsuarioDTO, UpdateUsuarioDTO, Usuario } from "../../types/us
 import type { Pet } from "../../types/pet";
 import type { Loja } from "../../types/loja";
 
-const BLUE  = "#1A3CB8";
-const BORD  = "#E0E0E0";
-const MUTED = "#6B6B6B";
+const TEAL  = "#0D7377";
+const AMBER = "#F59E0B";
+const BORD  = "#E2E8F0";
+const MUTED = "#64748B";
+const COAL  = "#1E293B";
+
+function HeroDecor() {
+  return (
+    <>
+      <div className="absolute -right-8 -top-8 h-44 w-44 rounded-full bg-white/10" />
+      <div className="absolute -bottom-6 right-28 h-28 w-28 rounded-full bg-white/10" />
+      <div className="absolute right-16 top-6 h-16 w-16 rounded-full bg-white/10" />
+    </>
+  );
+}
 
 export default function UsersPage() {
-  const [users, setUsers]                   = useState<Usuario[]>([]);
-  const [petsByUser, setPetsByUser]         = useState<Record<number, Pet[]>>({});
-  const [lojas, setLojas]                   = useState<Loja[]>([]);
-  const [lojaById, setLojaById]             = useState<Record<number, string>>({});
-  const [gastoByUser, setGastoByUser]       = useState<Record<number, number>>({});
+  const [users, setUsers]                     = useState<Usuario[]>([]);
+  const [petsByUser, setPetsByUser]           = useState<Record<number, Pet[]>>({});
+  const [lojas, setLojas]                     = useState<Loja[]>([]);
+  const [lojaById, setLojaById]               = useState<Record<number, string>>({});
+  const [gastoByUser, setGastoByUser]         = useState<Record<number, number>>({});
   const [userBeingEdited, setUserBeingEdited] = useState<Usuario | null>(null);
-  const [loading, setLoading]               = useState(true);
-  const [showForm, setShowForm]             = useState(false);
-  const [feedback, setFeedback]             = useState("");
-  const [error, setError]                   = useState("");
+  const [loading, setLoading]                 = useState(true);
+  const [showForm, setShowForm]               = useState(false);
+  const [feedback, setFeedback]               = useState("");
+  const [error, setError]                     = useState("");
 
   async function loadAll() {
     try {
@@ -107,43 +119,58 @@ export default function UsersPage() {
   }
 
   return (
-    <div className="px-4 py-6 sm:px-6 sm:py-8">
-      <div className="mx-auto max-w-6xl space-y-6">
+    <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
 
-        {/* Header */}
-        <div className="flex items-start justify-between gap-4">
+      {/* Hero */}
+      <div className="relative mb-5 overflow-hidden px-8 py-9" style={{ background: TEAL, borderRadius: "10px" }}>
+        <HeroDecor />
+        <div className="relative z-10 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <span className="mb-1 inline-block text-xs font-bold uppercase tracking-widest" style={{ color: BLUE }}>
-              Gerenciamento
-            </span>
-            <h1 className="text-2xl font-extrabold" style={{ color: "#1a1a1a" }}>Usuários</h1>
-            <p className="mt-0.5 text-sm" style={{ color: MUTED }}>Gerencie clientes e funcionários do sistema.</p>
+            <p className="mb-1.5 text-xs font-bold uppercase tracking-widest" style={{ color: AMBER }}>Gerenciamento</p>
+            <div className="flex items-center gap-2">
+              <Users size={22} className="text-white/80" />
+              <h1 className="text-2xl font-extrabold text-white">Usuários</h1>
+            </div>
+            <p className="mt-0.5 text-sm text-white/70">Gerencie clientes e funcionários do sistema.</p>
           </div>
-          <button
-            onClick={() => { setShowForm((v) => !v); setError(""); }}
-            className="flex shrink-0 items-center gap-2 px-4 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
-            style={{ background: showForm ? MUTED : BLUE, borderRadius: "4px" }}
-          >
-            {showForm ? <X size={15} /> : <Plus size={15} />}
-            <span className="hidden sm:inline">{showForm ? "Cancelar" : "Novo usuário"}</span>
+          <button onClick={() => { setShowForm((v) => !v); setError(""); }}
+            className="flex shrink-0 items-center gap-2 px-4 py-2 text-sm font-bold transition"
+            style={{ background: showForm ? "rgba(255,255,255,0.15)" : AMBER, color: showForm ? "#fff" : COAL, borderRadius: "6px" }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = "0.9"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = "1"; }}>
+            {showForm ? <><X size={14} /> Cancelar</> : <><Plus size={14} /> Novo usuário</>}
           </button>
         </div>
 
-        {/* Feedback */}
-        {feedback && (
-          <div className="px-4 py-3 text-sm font-medium"
-            style={{ borderRadius: "4px", border: "1px solid #A7F3D0", background: "rgba(167,243,208,0.25)", color: "#065F46" }}>
-            {feedback}
+        {!loading && users.length > 0 && (
+          <div className="relative z-10 mt-6 flex flex-wrap gap-3">
+            {[
+              { label: "Total",       value: users.length },
+              { label: "Clientes",    value: users.filter((u) => u.tipo_perfil === "cliente").length },
+              { label: "Funcionários",value: users.filter((u) => u.tipo_perfil === "funcionario").length },
+            ].map(({ label, value }) => (
+              <div key={label} className="px-4 py-2.5" style={{ background: "rgba(255,255,255,0.12)", borderRadius: "8px" }}>
+                <div className="text-lg font-extrabold text-white leading-none">{value}</div>
+                <div className="text-[10px] text-white/60">{label}</div>
+              </div>
+            ))}
           </div>
         )}
-        {error && (
-          <div className="px-4 py-3 text-sm font-medium"
-            style={{ borderRadius: "4px", border: "1px solid #FECACA", background: "rgba(254,202,202,0.25)", color: "#DC2626" }}>
-            {error}
-          </div>
-        )}
+      </div>
 
-        {showForm && (
+      {feedback && (
+        <div className="mb-4 px-4 py-2.5 text-sm" style={{ borderRadius: "6px", border: "1px solid #A7F3D0", background: "rgba(167,243,208,0.25)", color: "#065F46" }}>
+          {feedback}
+        </div>
+      )}
+      {error && (
+        <div className="mb-4 px-4 py-2.5 text-sm" style={{ borderRadius: "6px", border: "1px solid #FECACA", background: "rgba(254,202,202,0.25)", color: "#DC2626" }}>
+          {error}
+        </div>
+      )}
+
+      {showForm && (
+        <div className="mb-5">
           <UserForm
             userBeingEdited={null}
             onCreate={handleCreateUser}
@@ -151,47 +178,43 @@ export default function UsersPage() {
             onCancelEdit={() => { setUserBeingEdited(null); setShowForm(false); }}
             lojas={lojas}
           />
+        </div>
+      )}
+
+      <EditModal isOpen={Boolean(userBeingEdited)} title="Editar Usuário" onClose={() => setUserBeingEdited(null)}>
+        {userBeingEdited && (
+          <EditUserForm user={userBeingEdited} onUpdate={handleUpdateUser} onCancel={() => setUserBeingEdited(null)} />
         )}
+      </EditModal>
 
-        <EditModal isOpen={Boolean(userBeingEdited)} title="Editar Usuário" onClose={() => setUserBeingEdited(null)}>
-          {userBeingEdited && (
-            <EditUserForm user={userBeingEdited} onUpdate={handleUpdateUser} onCancel={() => setUserBeingEdited(null)} />
-          )}
-        </EditModal>
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-bold" style={{ color: COAL }}>
+            Base de usuários {!loading && <span className="font-normal" style={{ color: MUTED }}>({users.length})</span>}
+          </h2>
+          <button onClick={loadAll}
+            className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium transition hover:bg-gray-50"
+            style={{ border: `1px solid ${BORD}`, borderRadius: "6px", color: MUTED }}>
+            <RefreshCw size={12} /> Atualizar
+          </button>
+        </div>
 
-        {/* List */}
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold" style={{ color: "#1a1a1a" }}>
-              Base de usuários
-              {!loading && (
-                <span className="ml-2 text-sm font-normal" style={{ color: MUTED }}>({users.length})</span>
-              )}
-            </h2>
-            <button onClick={loadAll}
-              className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium transition hover:bg-gray-50"
-              style={{ border: `1px solid ${BORD}`, borderRadius: "4px", color: MUTED }}>
-              <RefreshCw size={13} /> Atualizar
-            </button>
+        {loading ? (
+          <div className="p-6 text-center text-sm"
+            style={{ border: `1px solid ${BORD}`, borderRadius: "10px", background: "#fff", color: MUTED }}>
+            Carregando usuários...
           </div>
-
-          {loading ? (
-            <div className="p-6 text-center text-sm"
-              style={{ border: `1px solid ${BORD}`, borderRadius: "8px", background: "#fff", color: MUTED }}>
-              Carregando usuários...
-            </div>
-          ) : (
-            <UserList
-              users={users}
-              onEdit={setUserBeingEdited}
-              onDelete={handleDeleteUser}
-              petsByUser={petsByUser}
-              lojaById={lojaById}
-              gastoByUser={gastoByUser}
-            />
-          )}
-        </section>
-      </div>
+        ) : (
+          <UserList
+            users={users}
+            onEdit={setUserBeingEdited}
+            onDelete={handleDeleteUser}
+            petsByUser={petsByUser}
+            lojaById={lojaById}
+            gastoByUser={gastoByUser}
+          />
+        )}
+      </section>
     </div>
   );
 }

@@ -6,9 +6,10 @@ import {
 import type { CreateUsuarioDTO, UpdateUsuarioDTO, Usuario } from "../../types/usuario";
 import type { Loja } from "../../types/loja";
 
-const BLUE  = "#1A3CB8";
-const BORD  = "#E0E0E0";
-const MUTED = "#6B6B6B";
+const TEAL  = "#0D7377";
+const BORD  = "#E2E8F0";
+const MUTED = "#64748B";
+const COAL  = "#1E293B";
 
 interface UserFormProps {
   userBeingEdited: Usuario | null;
@@ -22,19 +23,21 @@ const inputStyle: React.CSSProperties = {
   display: "block", width: "100%",
   padding: "10px 12px 10px 36px",
   fontSize: "14px",
-  border: `1px solid ${BORD}`, borderRadius: "4px",
-  background: "#fff", outline: "none",
+  border: `1px solid ${BORD}`, borderRadius: "6px",
+  background: "#F8FAFC", outline: "none",
   transition: "border-color 0.15s, box-shadow 0.15s",
 };
 const inputStyleNoIcon: React.CSSProperties = { ...inputStyle, paddingLeft: "12px" };
 
 function onFocus(e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) {
-  e.target.style.borderColor = BLUE;
-  e.target.style.boxShadow = "0 0 0 3px rgba(26,60,184,0.10)";
+  e.target.style.borderColor = TEAL;
+  e.target.style.boxShadow = "0 0 0 3px rgba(13,115,119,0.12)";
+  e.target.style.background = "#fff";
 }
 function onBlur(e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) {
   e.target.style.borderColor = BORD;
   e.target.style.boxShadow = "none";
+  e.target.style.background = "#F8FAFC";
 }
 
 function Label({ children }: { children: React.ReactNode }) {
@@ -62,33 +65,33 @@ function typeBtn(active: boolean): React.CSSProperties {
   return {
     display: "flex", alignItems: "center", justifyContent: "center",
     gap: "8px", padding: "10px 0", fontSize: "14px", fontWeight: 500,
-    borderRadius: "4px", width: "100%", cursor: "pointer", transition: "all 0.15s",
-    border: active ? `1.5px solid ${BLUE}` : `1px solid ${BORD}`,
-    background: active ? "rgba(26,60,184,0.07)" : "#fff",
-    color: active ? BLUE : MUTED,
+    borderRadius: "6px", width: "100%", cursor: "pointer", transition: "all 0.15s",
+    border: active ? `1.5px solid ${TEAL}` : `1px solid ${BORD}`,
+    background: active ? "rgba(13,115,119,0.07)" : "#fff",
+    color: active ? TEAL : MUTED,
   };
 }
 
 export default function UserForm({ userBeingEdited, onCreate, onUpdate, onCancelEdit, lojas }: UserFormProps) {
-  const [tipoPerfil, setTipoPerfil]   = useState<"cliente" | "funcionario">(userBeingEdited?.tipo_perfil ?? "cliente");
-  const [nome, setNome]               = useState(userBeingEdited?.nome ?? "");
-  const [email, setEmail]             = useState(userBeingEdited?.email ?? "");
-  const [telefone, setTelefone]       = useState(userBeingEdited?.telefone ?? "");
-  const [senha, setSenha]             = useState("");
-  const [showSenha, setShowSenha]     = useState(false);
-  const [cpf, setCpf]                 = useState(userBeingEdited?.cpf ?? "");
-  const [cnpj, setCnpj]               = useState(userBeingEdited?.cnpj ?? "");
-  const [ativo, setAtivo]             = useState(userBeingEdited?.ativo ?? true);
-  const [clientType, setClientType]   = useState<"pessoa_fisica" | "pessoa_juridica">("pessoa_fisica");
-  const [cep, setCep]                 = useState("");
-  const [estado, setEstado]           = useState("");
-  const [cidade, setCidade]           = useState("");
+  const [tipoPerfil, setTipoPerfil]     = useState<"cliente" | "funcionario">(userBeingEdited?.tipo_perfil ?? "cliente");
+  const [nome, setNome]                 = useState(userBeingEdited?.nome ?? "");
+  const [email, setEmail]               = useState(userBeingEdited?.email ?? "");
+  const [telefone, setTelefone]         = useState(userBeingEdited?.telefone ?? "");
+  const [senha, setSenha]               = useState("");
+  const [showSenha, setShowSenha]       = useState(false);
+  const [cpf, setCpf]                   = useState(userBeingEdited?.cpf ?? "");
+  const [cnpj, setCnpj]                 = useState(userBeingEdited?.cnpj ?? "");
+  const [ativo, setAtivo]               = useState(userBeingEdited?.ativo ?? true);
+  const [clientType, setClientType]     = useState<"pessoa_fisica" | "pessoa_juridica">("pessoa_fisica");
+  const [cep, setCep]                   = useState("");
+  const [estado, setEstado]             = useState("");
+  const [cidade, setCidade]             = useState("");
   const [employeeCode, setEmployeeCode] = useState("");
-  const [jobTitle, setJobTitle]       = useState("");
-  const [salary, setSalary]           = useState("");
-  const [hiredAt, setHiredAt]         = useState("");
-  const [storeId, setStoreId]         = useState<number | "">("");
-  const [localError, setLocalError]   = useState("");
+  const [jobTitle, setJobTitle]         = useState("");
+  const [salary, setSalary]             = useState("");
+  const [hiredAt, setHiredAt]           = useState("");
+  const [storeId, setStoreId]           = useState<number | "">("");
+  const [localError, setLocalError]     = useState("");
 
   const isEditing = Boolean(userBeingEdited);
   const isCliente = tipoPerfil === "cliente";
@@ -131,12 +134,15 @@ export default function UserForm({ userBeingEdited, onCreate, onUpdate, onCancel
 
   return (
     <form key={userBeingEdited?.id ?? "new"} onSubmit={handleSubmit}
-      className="space-y-5 bg-white p-5 shadow-sm"
-      style={{ border: `1px solid ${BORD}`, borderRadius: "8px" }}>
+      className="space-y-5 bg-white p-5"
+      style={{ border: `1px solid ${BORD}`, borderRadius: "10px" }}>
 
-      <h2 className="text-sm font-bold" style={{ color: "#1a1a1a" }}>
-        {isEditing ? "Editar Usuário" : "Novo Usuário"}
-      </h2>
+      <div className="flex items-center gap-2">
+        <User size={15} style={{ color: TEAL }} />
+        <h2 className="text-sm font-bold" style={{ color: COAL }}>
+          {isEditing ? "Editar Usuário" : "Novo Usuário"}
+        </h2>
+      </div>
 
       {/* Tipo de perfil */}
       {!isEditing && (
@@ -214,7 +220,7 @@ export default function UserForm({ userBeingEdited, onCreate, onUpdate, onCancel
       {!isEditing && isCliente && (
         <div className="space-y-4 p-4" style={{ border: `1px solid ${BORD}`, borderRadius: "8px", background: "#F9FAFB" }}>
           <div className="flex items-center gap-2">
-            <MapPin size={14} style={{ color: BLUE }} />
+            <MapPin size={14} style={{ color: TEAL }} />
             <span className="text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>
               Endereço do cliente
             </span>
@@ -257,7 +263,7 @@ export default function UserForm({ userBeingEdited, onCreate, onUpdate, onCancel
       {!isEditing && !isCliente && (
         <div className="space-y-4 p-4" style={{ border: `1px solid ${BORD}`, borderRadius: "8px", background: "#F9FAFB" }}>
           <div className="flex items-center gap-2">
-            <Briefcase size={14} style={{ color: BLUE }} />
+            <Briefcase size={14} style={{ color: TEAL }} />
             <span className="text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>
               Dados do funcionário
             </span>
@@ -342,33 +348,31 @@ export default function UserForm({ userBeingEdited, onCreate, onUpdate, onCancel
         <label className="flex cursor-pointer items-center gap-3">
           <div onClick={() => setAtivo((v) => !v)}
             className="relative h-5 w-9 rounded-full transition-colors"
-            style={{ background: ativo ? BLUE : "#D1D5DB" }}>
+            style={{ background: ativo ? TEAL : "#D1D5DB" }}>
             <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${ativo ? "translate-x-4" : "translate-x-0.5"}`} />
           </div>
           <span className="text-sm" style={{ color: "#374151" }}>{ativo ? "Usuário ativo" : "Usuário inativo"}</span>
         </label>
       )}
 
-      {/* Local error */}
       {localError && (
         <div className="px-4 py-3 text-sm font-medium"
-          style={{ borderRadius: "4px", border: "1px solid #FECACA", background: "rgba(254,202,202,0.25)", color: "#DC2626" }}>
+          style={{ borderRadius: "6px", border: "1px solid #FECACA", background: "rgba(254,202,202,0.25)", color: "#DC2626" }}>
           {localError}
         </div>
       )}
 
-      {/* Actions */}
       <div className="flex gap-2 pt-1">
         <button type="submit"
           className="flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
-          style={{ background: BLUE, borderRadius: "4px" }}>
+          style={{ background: TEAL, borderRadius: "6px" }}>
           <Plus size={14} />
           {isEditing ? "Salvar alterações" : "Cadastrar"}
         </button>
         {isEditing && (
           <button type="button" onClick={onCancelEdit}
             className="px-5 py-2.5 text-sm font-medium transition hover:bg-gray-50"
-            style={{ border: `1px solid ${BORD}`, borderRadius: "4px", color: MUTED }}>
+            style={{ border: `1px solid ${BORD}`, borderRadius: "6px", color: MUTED }}>
             Cancelar
           </button>
         )}

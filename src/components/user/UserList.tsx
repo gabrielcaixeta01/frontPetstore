@@ -6,9 +6,11 @@ import {
   UserCheck, UserX, ChevronLeft, ChevronRight,
 } from "lucide-react";
 
-const BLUE  = "#1A3CB8";
-const BORD  = "#E0E0E0";
-const MUTED = "#6B6B6B";
+const TEAL  = "#0D7377";
+const TDARK = "#085C60";
+const BORD  = "#E2E8F0";
+const MUTED = "#64748B";
+const COAL  = "#1E293B";
 const PAGE_SIZE = 8;
 
 import type { Usuario } from "../../types/usuario";
@@ -24,8 +26,8 @@ interface UserListProps {
 }
 
 const perfilCfg = {
-  cliente:     { label: "Cliente",     badge: "bg-blue-50 text-blue-700 border-blue-200",       avatar: "bg-blue-100 text-blue-700"     },
-  funcionario: { label: "Funcionário", badge: "bg-violet-50 text-violet-700 border-violet-200", avatar: "bg-violet-100 text-violet-700" },
+  cliente:     { label: "Cliente",     badge: "border-[#b3dfe0] bg-[#e6f5f5] text-[#085C60]", avatar: "bg-[#e6f5f5] text-[#085C60]" },
+  funcionario: { label: "Funcionário", badge: "border-amber-200 bg-amber-50 text-amber-700",   avatar: "bg-amber-50 text-amber-700"  },
 } as const;
 
 function getInitials(name: string) {
@@ -50,11 +52,11 @@ function InfoChip({ label, value, icon }: { label: string; value: React.ReactNod
 }
 
 export default function UserList({ users, onEdit, onDelete, petsByUser, lojaById, gastoByUser }: UserListProps) {
-  const [search, setSearch]           = useState("");
-  const [filterTipo, setFilterTipo]   = useState<"all" | "cliente" | "funcionario">("all");
+  const [search, setSearch]             = useState("");
+  const [filterTipo, setFilterTipo]     = useState<"all" | "cliente" | "funcionario">("all");
   const [filterStatus, setFilterStatus] = useState<"all" | "ativo" | "inativo">("all");
-  const [expandedId, setExpandedId]   = useState<number | null>(null);
-  const [page, setPage]               = useState(1);
+  const [expandedId, setExpandedId]     = useState<number | null>(null);
+  const [page, setPage]                 = useState(1);
 
   const summary = useMemo(() => ({
     total:        users.length,
@@ -82,22 +84,22 @@ export default function UserList({ users, onEdit, onDelete, petsByUser, lojaById
   if (users.length === 0) {
     return (
       <div className="p-10 text-center text-sm"
-        style={{ border: `1px dashed ${BORD}`, borderRadius: "8px", background: "#fff", color: MUTED }}>
+        style={{ border: `1px dashed ${BORD}`, borderRadius: "10px", background: "#fff", color: MUTED }}>
         Nenhum usuário encontrado.
       </div>
     );
   }
 
   const summaryCards = [
-    { icon: Users,     label: "Total",        value: summary.total,        accent: BLUE,      textColor: "#1a1a1a"  },
-    { icon: UserCheck, label: "Clientes",      value: summary.clientes,     accent: "#3B82F6", textColor: "#1D4ED8"  },
-    { icon: Briefcase, label: "Funcionários",  value: summary.funcionarios, accent: "#7C3AED", textColor: "#5B21B6"  },
-    { icon: UserX,     label: "Inativos",      value: summary.inativos,     accent: MUTED,     textColor: "#374151"  },
+    { icon: Users,     label: "Total",        value: summary.total        },
+    { icon: UserCheck, label: "Clientes",      value: summary.clientes     },
+    { icon: Briefcase, label: "Funcionários",  value: summary.funcionarios },
+    { icon: UserX,     label: "Inativos",      value: summary.inativos     },
   ];
 
   const inputStyle: React.CSSProperties = {
     border: `1px solid ${BORD}`,
-    borderRadius: "4px",
+    borderRadius: "6px",
     background: "#fff",
     fontSize: "14px",
     outline: "none",
@@ -109,14 +111,15 @@ export default function UserList({ users, onEdit, onDelete, petsByUser, lojaById
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {summaryCards.map(({ icon: Icon, label, value, accent, textColor }) => (
-          <div key={label} className="relative overflow-hidden bg-white p-4 shadow-sm"
-            style={{ border: `1px solid ${BORD}`, borderRadius: "8px" }}>
-            <div className="absolute left-0 top-0 bottom-0 w-[3px]" style={{ background: accent }} />
-            <div className="flex items-center gap-1.5 pl-2 text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>
-              <Icon size={12} style={{ color: accent }} /> {label}
+        {summaryCards.map(({ icon: Icon, label, value }) => (
+          <div key={label} className="bg-white p-4"
+            style={{ border: `1px solid ${BORD}`, borderRadius: "10px" }}>
+            <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-lg"
+              style={{ background: "#e6f5f5" }}>
+              <Icon size={14} style={{ color: TEAL }} />
             </div>
-            <p className="mt-1.5 pl-2 text-3xl font-extrabold" style={{ color: textColor }}>{value}</p>
+            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>{label}</p>
+            <p className="mt-0.5 text-2xl font-extrabold" style={{ color: COAL }}>{value}</p>
           </div>
         ))}
       </div>
@@ -132,7 +135,7 @@ export default function UserList({ users, onEdit, onDelete, petsByUser, lojaById
             onChange={(e) => setSearch(e.target.value)}
             className="w-full py-2.5 pl-9 pr-3"
             style={inputStyle}
-            onFocus={(e) => { e.target.style.borderColor = BLUE; e.target.style.boxShadow = "0 0 0 3px rgba(26,60,184,0.10)"; }}
+            onFocus={(e) => { e.target.style.borderColor = TEAL; e.target.style.boxShadow = "0 0 0 3px rgba(13,115,119,0.12)"; }}
             onBlur={(e)  => { e.target.style.borderColor = BORD; e.target.style.boxShadow = "none"; }}
           />
         </div>
@@ -151,9 +154,9 @@ export default function UserList({ users, onEdit, onDelete, petsByUser, lojaById
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden bg-white shadow-sm" style={{ border: `1px solid ${BORD}`, borderRadius: "8px" }}>
+      <div className="overflow-hidden bg-white" style={{ border: `1px solid ${BORD}`, borderRadius: "10px" }}>
         <div className="hidden border-b px-5 py-3 text-xs font-bold uppercase tracking-widest sm:grid sm:grid-cols-[1fr_185px_90px_80px] sm:gap-4"
-          style={{ borderColor: BORD, background: "#F4F4F4", color: MUTED }}>
+          style={{ borderColor: BORD, background: "#F8FAFC", color: MUTED }}>
           <span>Usuário</span>
           <span>Tipo</span>
           <span>Status</span>
@@ -165,7 +168,7 @@ export default function UserList({ users, onEdit, onDelete, petsByUser, lojaById
             Nenhum resultado.{" "}
             <button
               onClick={() => { setSearch(""); setFilterTipo("all"); setFilterStatus("all"); }}
-              className="font-bold transition hover:opacity-70" style={{ color: BLUE }}>
+              className="font-bold transition hover:opacity-70" style={{ color: TEAL }}>
               Limpar filtros
             </button>
           </div>
@@ -181,26 +184,23 @@ export default function UserList({ users, onEdit, onDelete, petsByUser, lojaById
 
               return (
                 <div key={user.id}>
-                  {/* Main row */}
                   <div
                     onClick={() => setExpandedId(isExpanded ? null : user.id)}
                     className={`flex cursor-pointer items-center gap-3 px-4 py-3.5 transition sm:grid sm:grid-cols-[1fr_185px_90px_80px] sm:gap-4 sm:px-5 ${isExpanded ? "bg-gray-50/70" : "hover:bg-gray-50/60"}`}
                   >
-                    {/* Col 1 — Avatar + name + email */}
                     <div className="flex min-w-0 flex-1 items-center gap-3 sm:flex-none">
                       <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold ${cfg.avatar}`}>
                         {getInitials(user.nome)}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <p className="truncate text-sm font-bold" style={{ color: "#1a1a1a" }}>{user.nome}</p>
+                          <p className="truncate text-sm font-bold" style={{ color: COAL }}>{user.nome}</p>
                           <ChevronDown size={13}
                             className={`shrink-0 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
-                            style={{ color: isExpanded ? BLUE : "#D1D5DB" }}
+                            style={{ color: isExpanded ? TEAL : "#D1D5DB" }}
                           />
                         </div>
                         <p className="truncate text-xs" style={{ color: MUTED }}>{user.email}</p>
-                        {/* Mobile-only badges */}
                         <div className="mt-1.5 flex flex-wrap items-center gap-1.5 sm:hidden">
                           <span className={`inline-flex items-center border px-2 py-0.5 text-xs font-semibold ${cfg.badge}`}
                             style={{ borderRadius: "20px" }}>
@@ -218,7 +218,6 @@ export default function UserList({ users, onEdit, onDelete, petsByUser, lojaById
                       </div>
                     </div>
 
-                    {/* Col 2 — Tipo */}
                     <div className="hidden sm:block">
                       <span className={`inline-flex items-center border px-2.5 py-0.5 text-xs font-semibold ${cfg.badge}`}
                         style={{ borderRadius: "20px" }}>
@@ -231,29 +230,28 @@ export default function UserList({ users, onEdit, onDelete, petsByUser, lojaById
                       </p>
                     </div>
 
-                    {/* Col 3 — Status */}
                     <div className="hidden sm:flex sm:items-center">
                       {user.ativo
                         ? <span className="flex items-center gap-1 text-xs font-medium text-emerald-600"><CheckCircle size={12} /> Ativo</span>
                         : <span className="flex items-center gap-1 text-xs font-medium text-red-500"><XCircle size={12} /> Inativo</span>}
                     </div>
 
-                    {/* Col 4 — Actions */}
                     <div className="flex shrink-0 gap-1.5 sm:justify-end" onClick={(e) => e.stopPropagation()}>
                       <button onClick={() => onEdit(user)} title="Editar"
-                        className="flex h-8 w-8 items-center justify-center transition hover:bg-gray-100"
-                        style={{ border: `1px solid ${BORD}`, borderRadius: "4px", color: MUTED }}>
+                        className="flex h-8 w-8 items-center justify-center transition hover:bg-[#e6f5f5]"
+                        style={{ border: `1px solid ${BORD}`, borderRadius: "6px", color: MUTED }}
+                        onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = TEAL; }}
+                        onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = MUTED; }}>
                         <Pencil size={13} />
                       </button>
                       <button onClick={() => onDelete(user.id)} title="Excluir"
                         className="flex h-8 w-8 items-center justify-center transition hover:bg-red-50"
-                        style={{ border: "1px solid #FECACA", borderRadius: "4px", color: "#EF4444" }}>
+                        style={{ border: "1px solid #FECACA", borderRadius: "6px", color: "#EF4444" }}>
                         <Trash2 size={13} />
                       </button>
                     </div>
                   </div>
 
-                  {/* Expanded row */}
                   {isExpanded && (
                     <div className="border-t px-5 py-4" style={{ borderColor: BORD, background: "#F9FAFB" }}>
                       {user.tipo_perfil === "cliente" ? (
@@ -273,7 +271,7 @@ export default function UserList({ users, onEdit, onDelete, petsByUser, lojaById
                               <div className="flex flex-wrap gap-1.5">
                                 {pets.map((p) => (
                                   <span key={p.id} className="flex items-center gap-1 px-2 py-0.5 text-xs font-medium"
-                                    style={{ background: "rgba(26,60,184,0.08)", borderRadius: "20px", color: BLUE }}>
+                                    style={{ background: "#e6f5f5", borderRadius: "20px", color: TDARK }}>
                                     <PawPrint size={10} /> {p.nome}
                                     {p.raca && <span className="opacity-60">· {p.raca}</span>}
                                   </span>
@@ -308,15 +306,15 @@ export default function UserList({ users, onEdit, onDelete, petsByUser, lojaById
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between bg-white px-4 py-3 shadow-sm"
-          style={{ border: `1px solid ${BORD}`, borderRadius: "8px" }}>
+        <div className="flex items-center justify-between bg-white px-4 py-3"
+          style={{ border: `1px solid ${BORD}`, borderRadius: "10px" }}>
           <p className="text-xs" style={{ color: MUTED }}>
             {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} de {filtered.length}
           </p>
           <div className="flex items-center gap-1">
             <button onClick={() => setPage((p) => p - 1)} disabled={page === 1}
               className="flex h-8 w-8 items-center justify-center transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
-              style={{ border: `1px solid ${BORD}`, borderRadius: "4px", color: MUTED }}>
+              style={{ border: `1px solid ${BORD}`, borderRadius: "6px", color: MUTED }}>
               <ChevronLeft size={14} />
             </button>
             {Array.from({ length: totalPages }, (_, i) => i + 1)
@@ -333,9 +331,9 @@ export default function UserList({ users, onEdit, onDelete, petsByUser, lojaById
                   <button key={n} onClick={() => setPage(n as number)}
                     className="flex h-8 w-8 items-center justify-center text-xs font-bold transition"
                     style={{
-                      border: `1px solid ${page === n ? BLUE : BORD}`,
-                      borderRadius: "4px",
-                      background: page === n ? BLUE : "#fff",
+                      border: `1px solid ${page === n ? TEAL : BORD}`,
+                      borderRadius: "6px",
+                      background: page === n ? TEAL : "#fff",
                       color: page === n ? "#fff" : "#374151",
                     }}>
                     {n}
@@ -344,7 +342,7 @@ export default function UserList({ users, onEdit, onDelete, petsByUser, lojaById
               )}
             <button onClick={() => setPage((p) => p + 1)} disabled={page === totalPages}
               className="flex h-8 w-8 items-center justify-center transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
-              style={{ border: `1px solid ${BORD}`, borderRadius: "4px", color: MUTED }}>
+              style={{ border: `1px solid ${BORD}`, borderRadius: "6px", color: MUTED }}>
               <ChevronRight size={14} />
             </button>
           </div>

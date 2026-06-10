@@ -6,7 +6,6 @@ import { api } from "../services/api";
 const TEAL  = "#0D7377";
 const TDARK = "#085C60";
 const AMBER = "#F59E0B";
-const MINT  = "#10B981";
 const COAL  = "#1E293B";
 const BG    = "#F8FAFC";
 const BORD  = "#E2E8F0";

@@ -36,23 +36,19 @@ function strip(s: string) {
   return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 }
 
-function getCargoBadge(cargo: string): string {
+function getAvatarStyle(cargo: string): React.CSSProperties {
   const n = strip(cargo);
-  if (/gerente|gestor|diretor|coordenador/.test(n))    return "border-purple-200 bg-purple-50 text-purple-700";
-  if (/veterinario|vet|medico|doutor/.test(n))         return "border-emerald-200 bg-emerald-50 text-emerald-700";
-  if (/tosador|groomer|esteticista|banho/.test(n))     return "border-amber-200 bg-amber-50 text-amber-700";
-  if (/atendente|recepcionist|vendedor|caixa/.test(n)) return "border-blue-200 bg-blue-50 text-blue-700";
-  return "border-slate-200 bg-slate-50 text-slate-600";
+  const isLeadership = /gerente|gestor|diretor|coordenador/.test(n);
+  return {
+    background: "#e6f5f5",
+    color: "#085C60",
+    ...(isLeadership && { boxShadow: "0 0 0 2px #fff, 0 0 0 4px #F59E0B" }),
+  };
 }
 
-const AVATAR_COLORS = [
-  "bg-blue-100 text-blue-700",
-  "bg-violet-100 text-violet-700",
-  "bg-emerald-100 text-emerald-700",
-  "bg-amber-100 text-amber-700",
-  "bg-rose-100 text-rose-700",
-  "bg-cyan-100 text-cyan-700",
-];
+function getCargoBadge(_cargo: string): string {
+  return "border-teal-200 bg-teal-50 text-teal-700";
+}
 
 const DEFAULT_SCHEDULE = [
   { day: "Segunda-feira", open: "08:00", close: "18:00" },
@@ -308,19 +304,19 @@ export default function LojaPage() {
                   <span>Desde</span>
                 </div>
                 <div className="divide-y" style={{ borderColor: BORD }}>
-                  {loja.funcionarios.map((func, i) => (
+                  {loja.funcionarios.map((func) => (
                     <div key={`${func.usuario_id}-${func.matricula}`}
                       className="px-4 py-3 transition hover:bg-gray-50/60 sm:grid sm:grid-cols-[1fr_120px_110px_100px] sm:items-center sm:gap-4">
                       <div className="flex min-w-0 items-center gap-3">
-                        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${AVATAR_COLORS[i % AVATAR_COLORS.length]}`}>
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold"
+                          style={getAvatarStyle(func.cargo)}>
                           {getInitials(func.nome)}
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
                             <p className="truncate text-sm font-bold" style={{ color: COAL }}>{func.nome}</p>
-                            <span className={`inline-flex sm:hidden items-center border px-2 py-0.5 text-xs font-semibold capitalize ${getCargoBadge(func.cargo)}`}
-                              style={{ borderRadius: "20px" }}>
-                              {func.cargo}
+                            <span className={`inline-flex sm:hidden items-center border px-2 py-0.5 text-xs font-semibold capitalize ${getCargoBadge(func.cargo)}`}>
+                              {func.cargo.trim()}
                             </span>
                           </div>
                           <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs" style={{ color: MUTED }}>
@@ -330,9 +326,9 @@ export default function LojaPage() {
                           </p>
                         </div>
                       </div>
-                      <span className={`hidden sm:inline-flex items-center border px-2.5 py-0.5 text-xs font-semibold capitalize ${getCargoBadge(func.cargo)}`}
+                      <span className={`hidden sm:inline-flex items-center border px-2 py-0.5 text-xs font-semibold capitalize ${getCargoBadge(func.cargo)}`}
                         style={{ borderRadius: "20px" }}>
-                        {func.cargo}
+                        {func.cargo.trim()}
                       </span>
                       <span className="hidden sm:flex items-center gap-1 text-xs" style={{ color: "#374151" }}>
                         <Banknote size={11} style={{ color: MUTED }} />

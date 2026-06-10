@@ -10,8 +10,6 @@ const TEAL  = "#0D7377";
 const AMBER = "#F59E0B";
 const COAL  = "#1E293B";
 const BG    = "#F8FAFC";
-const BORD  = "#E2E8F0";
-const MUTED = "#64748B";
 
 const navSections = [
   {
