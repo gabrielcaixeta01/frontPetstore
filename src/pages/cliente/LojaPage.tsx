@@ -7,9 +7,11 @@ import {
 import { getLojaById } from "../../services/lojaService";
 import type { Loja } from "../../types/loja";
 
-const BLUE  = "#1A3CB8";
-const BORD  = "#E0E0E0";
-const MUTED = "#6B6B6B";
+const TEAL  = "#0D7377";
+const TDARK = "#085C60";
+const BORD  = "#E2E8F0";
+const MUTED = "#64748B";
+const COAL  = "#1E293B";
 
 function getInitials(name: string) {
   return name.split(" ").slice(0, 2).map((n) => n[0]).join("").toUpperCase();
@@ -29,7 +31,7 @@ const AVATAR_COLORS = [
   "bg-violet-100 text-violet-700",
   "bg-emerald-100 text-emerald-700",
   "bg-amber-100 text-amber-700",
-  "bg-rose-300 text-rose-700",
+  "bg-rose-100 text-rose-700",
   "bg-cyan-100 text-cyan-700",
 ];
 
@@ -39,14 +41,14 @@ function InfoField({ icon, label, value }: { icon: React.ReactNode; label: strin
       <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>
         {icon} {label}
       </p>
-      <p className="text-sm font-semibold" style={{ color: "#1a1a1a" }}>{value || "—"}</p>
+      <p className="text-sm font-semibold" style={{ color: COAL }}>{value || "—"}</p>
     </div>
   );
 }
 
 function SectionCard({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-white p-5 shadow-sm" style={{ border: `1px solid ${BORD}`, borderRadius: "8px" }}>
+    <div className="bg-white p-5" style={{ border: `1px solid ${BORD}`, borderRadius: "10px" }}>
       {children}
     </div>
   );
@@ -55,7 +57,7 @@ function SectionCard({ children }: { children: React.ReactNode }) {
 function SectionTitle({ icon, children, badge }: { icon: React.ReactNode; children: React.ReactNode; badge?: React.ReactNode }) {
   return (
     <div className="mb-4 flex items-center gap-2">
-      <span style={{ color: BLUE }}>{icon}</span>
+      <span style={{ color: TEAL }}>{icon}</span>
       <h2 className="text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>{children}</h2>
       {badge && <span className="ml-auto">{badge}</span>}
     </div>
@@ -65,9 +67,9 @@ function SectionTitle({ icon, children, badge }: { icon: React.ReactNode; childr
 export default function ClienteLojaPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [loja, setLoja]     = useState<Loja | null>(null);
+  const [loja, setLoja]       = useState<Loja | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError]   = useState("");
+  const [error, setError]     = useState("");
 
   useEffect(() => {
     if (!id) { setError("ID da loja não informado."); setLoading(false); return; }
@@ -80,24 +82,21 @@ export default function ClienteLojaPage() {
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
 
-      {/* Back */}
-      <button
-        onClick={() => navigate("/lojas")}
+      <button onClick={() => navigate("/lojas")}
         className="mb-6 flex items-center gap-2 text-sm font-medium transition hover:opacity-70"
-        style={{ color: BLUE }}
-      >
+        style={{ color: TEAL }}>
         <ArrowLeft size={15} /> Voltar para lojas
       </button>
 
       {loading && (
         <div className="p-8 text-center text-sm"
-          style={{ border: `1px solid ${BORD}`, borderRadius: "8px", background: "#fff", color: MUTED }}>
+          style={{ border: `1px solid ${BORD}`, borderRadius: "10px", background: "#fff", color: MUTED }}>
           Carregando loja...
         </div>
       )}
       {error && (
         <div className="px-4 py-3 text-sm"
-          style={{ borderRadius: "4px", border: "1px solid #FECACA", background: "rgba(254,202,202,0.25)", color: "#DC2626" }}>
+          style={{ borderRadius: "6px", border: "1px solid #FECACA", background: "rgba(254,202,202,0.25)", color: "#DC2626" }}>
           {error}
         </div>
       )}
@@ -106,8 +105,8 @@ export default function ClienteLojaPage() {
         <div className="space-y-5">
 
           {/* Hero banner */}
-          <div className="overflow-hidden shadow-sm" style={{ borderRadius: "8px", border: `1px solid ${BORD}` }}>
-            <div className="px-6 py-5" style={{ background: BLUE }}>
+          <div className="overflow-hidden" style={{ borderRadius: "10px", border: `1px solid ${BORD}` }}>
+            <div className="px-6 py-5" style={{ background: TEAL }}>
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-3">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center"
@@ -131,9 +130,9 @@ export default function ClienteLojaPage() {
                 </div>
               </div>
             </div>
-            <div className="px-6 py-3" style={{ background: "#F4F4F4", borderTop: `1px solid ${BORD}` }}>
+            <div className="px-6 py-3" style={{ background: "#F8FAFC", borderTop: `1px solid ${BORD}` }}>
               <p className="flex items-center gap-1.5 text-sm" style={{ color: MUTED }}>
-                <MapPin size={13} className="shrink-0" style={{ color: BLUE }} />
+                <MapPin size={13} className="shrink-0" style={{ color: TEAL }} />
                 {loja.street}, {loja.number} — {loja.neighborhood}, {loja.city}/{loja.state}
               </p>
             </div>
@@ -159,12 +158,10 @@ export default function ClienteLojaPage() {
                 <InfoField icon={<MapPin size={12} />} label="Cidade/UF"  value={`${loja.city} / ${loja.state}`}  />
                 <InfoField icon={<MapPin size={12} />} label="CEP"        value={loja.cep}                        />
               </div>
-              <a
-                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${loja.street} ${loja.number}, ${loja.neighborhood}, ${loja.city}, ${loja.state}, Brasil`)}`}
+              <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${loja.street} ${loja.number}, ${loja.neighborhood}, ${loja.city}, ${loja.state}, Brasil`)}`}
                 target="_blank" rel="noopener noreferrer"
                 className="mt-4 flex items-center gap-2 px-4 py-2 text-sm font-medium transition hover:opacity-80"
-                style={{ border: `1px solid rgba(26,60,184,0.25)`, borderRadius: "4px", color: BLUE }}
-              >
+                style={{ border: `1px solid rgba(13,115,119,0.25)`, borderRadius: "6px", color: TEAL }}>
                 <MapPin size={14} /> Ver no Google Maps
                 <ExternalLink size={12} className="ml-auto opacity-50" />
               </a>
@@ -181,13 +178,13 @@ export default function ClienteLojaPage() {
             )}
           </SectionCard>
 
-          {/* Equipe — cards compactos para cliente */}
+          {/* Equipe */}
           <SectionCard>
             <SectionTitle
               icon={<Users size={16} />}
               badge={
                 <span className="px-2.5 py-0.5 text-xs font-bold"
-                  style={{ background: "rgba(26,60,184,0.10)", borderRadius: "20px", color: BLUE }}>
+                  style={{ background: "#e6f5f5", borderRadius: "20px", color: TDARK }}>
                   {loja.funcionarios.length}
                 </span>
               }
@@ -207,7 +204,7 @@ export default function ClienteLojaPage() {
                       {getInitials(func.nome)}
                     </div>
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-bold" style={{ color: "#1a1a1a" }}>{func.nome}</p>
+                      <p className="truncate text-sm font-bold" style={{ color: COAL }}>{func.nome}</p>
                       <span className={`inline-flex items-center border px-2 py-0.5 text-xs font-semibold capitalize ${getCargoBadge(func.cargo)}`}
                         style={{ borderRadius: "20px" }}>
                         {func.cargo}

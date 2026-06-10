@@ -10,11 +10,11 @@ import { getAppointments } from "../../services/atendimentoService";
 import type { Loja } from "../../types/loja";
 import type { Atendimento } from "../../types/atendimento";
 
-const BLUE  = "#1A3CB8";
-const GREEN = "#00A651";
-const YELL  = "#F5A800";
-const BORD  = "#E0E0E0";
-const MUTED = "#6B6B6B";
+const TEAL  = "#0D7377";
+const TDARK = "#085C60";
+const BORD  = "#E2E8F0";
+const MUTED = "#64748B";
+const COAL  = "#1E293B";
 
 function formatMoney(value: number) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
@@ -50,7 +50,7 @@ const AVATAR_COLORS = [
   "bg-violet-100 text-violet-700",
   "bg-emerald-100 text-emerald-700",
   "bg-amber-100 text-amber-700",
-  "bg-rose-300 text-rose-700",
+  "bg-rose-100 text-rose-700",
   "bg-cyan-100 text-cyan-700",
 ];
 
@@ -68,7 +68,6 @@ function getTodayIdx() {
   const d = new Date().getDay();
   return d === 0 ? 6 : d - 1;
 }
-
 function isOpenNow() {
   const idx = getTodayIdx();
   const today = DEFAULT_SCHEDULE[idx];
@@ -86,14 +85,14 @@ function InfoField({ icon, label, value }: { icon: React.ReactNode; label: strin
       <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>
         {icon} {label}
       </p>
-      <p className="text-sm font-semibold" style={{ color: "#1a1a1a" }}>{value || "—"}</p>
+      <p className="text-sm font-semibold" style={{ color: COAL }}>{value || "—"}</p>
     </div>
   );
 }
 
 function SectionCard({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-white p-5 shadow-sm" style={{ border: `1px solid ${BORD}`, borderRadius: "8px" }}>
+    <div className="bg-white p-5" style={{ border: `1px solid ${BORD}`, borderRadius: "10px" }}>
       {children}
     </div>
   );
@@ -102,19 +101,19 @@ function SectionCard({ children }: { children: React.ReactNode }) {
 function SectionTitle({ icon, children, badge }: { icon: React.ReactNode; children: React.ReactNode; badge?: React.ReactNode }) {
   return (
     <div className="mb-4 flex items-center gap-2">
-      <span style={{ color: BLUE }}>{icon}</span>
+      <span style={{ color: TEAL }}>{icon}</span>
       <h2 className="text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>{children}</h2>
       {badge && <span className="ml-auto">{badge}</span>}
     </div>
   );
 }
 
-export default function LojaPage() {
+export default function FuncionarioLojaPage() {
   const { id } = useParams();
-  const [loja, setLoja]             = useState<Loja | null>(null);
+  const [loja, setLoja]                 = useState<Loja | null>(null);
   const [atendimentos, setAtendimentos] = useState<Atendimento[]>([]);
-  const [loading, setLoading]       = useState(true);
-  const [error, setError]           = useState("");
+  const [loading, setLoading]           = useState(true);
+  const [error, setError]               = useState("");
 
   useEffect(() => {
     if (!id) { setError("ID da loja não informado."); setLoading(false); return; }
@@ -150,13 +149,13 @@ export default function LojaPage() {
 
       {loading && (
         <div className="p-8 text-center text-sm"
-          style={{ border: `1px solid ${BORD}`, borderRadius: "8px", background: "#fff", color: MUTED }}>
+          style={{ border: `1px solid ${BORD}`, borderRadius: "10px", background: "#fff", color: MUTED }}>
           Carregando loja...
         </div>
       )}
       {error && (
         <div className="px-4 py-3 text-sm"
-          style={{ borderRadius: "4px", border: "1px solid #FECACA", background: "rgba(254,202,202,0.25)", color: "#DC2626" }}>
+          style={{ borderRadius: "6px", border: "1px solid #FECACA", background: "rgba(254,202,202,0.25)", color: "#DC2626" }}>
           {error}
         </div>
       )}
@@ -165,8 +164,8 @@ export default function LojaPage() {
         <div className="space-y-5">
 
           {/* Hero banner */}
-          <div className="overflow-hidden shadow-sm" style={{ borderRadius: "8px", border: `1px solid ${BORD}` }}>
-            <div className="px-6 py-5" style={{ background: BLUE }}>
+          <div className="overflow-hidden" style={{ borderRadius: "10px", border: `1px solid ${BORD}` }}>
+            <div className="px-6 py-5" style={{ background: TEAL }}>
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-3">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center"
@@ -184,7 +183,7 @@ export default function LojaPage() {
                   {[
                     { label: "Equipe",       value: String(loja.funcionarios.length), icon: <Users size={13} className="mb-0.5 opacity-70" />,        accent: "rgba(255,255,255,0.15)" },
                     { label: "Atend. / Mês", value: String(atendMes),                 icon: <CalendarCheck size={13} className="mb-0.5 opacity-70" />, accent: "rgba(255,255,255,0.15)" },
-                    { label: "Fat. / Mês",   value: formatMoneyShort(faturMes),       icon: <TrendingUp size={13} className="mb-0.5 opacity-70" />,    accent: faturMes > 0 ? "rgba(0,166,81,0.4)" : "rgba(255,255,255,0.15)" },
+                    { label: "Fat. / Mês",   value: formatMoneyShort(faturMes),       icon: <TrendingUp size={13} className="mb-0.5 opacity-70" />,    accent: "rgba(255,255,255,0.15)" },
                   ].map(({ label, value, icon, accent }) => (
                     <div key={label} className="px-4 py-2.5 text-white" style={{ background: accent, borderRadius: "6px" }}>
                       <p className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.70)" }}>{label}</p>
@@ -197,9 +196,9 @@ export default function LojaPage() {
                 </div>
               </div>
             </div>
-            <div className="px-6 py-3" style={{ background: "#F4F4F4", borderTop: `1px solid ${BORD}` }}>
+            <div className="px-6 py-3" style={{ background: "#F8FAFC", borderTop: `1px solid ${BORD}` }}>
               <p className="flex items-center gap-1.5 text-sm" style={{ color: MUTED }}>
-                <MapPin size={13} className="shrink-0" style={{ color: BLUE }} />
+                <MapPin size={13} className="shrink-0" style={{ color: TEAL }} />
                 {loja.street}, {loja.number} — {loja.neighborhood}, {loja.city}/{loja.state}
               </p>
             </div>
@@ -226,12 +225,10 @@ export default function LojaPage() {
                 <InfoField icon={<MapPin size={12} />} label="Cidade/UF" value={`${loja.city} / ${loja.state}`} />
                 <InfoField icon={<MapPin size={12} />} label="CEP"       value={loja.cep}           />
               </div>
-              <a
-                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${loja.street} ${loja.number}, ${loja.neighborhood}, ${loja.city}, ${loja.state}, Brasil`)}`}
+              <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${loja.street} ${loja.number}, ${loja.neighborhood}, ${loja.city}, ${loja.state}, Brasil`)}`}
                 target="_blank" rel="noopener noreferrer"
                 className="mt-4 flex items-center gap-2 px-4 py-2 text-sm font-medium transition hover:opacity-80"
-                style={{ border: `1px solid rgba(26,60,184,0.25)`, borderRadius: "4px", color: BLUE }}
-              >
+                style={{ border: `1px solid rgba(13,115,119,0.25)`, borderRadius: "6px", color: TEAL }}>
                 <MapPin size={14} /> Ver no Google Maps
                 <ExternalLink size={12} className="ml-auto opacity-50" />
               </a>
@@ -250,24 +247,22 @@ export default function LojaPage() {
             >
               Horário de Funcionamento
             </SectionTitle>
-            <div className="overflow-hidden rounded-md border" style={{ borderColor: BORD }}>
+            <div className="overflow-hidden rounded-lg border" style={{ borderColor: BORD }}>
               {DEFAULT_SCHEDULE.map((row, i) => {
                 const isToday = i === getTodayIdx();
                 return (
-                  <div
-                    key={row.day}
+                  <div key={row.day}
                     className="flex items-center justify-between px-4 py-2.5"
                     style={{
-                      background: isToday ? "rgba(26,60,184,0.05)" : i % 2 === 0 ? "#FAFAFA" : "#fff",
+                      background: isToday ? "rgba(13,115,119,0.05)" : i % 2 === 0 ? "#FAFAFA" : "#fff",
                       borderTop: i > 0 ? `1px solid ${BORD}` : undefined,
-                    }}
-                  >
-                    <span className="text-sm font-medium" style={{ color: isToday ? BLUE : "#374151", fontWeight: isToday ? 700 : 500 }}>
+                    }}>
+                    <span className="text-sm" style={{ color: isToday ? TEAL : "#374151", fontWeight: isToday ? 700 : 500 }}>
                       {row.day}
-                      {isToday && <span className="ml-2 text-[10px] font-bold uppercase tracking-wide" style={{ color: BLUE }}>(hoje)</span>}
+                      {isToday && <span className="ml-2 text-[10px] font-bold uppercase tracking-wide" style={{ color: TEAL }}>(hoje)</span>}
                     </span>
                     {row.open && row.close ? (
-                      <span className="text-sm font-semibold tabular-nums" style={{ color: isToday ? BLUE : "#374151" }}>
+                      <span className="text-sm font-semibold tabular-nums" style={{ color: isToday ? TEAL : "#374151" }}>
                         {row.open} – {row.close}
                       </span>
                     ) : (
@@ -285,7 +280,7 @@ export default function LojaPage() {
               icon={<Users size={16} />}
               badge={
                 <span className="px-2.5 py-0.5 text-xs font-bold"
-                  style={{ background: "rgba(26,60,184,0.10)", borderRadius: "20px", color: BLUE }}>
+                  style={{ background: "#e6f5f5", borderRadius: "20px", color: TDARK }}>
                   {loja.funcionarios.length}
                 </span>
               }
@@ -298,7 +293,7 @@ export default function LojaPage() {
             ) : (
               <div className="overflow-hidden" style={{ border: `1px solid ${BORD}`, borderRadius: "6px" }}>
                 <div className="hidden grid-cols-[1fr_120px_110px_100px] gap-4 border-b px-4 py-2.5 text-xs font-bold uppercase tracking-widest sm:grid"
-                  style={{ borderColor: BORD, background: "#F4F4F4", color: MUTED }}>
+                  style={{ borderColor: BORD, background: "#F8FAFC", color: MUTED }}>
                   <span>Funcionário</span><span>Cargo</span><span>Salário</span><span>Desde</span>
                 </div>
                 <div className="divide-y" style={{ borderColor: BORD }}>
@@ -311,7 +306,7 @@ export default function LojaPage() {
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
-                            <p className="truncate text-sm font-bold" style={{ color: "#1a1a1a" }}>{func.nome}</p>
+                            <p className="truncate text-sm font-bold" style={{ color: COAL }}>{func.nome}</p>
                             <span className={`inline-flex sm:hidden items-center border px-2 py-0.5 text-xs font-semibold capitalize ${getCargoBadge(func.cargo)}`}
                               style={{ borderRadius: "20px" }}>
                               {func.cargo}
@@ -344,18 +339,18 @@ export default function LojaPage() {
           {/* KPIs */}
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
             {[
-              { label: "Atendimentos este mês", value: atendMes,                   icon: CalendarCheck, accent: BLUE  },
-              { label: "Faturamento este mês",  value: formatMoneyShort(faturMes), icon: TrendingUp,    accent: GREEN },
-              { label: "Funcionários",          value: loja.funcionarios.length,    icon: Users,         accent: YELL  },
-            ].map(({ label, value, icon: Icon, accent }) => (
-              <div key={label} className="relative overflow-hidden bg-white p-4 shadow-sm"
-                style={{ border: `1px solid ${BORD}`, borderRadius: "8px" }}>
-                <div className="absolute left-0 top-0 bottom-0 w-[3px]" style={{ background: accent }} />
-                <p className="pl-2 text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>{label}</p>
-                <div className="mt-2 flex items-end gap-2 pl-2">
-                  <span className="text-2xl font-extrabold" style={{ color: "#1a1a1a" }}>{value}</span>
-                  <Icon size={16} className="mb-0.5" style={{ color: accent }} />
+              { label: "Atendimentos este mês", value: atendMes,                   icon: CalendarCheck },
+              { label: "Faturamento este mês",  value: formatMoneyShort(faturMes), icon: TrendingUp    },
+              { label: "Funcionários",          value: loja.funcionarios.length,    icon: Users         },
+            ].map(({ label, value, icon: Icon }) => (
+              <div key={label} className="bg-white p-4"
+                style={{ border: `1px solid ${BORD}`, borderRadius: "10px" }}>
+                <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-lg"
+                  style={{ background: "#e6f5f5" }}>
+                  <Icon size={16} style={{ color: TEAL }} />
                 </div>
+                <p className="text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>{label}</p>
+                <p className="mt-1 text-2xl font-extrabold" style={{ color: COAL }}>{value}</p>
               </div>
             ))}
           </div>
