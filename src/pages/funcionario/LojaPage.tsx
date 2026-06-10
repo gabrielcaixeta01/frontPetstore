@@ -33,18 +33,23 @@ function getInitials(name: string) {
   return name.split(" ").slice(0, 2).map((n) => n[0]).join("").toUpperCase();
 }
 
+function strip(s: string) {
+  return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+}
+
+function getAvatarStyle(cargo: string): React.CSSProperties {
+  const n = strip(cargo);
+  const isLeadership = /gerente|gestor|diretor|coordenador/.test(n);
+  return {
+    background: "#e6f5f5",
+    color: "#085C60",
+    ...(isLeadership && { boxShadow: "0 0 0 2px #fff, 0 0 0 4px #F59E0B" }),
+  };
+}
+
 function getCargoBadge(_cargo: string): string {
   return "border-teal-200 bg-teal-50 text-teal-700";
 }
-
-const AVATAR_COLORS = [
-  "bg-blue-100 text-blue-700",
-  "bg-violet-100 text-violet-700",
-  "bg-emerald-100 text-emerald-700",
-  "bg-amber-100 text-amber-700",
-  "bg-rose-100 text-rose-700",
-  "bg-cyan-100 text-cyan-700",
-];
 
 const DEFAULT_SCHEDULE = [
   { day: "Segunda-feira", open: "08:00", close: "18:00" },
@@ -289,11 +294,12 @@ export default function FuncionarioLojaPage() {
                   <span>Funcionário</span><span>Cargo</span><span>Salário</span><span>Desde</span>
                 </div>
                 <div className="divide-y" style={{ borderColor: BORD }}>
-                  {loja.funcionarios.map((func, i) => (
+                  {loja.funcionarios.map((func) => (
                     <div key={`${func.usuario_id}-${func.matricula}`}
                       className="px-4 py-3 transition hover:bg-gray-50/60 sm:grid sm:grid-cols-[1fr_120px_110px_100px] sm:items-center sm:gap-4">
                       <div className="flex min-w-0 items-center gap-3">
-                        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${AVATAR_COLORS[i % AVATAR_COLORS.length]}`}>
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold"
+                          style={getAvatarStyle(func.cargo)}>
                           {getInitials(func.nome)}
                         </div>
                         <div className="min-w-0 flex-1">
