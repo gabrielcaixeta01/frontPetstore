@@ -175,7 +175,7 @@ export default function UserList({ users, onEdit, onDelete, petsByUser, lojaById
             </button>
           </div>
         ) : (
-          <div className="divide-y" style={{ borderColor: BORD }}>
+          <div className="divide-y divide-gray-100">
             {paginated.map((user) => {
               const cfg = perfilCfg[user.tipo_perfil] ?? { label: user.tipo_perfil, badge: "bg-gray-100 text-gray-700 border-gray-200", avatar: "bg-gray-100 text-gray-600" };
               const isExpanded = expandedId === user.id;

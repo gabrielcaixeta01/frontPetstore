@@ -39,6 +39,10 @@ export default function TagList({ tags, onEdit, onDelete, compact, cards, petCou
   const canEdit = Boolean(onEdit || onDelete);
   const showCards = canEdit || cards;
 
+  const sorted = [...tags].sort((a, b) =>
+    humanLabel(a.nome).localeCompare(humanLabel(b.nome), "pt-BR")
+  );
+
   if (tags.length === 0) {
     return (
       <div
@@ -54,7 +58,7 @@ export default function TagList({ tags, onEdit, onDelete, compact, cards, petCou
   if (!canEdit && !compact && !cards) {
     return (
       <div className="flex flex-wrap gap-2">
-        {tags.map((tag) => (
+        {sorted.map((tag) => (
           <span
             key={tag.id}
             title={tag.nome + (tag.descricao ? ` — ${tag.descricao}` : "")}
@@ -85,8 +89,8 @@ export default function TagList({ tags, onEdit, onDelete, compact, cards, petCou
           <span>Tag</span>
           {canEdit && <span className="text-right">Ações</span>}
         </div>
-        <div className="divide-y" style={{ borderColor: BORD }}>
-          {tags.map((tag) => (
+        <div className="divide-y divide-gray-100">
+          {sorted.map((tag) => (
             <div key={tag.id} className="flex items-center gap-4 px-5 py-3 transition hover:bg-gray-50/60">
               <div className="flex min-w-0 flex-1 items-center gap-3">
                 <span
@@ -127,7 +131,7 @@ export default function TagList({ tags, onEdit, onDelete, compact, cards, petCou
   if (!showCards) return null;
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {tags.map((tag) => {
+      {sorted.map((tag) => {
         const label = humanLabel(tag.nome);
         const count = petCountByTag?.[tag.id] ?? 0;
         return (
