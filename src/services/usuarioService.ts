@@ -17,6 +17,7 @@ type ApiClientProfile = {
 type ApiEmployeeProfile = {
   user_id?: number;
   usuario_id?: number;
+  employee_code?: string;
   matricula?: string;
   job_title?: string;
   cargo?: string;
@@ -77,7 +78,7 @@ function toUsuario(user: ApiUser): Usuario {
             user.employee_profile.user_id ??
             user.employee_profile.usuario_id ??
             user.id,
-          matricula: user.employee_profile.matricula ?? "",
+          matricula: user.employee_profile.employee_code ?? user.employee_profile.matricula ?? "",
           cargo: user.employee_profile.job_title ?? user.employee_profile.cargo ?? "",
           salario: Number(user.employee_profile.salary ?? user.employee_profile.salario ?? 0),
           data_contratacao:
@@ -137,6 +138,11 @@ export async function updateUsuario(id: number, data: UpdateUsuarioDTO): Promise
       cep: data.cep,
       state: data.state,
       city: data.city,
+      employee_code: data.employee_code,
+      job_title: data.job_title,
+      salary: data.salary,
+      hired_at: data.hired_at,
+      store_id: data.store_id,
     },
   });
   return toUsuario(response.data);

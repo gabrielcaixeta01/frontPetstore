@@ -86,11 +86,12 @@ export default function UserForm({ userBeingEdited, onCreate, onUpdate, onCancel
   const [cep, setCep]                   = useState("");
   const [estado, setEstado]             = useState("");
   const [cidade, setCidade]             = useState("");
-  const [employeeCode, setEmployeeCode] = useState("");
-  const [jobTitle, setJobTitle]         = useState("");
-  const [salary, setSalary]             = useState("");
-  const [hiredAt, setHiredAt]           = useState("");
-  const [storeId, setStoreId]           = useState<number | "">("");
+  const ep = userBeingEdited?.employee_profile;
+  const [employeeCode, setEmployeeCode] = useState(ep?.matricula ?? "");
+  const [jobTitle, setJobTitle]         = useState(ep?.cargo ?? "");
+  const [salary, setSalary]             = useState(ep ? String(ep.salario) : "");
+  const [hiredAt, setHiredAt]           = useState((ep?.data_contratacao ?? "").slice(0, 10));
+  const [storeId, setStoreId]           = useState<number | "">(ep?.loja_id ?? "");
   const [localError, setLocalError]     = useState("");
 
   const isEditing = Boolean(userBeingEdited);
@@ -116,6 +117,13 @@ export default function UserForm({ userBeingEdited, onCreate, onUpdate, onCancel
       await onUpdate(userBeingEdited.id, {
         nome: nome.trim(), email: email.trim(), telefone: telefone.trim(),
         tipo_perfil: tipoPerfil, cpf: cpf || undefined, cnpj: cnpj || undefined, ativo,
+        ...(!isCliente && {
+          employee_code: employeeCode.trim() || undefined,
+          job_title: jobTitle.trim() || undefined,
+          salary: salary ? Number(salary) : undefined,
+          hired_at: hiredAt || undefined,
+          store_id: storeId !== "" ? Number(storeId) : undefined,
+        }),
       });
     } else {
       await onCreate({
@@ -307,6 +315,68 @@ export default function UserForm({ userBeingEdited, onCreate, onUpdate, onCancel
             </div>
             <div className="space-y-1.5 sm:col-span-2">
               <Label>Loja *</Label>
+              <div className="relative">
+                <Store size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: MUTED }} />
+                <select value={storeId} onChange={(e) => setStoreId(e.target.value === "" ? "" : Number(e.target.value))}
+                  style={{ ...inputStyle, appearance: "none" as const }}
+                  onFocus={onFocus as any} onBlur={onBlur as any}>
+                  <option value="">Selecione uma loja</option>
+                  {(lojas ?? []).map((l) => <option key={l.id} value={l.id}>{l.nome}</option>)}
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Dados funcionário — edição */}
+      {isEditing && !isCliente && (
+        <div className="space-y-4 p-4" style={{ border: `1px solid ${BORD}`, borderRadius: "8px", background: "#F9FAFB" }}>
+          <div className="flex items-center gap-2">
+            <Briefcase size={14} style={{ color: TEAL }} />
+            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>
+              Dados do funcionário
+            </span>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label>Matrícula</Label>
+              <div className="relative">
+                <Briefcase size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: MUTED }} />
+                <input type="text" placeholder="EMP001"
+                  value={employeeCode} onChange={(e) => setEmployeeCode(e.target.value)}
+                  style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Cargo</Label>
+              <div className="relative">
+                <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: MUTED }} />
+                <input type="text" placeholder="Tosador, Veterinário..."
+                  value={jobTitle} onChange={(e) => setJobTitle(e.target.value)}
+                  style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Salário (R$)</Label>
+              <div className="relative">
+                <Banknote size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: MUTED }} />
+                <input type="number" min="0" step="0.01" placeholder="2500.00"
+                  value={salary} onChange={(e) => setSalary(e.target.value)}
+                  style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Data de contratação</Label>
+              <div className="relative">
+                <Calendar size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: MUTED }} />
+                <input type="date"
+                  value={hiredAt} onChange={(e) => setHiredAt(e.target.value)}
+                  style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
+              </div>
+            </div>
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label>Loja</Label>
               <div className="relative">
                 <Store size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: MUTED }} />
                 <select value={storeId} onChange={(e) => setStoreId(e.target.value === "" ? "" : Number(e.target.value))}

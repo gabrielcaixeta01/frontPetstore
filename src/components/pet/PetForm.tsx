@@ -230,7 +230,7 @@ export default function PetForm({ petBeingEdited, onCreate, onUpdate, onCancelEd
         {/* Peso */}
         <div className="space-y-1.5">
           <label className="block text-xs font-medium text-gray-500">Peso (kg)</label>
-          <input type="number" step="0.1" min="0" max="100" className={inputCls} placeholder="Ex: 8.5" value={peso} onChange={(e) => setPeso(e.target.value)} />
+          <input type="number" step="0.1" min="0.1" max="100" className={inputCls} placeholder="Ex: 8.5" value={peso} onChange={(e) => setPeso(e.target.value)} />
         </div>
 
         {/* Dono — busca por nome (somente funcionário) */}

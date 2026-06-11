@@ -183,7 +183,7 @@ export default function UsersPage() {
 
       <EditModal isOpen={Boolean(userBeingEdited)} title="Editar Usuário" onClose={() => setUserBeingEdited(null)}>
         {userBeingEdited && (
-          <EditUserForm user={userBeingEdited} onUpdate={handleUpdateUser} onCancel={() => setUserBeingEdited(null)} />
+          <EditUserForm user={userBeingEdited} onUpdate={handleUpdateUser} onCancel={() => setUserBeingEdited(null)} lojas={lojas} />
         )}
       </EditModal>
 

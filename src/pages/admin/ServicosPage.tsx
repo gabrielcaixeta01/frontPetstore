@@ -119,10 +119,10 @@ export default function ServicosPage() {
   const [editPreco, setEditPreco]                     = useState("");
   const [catFilter, setCatFilter]                     = useState<ServiceCat>("todos");
 
-  const servicosFiltrados = useMemo(() =>
-    catFilter === "todos" ? servicos : servicos.filter((s) => getCat(s.nome) === catFilter),
-    [servicos, catFilter],
-  );
+  const servicosFiltrados = useMemo(() => {
+    const list = catFilter === "todos" ? servicos : servicos.filter((s) => getCat(s.nome) === catFilter);
+    return [...list].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
+  }, [servicos, catFilter]);
 
   async function loadServicos() {
     setLoading(true);

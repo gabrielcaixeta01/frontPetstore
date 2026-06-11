@@ -45,6 +45,36 @@ function onBlur(e: React.FocusEvent<HTMLInputElement>) {
   e.target.style.background = "#F8FAFC";
 }
 
+function maskCNPJ(v: string) {
+  return v.replace(/\D/g, "").slice(0, 14)
+    .replace(/(\d{2})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d)/, "$1/$2")
+    .replace(/(\d{4})(\d{1,2})$/, "$1-$2");
+}
+function maskPhone(v: string) {
+  const d = v.replace(/\D/g, "").slice(0, 11);
+  if (d.length <= 10) return d.replace(/(\d{2})(\d)/, "($1) $2").replace(/(\d{4})(\d)/, "$1-$2");
+  return d.replace(/(\d{2})(\d)/, "($1) $2").replace(/(\d{5})(\d)/, "$1-$2");
+}
+function maskCEP(v: string) {
+  return v.replace(/\D/g, "").slice(0, 8).replace(/(\d{5})(\d)/, "$1-$2");
+}
+
+function getMasked(field: keyof CreateLojaDTO, value: string): string {
+  if (field === "cnpj") return maskCNPJ(value);
+  if (field === "telefone") return maskPhone(value);
+  if (field === "cep") return maskCEP(value);
+  return value;
+}
+
+function extractApiError(err: unknown, fallback: string): string {
+  const detail = (err as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail;
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail)) return detail.map((d: { msg?: string }) => d.msg ?? String(d)).join(" · ");
+  return fallback;
+}
+
 function HeroDecor() {
   return (
     <>
@@ -122,18 +152,26 @@ export default function LojasPage() {
     return Object.values(map).sort((a, b) => b.count - a.count);
   }, [lojas]);
 
-  function updateField<K extends keyof CreateLojaDTO>(field: K, value: CreateLojaDTO[K]) { setForm((p) => ({ ...p, [field]: value })); }
-  function updateEditField<K extends keyof CreateLojaDTO>(field: K, value: CreateLojaDTO[K]) { setEditForm((p) => ({ ...p, [field]: value })); }
+  function updateField<K extends keyof CreateLojaDTO>(field: K, value: CreateLojaDTO[K]) {
+    const masked = typeof value === "string" ? getMasked(field, value) as CreateLojaDTO[K] : value;
+    setForm((p) => ({ ...p, [field]: masked }));
+  }
+  function updateEditField<K extends keyof CreateLojaDTO>(field: K, value: CreateLojaDTO[K]) {
+    const masked = typeof value === "string" ? getMasked(field, value) as CreateLojaDTO[K] : value;
+    setEditForm((p) => ({ ...p, [field]: masked }));
+  }
 
   async function handleCreateSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setFeedback(""); setError("");
     if (!form.nome.trim() || !form.cnpj.trim() || !form.telefone.trim() || !form.email.trim()) { setError("Preencha os campos obrigatórios."); return; }
     try { await createLoja(form); setFeedback("Loja cadastrada."); setShowForm(false); setForm(EMPTY_FORM); await loadAll(); }
-    catch { setError("Erro ao cadastrar loja."); }
+    catch (err) { setError(extractApiError(err, "Erro ao cadastrar loja.")); }
   }
   async function handleUpdateSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!lojaBeingEdited) return;
+    setFeedback(""); setError("");
     if (!editForm.nome.trim() || !editForm.telefone.trim() || !editForm.email.trim()) { setError("Preencha os campos obrigatórios."); return; }
     try {
       const payload: UpdateLojaDTO = {
@@ -143,7 +181,7 @@ export default function LojasPage() {
       };
       await updateLoja(lojaBeingEdited.id, payload);
       setFeedback("Loja atualizada."); setLojaBeingEdited(null); await loadAll();
-    } catch { setError("Erro ao atualizar loja."); }
+    } catch (err) { setError(extractApiError(err, "Erro ao atualizar loja.")); }
   }
   async function handleDeleteLoja(id: number) {
     if (!window.confirm("Excluir esta loja?")) return;

@@ -63,4 +63,9 @@ export interface UpdateUsuarioDTO {
   cep?: string;
   state?: string;
   city?: string;
+  employee_code?: string;
+  job_title?: string;
+  salary?: number;
+  hired_at?: string;
+  store_id?: number;
 }

@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { Plus } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Plus, Search, ChevronDown } from "lucide-react";
 import { getPets } from "../../services/petService";
 import { getLojas } from "../../services/lojaService";
 import { getServicos } from "../../services/servicoService";
@@ -25,6 +25,97 @@ type AppointmentFormProps = {
 const selectCls = "w-full rounded border border-gray-200 bg-gray-50 px-3 py-2 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white disabled:opacity-60 appearance-none";
 const inputCls  = "w-full rounded border border-gray-200 bg-gray-50 px-3 py-2 text-sm outline-none transition focus:border-[#1c46f3] focus:bg-white";
 const labelCls  = "mb-1 block text-xs font-medium text-gray-500";
+
+interface SelectOption { value: string; label: string }
+
+function SearchableSelect({
+  value,
+  onChange,
+  options,
+  placeholder = "Selecionar...",
+  disabled = false,
+  emptyText = "Nenhuma opção",
+  loadingText,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  options: SelectOption[];
+  placeholder?: string;
+  disabled?: boolean;
+  emptyText?: string;
+  loadingText?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const ref = useRef<HTMLDivElement>(null);
+
+  const selectedLabel = options.find((o) => o.value === value)?.label;
+  const filtered = useMemo(
+    () => options.filter((o) => o.label.toLowerCase().includes(search.toLowerCase())),
+    [options, search],
+  );
+
+  useEffect(() => { if (!open) setSearch(""); }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    function onMouseDown(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", onMouseDown);
+    return () => document.removeEventListener("mousedown", onMouseDown);
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => !disabled && setOpen((v) => !v)}
+        className={`${selectCls} flex items-center justify-between gap-2 text-left`}
+        style={{ cursor: disabled ? "not-allowed" : "pointer" }}
+      >
+        <span className={selectedLabel ? "text-gray-700" : "text-gray-400"} style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {loadingText ?? selectedLabel ?? placeholder}
+        </span>
+        <ChevronDown size={14} className={`shrink-0 text-gray-400 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      {open && !disabled && (
+        <div className="absolute z-50 mt-1 w-full rounded border border-gray-200 bg-white shadow-lg" style={{ minWidth: "100%" }}>
+          <div className="relative p-1.5">
+            <Search size={13} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              autoFocus
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar..."
+              className="w-full rounded border border-gray-200 bg-gray-50 py-1.5 pl-7 pr-2 text-sm outline-none focus:border-[#1c46f3] focus:bg-white"
+            />
+          </div>
+          <div className="max-h-48 overflow-y-auto">
+            {filtered.length === 0 ? (
+              <div className="px-3 py-2 text-sm text-gray-400">{emptyText}</div>
+            ) : (
+              filtered.map((o) => (
+                <button
+                  key={o.value}
+                  type="button"
+                  onClick={() => { onChange(o.value); setOpen(false); }}
+                  className={`w-full px-3 py-2 text-left text-sm transition hover:bg-gray-50 ${o.value === value ? "font-medium text-[#1c46f3]" : "text-gray-700"}`}
+                  style={{ background: o.value === value ? "rgba(28,70,243,0.06)" : undefined }}
+                >
+                  {o.label}
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function AppointmentForm({
   appointmentBeingEdited,
@@ -77,6 +168,14 @@ export default function AppointmentForm({
   const lojaSelecionada = useMemo(() => lojas.find((l) => String(l.id) === lojaId), [lojas, lojaId]);
   const funcionariosDaLoja = useMemo(() => lojaSelecionada?.funcionarios ?? [], [lojaSelecionada]);
 
+  const lojasSorted    = useMemo(() => [...lojas].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR")), [lojas]);
+  const clientesSorted = useMemo(() => [...clientes].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR")), [clientes]);
+  const funcSorted     = useMemo(() => [...funcionariosDaLoja].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR")), [funcionariosDaLoja]);
+  const servicosSorted = useMemo(() => [...servicos].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR")), [servicos]);
+
+  const petsDoCliente    = useMemo(() => clienteId ? pets.filter((p) => String(p.dono_id) === clienteId) : [], [clienteId, pets]);
+  const petsSorted       = useMemo(() => [...petsDoCliente].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR")), [petsDoCliente]);
+
   function getPrecoSeguro(preco: number): number {
     const valor = Number(preco);
     return Number.isFinite(valor) ? valor : 0;
@@ -125,7 +224,6 @@ export default function AppointmentForm({
   }, [appointmentBeingEdited, lojas, clientes, lojaId, clienteId, fixedLojaId]);
 
   useEffect(() => {
-    const petsDoCliente = clienteId ? pets.filter((p) => String(p.dono_id) === clienteId) : [];
     if (petsDoCliente.length === 0) { setPetId(""); return; }
     if (!petId || !petsDoCliente.some((p) => String(p.id) === petId)) {
       setPetId(String(petsDoCliente[0].id));
@@ -177,7 +275,6 @@ export default function AppointmentForm({
       alert("Selecione pelo menos um serviço.");
       return;
     }
-    const petsDoCliente = pets.filter((p) => String(p.dono_id) === clienteId);
     if (petsDoCliente.length === 0) {
       alert("O cliente selecionado não possui pets cadastrados.");
       return;
@@ -214,8 +311,6 @@ export default function AppointmentForm({
     setData(""); setHora("");
   }
 
-  const petsDoCliente = clienteId ? pets.filter((p) => String(p.dono_id) === clienteId) : [];
-
   return (
     <form
       key={appointmentBeingEdited?.id ?? "new"}
@@ -231,22 +326,28 @@ export default function AppointmentForm({
         {fixedLojaId == null && (
           <div>
             <label className={labelCls}>Loja *</label>
-            <select value={lojaId} onChange={(e) => setLojaId(e.target.value)}
-              disabled={loadingRelacionamentos || lojas.length === 0} className={selectCls}>
-              {loadingRelacionamentos ? <option value="">Carregando...</option>
-                : lojas.length === 0 ? <option value="">Nenhuma loja</option>
-                : lojas.map((l) => <option key={l.id} value={String(l.id)}>{l.nome}</option>)}
-            </select>
+            <SearchableSelect
+              value={lojaId}
+              onChange={setLojaId}
+              disabled={loadingRelacionamentos}
+              loadingText={loadingRelacionamentos ? "Carregando..." : undefined}
+              placeholder="Selecione uma loja"
+              emptyText="Nenhuma loja encontrada"
+              options={lojasSorted.map((l) => ({ value: String(l.id), label: l.nome }))}
+            />
           </div>
         )}
         <div>
           <label className={labelCls}>Cliente *</label>
-          <select value={clienteId} onChange={(e) => setClienteId(e.target.value)}
-            disabled={loadingRelacionamentos || clientes.length === 0} className={selectCls}>
-            {loadingRelacionamentos ? <option value="">Carregando...</option>
-              : clientes.length === 0 ? <option value="">Nenhum cliente</option>
-              : clientes.map((c) => <option key={c.id} value={String(c.id)}>{c.nome}</option>)}
-          </select>
+          <SearchableSelect
+            value={clienteId}
+            onChange={setClienteId}
+            disabled={loadingRelacionamentos}
+            loadingText={loadingRelacionamentos ? "Carregando..." : undefined}
+            placeholder="Selecione um cliente"
+            emptyText="Nenhum cliente encontrado"
+            options={clientesSorted.map((c) => ({ value: String(c.id), label: c.nome }))}
+          />
         </div>
       </div>
 
@@ -254,30 +355,30 @@ export default function AppointmentForm({
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
           <label className={labelCls}>Funcionário *</label>
-          <select value={funcionarioId} onChange={(e) => setFuncionarioId(e.target.value)}
-            disabled={loadingRelacionamentos || funcionariosDaLoja.length === 0} className={selectCls}>
-            {loadingRelacionamentos ? <option value="">Carregando...</option>
-              : !lojaSelecionada ? <option value="">Selecione uma loja primeiro</option>
-              : funcionariosDaLoja.length === 0 ? <option value="">Nenhum funcionário</option>
-              : funcionariosDaLoja.map((f) => (
-                  <option key={f.usuario_id} value={String(f.usuario_id)}>
-                    {f.nome}{f.cargo ? ` — ${f.cargo}` : ""}
-                  </option>
-                ))}
-          </select>
+          <SearchableSelect
+            value={funcionarioId}
+            onChange={setFuncionarioId}
+            disabled={loadingRelacionamentos || !lojaSelecionada}
+            loadingText={loadingRelacionamentos ? "Carregando..." : undefined}
+            placeholder={!lojaSelecionada ? "Selecione uma loja primeiro" : "Selecione um funcionário"}
+            emptyText="Nenhum funcionário encontrado"
+            options={funcSorted.map((f) => ({
+              value: String(f.usuario_id),
+              label: f.nome + (f.cargo ? ` — ${f.cargo}` : ""),
+            }))}
+          />
         </div>
         <div>
           <label className={labelCls}>Pet *</label>
-          <select value={petId} onChange={(e) => setPetId(e.target.value)}
-            disabled={loadingRelacionamentos || petsDoCliente.length === 0} className={selectCls}>
-            {loadingRelacionamentos ? <option value="">Carregando...</option>
-              : !clienteId ? <option value="">Selecione um cliente primeiro</option>
-              : petsDoCliente.length === 0 ? <option value="">Nenhum pet neste cliente</option>
-              : <>
-                  <option value="">Selecionar...</option>
-                  {petsDoCliente.map((p) => <option key={p.id} value={String(p.id)}>{p.nome}</option>)}
-                </>}
-          </select>
+          <SearchableSelect
+            value={petId}
+            onChange={setPetId}
+            disabled={loadingRelacionamentos || !clienteId}
+            loadingText={loadingRelacionamentos ? "Carregando..." : undefined}
+            placeholder={!clienteId ? "Selecione um cliente primeiro" : "Selecione um pet"}
+            emptyText="Nenhum pet neste cliente"
+            options={petsSorted.map((p) => ({ value: String(p.id), label: p.nome }))}
+          />
         </div>
       </div>
 
@@ -373,13 +474,13 @@ export default function AppointmentForm({
           <p className="rounded border border-gray-100 bg-gray-50 px-3 py-3 text-sm text-gray-400">
             Carregando serviços...
           </p>
-        ) : servicos.length === 0 ? (
+        ) : servicosSorted.length === 0 ? (
           <p className="rounded border border-dashed border-gray-200 px-3 py-3 text-sm text-gray-400">
             Nenhum serviço cadastrado.
           </p>
         ) : (
           <div className="grid gap-1.5 sm:grid-cols-2">
-            {servicos.map((s) => {
+            {servicosSorted.map((s) => {
               const checked = servicoIdsSelecionados.includes(s.id);
               return (
                 <label

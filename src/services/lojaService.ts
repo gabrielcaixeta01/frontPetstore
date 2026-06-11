@@ -4,7 +4,8 @@ import type { FuncionarioLoja, Loja, CreateLojaDTO, UpdateLojaDTO } from "../typ
 type ApiStoreEmployee = {
   user_id: number;
   employee_name?: string;
-  matricula: string;
+  employee_code?: string;
+  matricula?: string;
   job_title: string;
   salary: string | number;
   hired_at: string;
@@ -49,7 +50,7 @@ function toLoja(store: ApiStore): Loja {
     funcionarios: (store.employees ?? []).map((employee) => ({
       usuario_id: employee.user_id,
       nome: employee.employee_name ?? `Usuário #${employee.user_id}`,
-      matricula: employee.matricula,
+      matricula: employee.employee_code ?? employee.matricula ?? "",
       cargo: employee.job_title,
       salario: Number(employee.salary),
       data_contratacao: employee.hired_at,
@@ -114,7 +115,7 @@ export async function getStoreEmployees(storeId: number): Promise<FuncionarioLoj
   return response.data.map((e) => ({
     usuario_id: e.user_id,
     nome: e.employee_name ?? `Usuário #${e.user_id}`,
-    matricula: e.matricula,
+    matricula: e.employee_code ?? e.matricula ?? "",
     cargo: e.job_title,
     salario: Number(e.salary),
     data_contratacao: e.hired_at,

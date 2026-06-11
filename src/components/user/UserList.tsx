@@ -67,13 +67,15 @@ export default function UserList({ users, onEdit, onDelete, petsByUser, lojaById
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
-    return users.filter((u) => {
-      if (q && !u.nome.toLowerCase().includes(q) && !u.email.toLowerCase().includes(q)) return false;
-      if (filterTipo !== "all" && u.tipo_perfil !== filterTipo) return false;
-      if (filterStatus === "ativo" && !u.ativo) return false;
-      if (filterStatus === "inativo" && u.ativo) return false;
-      return true;
-    });
+    return users
+      .filter((u) => {
+        if (q && !u.nome.toLowerCase().includes(q) && !u.email.toLowerCase().includes(q)) return false;
+        if (filterTipo !== "all" && u.tipo_perfil !== filterTipo) return false;
+        if (filterStatus === "ativo" && !u.ativo) return false;
+        if (filterStatus === "inativo" && u.ativo) return false;
+        return true;
+      })
+      .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
   }, [users, search, filterTipo, filterStatus]);
 
   useEffect(() => { setPage(1); }, [search, filterTipo, filterStatus]);
